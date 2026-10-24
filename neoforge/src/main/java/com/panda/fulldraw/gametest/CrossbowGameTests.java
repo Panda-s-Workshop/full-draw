@@ -2,6 +2,7 @@ package com.panda.fulldraw.gametest;
 
 import com.panda.fulldraw.item.RepeatingCrossbowItem;
 import com.panda.fulldraw.registry.ModItems;
+import com.panda.fulldraw.registry.ModSounds;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -374,6 +375,34 @@ final class CrossbowGameTests {
         List<AbstractArrow> after = helper.getLevel().getEntitiesOfClass(AbstractArrow.class, box, a -> !before.contains(a));
         if (after.size() != 1) throw helper.assertionException("expected one new bolt, found " + after.size());
         return after.getFirst();
+    }
+
+    /**
+     * The sounds vanilla picks for a crank: the Arbalest's own; Quick Charge's on a Quick Charge Arbalest, as on any
+     * crossbow; vanilla's for the Repeating Crossbow and a vanilla crossbow.
+     */
+    static void crankSounds(GameTestHelper helper) {
+        try {
+            var pick = CrossbowItem.class.getDeclaredMethod("getChargingSounds", ItemStack.class);
+            pick.setAccessible(true);
+            var field = CrossbowItem.class.getDeclaredField("DEFAULT_SOUNDS");
+            field.setAccessible(true);
+            Object vanilla = field.get(null);
+            var arbalest = (CrossbowItem.ChargingSounds) pick.invoke(null, new ItemStack(ModItems.ARBALEST.get()));
+            Object quick = pick.invoke(null, enchanted(helper, ModItems.ARBALEST.get(), Enchantments.QUICK_CHARGE, 1));
+            Object vanillaQuick = pick.invoke(null, enchanted(helper, Items.CROSSBOW, Enchantments.QUICK_CHARGE, 1));
+            Object repeater = pick.invoke(null, new ItemStack(ModItems.REPEATING_CROSSBOW.get()));
+            Object plain = pick.invoke(null, new ItemStack(Items.CROSSBOW));
+            boolean own = arbalest.start().map(h -> h.value() == ModSounds.ARBALEST_CRANK_START.get()).orElse(false)
+                    && arbalest.mid().map(h -> h.value() == ModSounds.ARBALEST_CRANK_MIDDLE.get()).orElse(false)
+                    && arbalest.end().map(h -> h.value() == ModSounds.ARBALEST_CRANK_END.get()).orElse(false);
+            if (!own) helper.fail("the Arbalest should crank with its own three sounds: " + arbalest);
+            else if (!quick.equals(vanillaQuick) || quick == vanilla) helper.fail("a Quick Charge Arbalest should play Quick Charge's crank: " + quick);
+            else if (repeater != vanilla || plain != vanilla) helper.fail("the Repeating Crossbow and a vanilla crossbow keep vanilla's crank: " + repeater + ", " + plain);
+            else helper.succeed();
+        } catch (ReflectiveOperationException e) {
+            helper.fail("couldn't ask vanilla for the crank sounds: " + e);
+        }
     }
 
     private static ItemStack enchanted(GameTestHelper helper, net.minecraft.world.item.Item item, ResourceKey<Enchantment> key, int level) {

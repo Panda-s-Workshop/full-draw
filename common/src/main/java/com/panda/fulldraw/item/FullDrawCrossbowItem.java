@@ -5,6 +5,7 @@ import com.panda.fulldraw.logic.BoltTraits;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.shot.Weapons;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -21,18 +22,53 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A Full Draw crossbow. It is a vanilla crossbow with its own load time (set where vanilla reads it, in
  * {@code CrossbowItem.getChargeDuration}), launch speed, spread and damage, and bolts that carry {@link BoltTraits}.
- * Vanilla's loading, ammo, sounds and multishot all still run. A player's bolt doesn't get vanilla's random crit bonus
+ * Vanilla's loading, ammo and multishot all still run, and its loading sounds unless the crossbow has its own crank.
+ * A bolt that pierces or bites through armour is heard where it hits. A player's bolt doesn't get vanilla's random crit bonus
  * (as a full-drawn bow's arrow doesn't, unless {@code vanillaCritOnFullDraw} is on). In {@code fulldraw:no_shot_pipeline}
  * it is a plain vanilla crossbow.
  */
 public class FullDrawCrossbowItem extends CrossbowItem implements Weapons.Ranged {
     private final WeaponStats stats;
     private final BoltTraits bolts;
+    @Nullable
+    private final Supplier<ChargingSounds> crank;
+    @Nullable
+    private ChargingSounds crankSounds;
 
     public FullDrawCrossbowItem(Properties properties, WeaponStats stats, BoltTraits bolts) {
+        this(properties, stats, bolts, null);
+    }
+
+    /** @param crank its own loading sounds in place of vanilla's (a Quick Charge crossbow still plays Quick Charge's) */
+    public FullDrawCrossbowItem(Properties properties, WeaponStats stats, BoltTraits bolts, @Nullable Supplier<ChargingSounds> crank) {
         super(properties);
         this.stats = stats;
         this.bolts = bolts;
+        this.crank = crank;
+    }
+
+    /** Its own loading sounds, or null for vanilla's. */
+    @Nullable
+    public ChargingSounds crankSounds() {
+        // built on first use: the sound holders aren't bound when the item is constructed
+        if (crankSounds == null && crank != null) crankSounds = crank.get();
+        return crankSounds;
+    }
+
+    /**
+     * A heavy bolt's sound where it struck, for anyone near, under its shooter's sound category. A shooting player too
+     * far away to hear it there gets it too, as it is how they learn what the bolt did.
+     */
+    public static void boltSound(AbstractArrow bolt, net.minecraft.world.entity.Entity target, net.minecraft.sounds.SoundEvent sound, float volume) {
+        if (!(target.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+        net.minecraft.world.entity.Entity owner = bolt.getOwner();
+        net.minecraft.sounds.SoundSource category = owner != null ? owner.getSoundSource() : net.minecraft.sounds.SoundSource.NEUTRAL;
+        long seed = level.getRandom().nextLong();
+        level.playSeededSound(null, target.getX(), target.getY(), target.getZ(), net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), category, volume, 1.0F, seed);
+        // a sound is heard up to 16 blocks away (further only when louder than 1)
+        if (owner instanceof net.minecraft.server.level.ServerPlayer player && player.level() == level && player.distanceToSqr(target) > 16 * 16)
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), category,
+                    player.getX(), player.getY(), player.getZ(), volume, 1.0F, seed));
     }
 
     @Override

@@ -34,7 +34,7 @@ public final class ModItems {
      * and a raised shield.
      */
     public static final DeferredItem<FullDrawCrossbowItem> ARBALEST = ITEMS.registerItem("arbalest",
-            p -> new FullDrawCrossbowItem(p, WeaponStats.ARBALEST, BoltTraits.ARBALEST),
+            p -> new FullDrawCrossbowItem(p, WeaponStats.ARBALEST, BoltTraits.ARBALEST, ModSounds::arbalestCrank),
             p -> p.stacksTo(1).durability(600).component(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).enchantable(1)
                     .component(DataComponents.USE_EFFECTS, new UseEffects(false, true, 0.0F)));
 

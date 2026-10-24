@@ -134,6 +134,10 @@ public abstract class AbstractArrowMixin implements ShotHolder {
         float damage = breakdown == null ? vanillaAmount : (float) breakdown.total();
         net.minecraft.world.item.ItemStack cracked = fulldraw$crackableShield(target, source, damage);
         boolean hurt = original.call(target, source, damage);
+        // a heavy bolt's own sound on every creature it goes into, under vanilla's hit sound
+        BoltTraits bolts = FullDrawCrossbowItem.boltsOf(((AbstractArrow) (Object) this).getWeaponItem());
+        if (hurt && bolts != null && bolts.pierce() > 0 && target instanceof net.minecraft.world.entity.LivingEntity)
+            FullDrawCrossbowItem.boltSound((AbstractArrow) (Object) this, target, com.panda.fulldraw.registry.ModSounds.BOLT_PIERCE.get(), 0.8F);
         // not when the hit was cancelled (an invulnerable or creative target)
         if (cracked != null && target instanceof net.minecraft.world.entity.LivingEntity living && target.level() instanceof ServerLevel level
                 && !living.isInvulnerableTo(level, source))

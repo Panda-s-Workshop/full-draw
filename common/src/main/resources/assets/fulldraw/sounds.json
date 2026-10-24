@@ -208,5 +208,90 @@
         "pitch": 1.25
       }
     ]
+  },
+  "arbalest_crank_start": {
+    "subtitle": "subtitles.fulldraw.arbalest_crank_start",
+    "sounds": [
+      {
+        "name": "minecraft:item/crossbow/loading_start",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "arbalest_crank_middle": {
+    "subtitle": "subtitles.fulldraw.arbalest_crank_middle",
+    "sounds": [
+      {
+        "name": "minecraft:item/crossbow/loading_middle1",
+        "volume": 1.0,
+        "pitch": 0.72
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle2",
+        "volume": 1.0,
+        "pitch": 0.72
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle3",
+        "volume": 1.0,
+        "pitch": 0.72
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle4",
+        "volume": 1.0,
+        "pitch": 0.72
+      }
+    ]
+  },
+  "arbalest_crank_end": {
+    "subtitle": "subtitles.fulldraw.arbalest_crank_end",
+    "sounds": [
+      {
+        "name": "minecraft:item/crossbow/loading_end",
+        "volume": 1.0,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "repeater_click": {
+    "subtitle": "subtitles.fulldraw.repeater_click",
+    "sounds": [
+      {
+        "name": "minecraft:random/click",
+        "volume": 0.6,
+        "pitch": 1.7
+      }
+    ]
+  },
+  "bolt_pierce": {
+    "subtitle": "subtitles.fulldraw.bolt_pierce",
+    "sounds": [
+      {
+        "name": "minecraft:item/trident/pierce1",
+        "volume": 0.8,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:item/trident/pierce2",
+        "volume": 0.8,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:item/trident/pierce3",
+        "volume": 0.8,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "bolt_armour": {
+    "subtitle": "subtitles.fulldraw.bolt_armour",
+    "sounds": [
+      {
+        "name": "minecraft:random/anvil_land",
+        "volume": 0.25,
+        "pitch": 1.9
+      }
+    ]
   }
 }

@@ -54,6 +54,25 @@ class SourceHygieneTest {
     }
 
     @Test
+    void everyRegisteredSoundHasAnEntryAndASubtitle() throws IOException {
+        String registry = Files.readString(SRC.resolve(Path.of("com", "panda", "fulldraw", "registry", "ModSounds.java")));
+        String lang = Files.readString(LANG);
+        var sounds = new com.google.gson.Gson().fromJson(Files.readString(Path.of("src", "main", "resources", "assets", "fulldraw", "sounds.json")),
+                com.google.gson.JsonObject.class);
+        Matcher m = Pattern.compile("sound\\(\"([a-z0-9_]+)\"\\)").matcher(registry);
+        Set<String> missing = new TreeSet<>();
+        int n = 0;
+        while (m.find()) {
+            n++;
+            String id = m.group(1);
+            if (!sounds.has(id) || sounds.getAsJsonObject(id).getAsJsonArray("sounds").isEmpty()) missing.add(id + " (sounds.json)");
+            else if (!lang.contains("\"" + sounds.getAsJsonObject(id).get("subtitle").getAsString() + "\"")) missing.add(id + " (subtitle)");
+        }
+        assertTrue(n > 0, "no sound(...) registrations found in ModSounds");
+        assertTrue(missing.isEmpty(), "registered sounds without a sound or a subtitle: " + missing);
+    }
+
+    @Test
     void everyGeneratedJsonParsesAndHasNoTabs() throws IOException {
         Path res = Path.of("src", "main", "resources");
         com.google.gson.Gson gson = new com.google.gson.Gson();

@@ -14,4 +14,15 @@ public record BoltTraits(int pierce, double armourKept, float knockback) {
 
     /** How long a shield-cracking weapon's bolt knocks a raised shield down, as an axe does (an axe: 5 s). */
     public static final float SHIELD_CRACK_SECONDS = 3.0F;
+
+    /** The least armour a bolt clanks through: below it there's nothing worth hearing (a husk's own 2 points). */
+    public static final float CLANK_MIN_ARMOUR = 4.0F;
+
+    /**
+     * Whether a bolt that ignores part of the armour clanks as it bites through: only on damage that gets past a
+     * shield (a blocked bolt reaches the armour with 0) and only through real armour.
+     */
+    public boolean clanks(float damage, float armour) {
+        return armourKept < 1.0 && damage > 0 && armour >= CLANK_MIN_ARMOUR;
+    }
 }

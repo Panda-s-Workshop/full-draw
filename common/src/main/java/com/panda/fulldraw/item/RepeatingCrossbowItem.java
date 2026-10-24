@@ -4,6 +4,7 @@ import com.panda.fulldraw.logic.BoltTraits;
 import com.panda.fulldraw.logic.Magazine;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.registry.ModComponents;
+import com.panda.fulldraw.registry.ModSounds;
 import com.panda.fulldraw.shot.Weapons;
 import java.util.List;
 import java.util.function.Consumer;
@@ -81,6 +82,9 @@ public class RepeatingCrossbowItem extends FullDrawCrossbowItem {
         boolean rocketShot = shot.stream().anyMatch(s -> s.is(Items.FIREWORK_ROCKET));
         float power = rocketShot == loaded.contains(Items.FIREWORK_ROCKET) ? velocity : rocketShot ? 1.6F : 3.15F;
         super.performShooting(level, shooter, hand, weapon, power, inaccuracy, target);
+        // the magazine's action on top of vanilla's shot, lower on the last one: it's empty
+        level.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), ModSounds.REPEATER_CLICK.get(), shooter.getSoundSource(), 0.7F,
+                rest.isEmpty() ? 0.7F : 1.0F);
         if (rest.isEmpty()) return;
         // vanilla emptied it; put back what's left, or drop the real ammo if the shot broke the crossbow
         if (!weapon.isEmpty()) weapon.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.ofNonEmpty(rest));

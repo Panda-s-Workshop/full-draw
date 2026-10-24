@@ -1,5 +1,6 @@
 package com.panda.fulldraw.logic;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -47,6 +48,14 @@ class BalanceTest {
      * not a heavier hit) and at least one Arbalest bolt (else it has no reason to exist). Plain arrows, no crit on either.
      * That every bolt does land on one target is the GameTest {@code repeater_burst_lands}.
      */
+    @Test
+    void clankOnlyWhenTheBoltGetsThroughRealArmour() {
+        assertTrue(BoltTraits.ARBALEST.clanks(12.0F, 8.0F), "an Arbalest bolt into an iron chestplate clanks");
+        assertFalse(BoltTraits.ARBALEST.clanks(0.0F, 8.0F), "a bolt a shield stopped reaches the armour with 0: no clank");
+        assertFalse(BoltTraits.ARBALEST.clanks(12.0F, 2.0F), "a husk's own 2 points: no clank");
+        assertFalse(BoltTraits.NONE.clanks(12.0F, 20.0F), "a plain bolt ignores no armour: no clank");
+    }
+
     @Test
     void repeaterBurst() {
         int bolt = ShotMath.vanillaDamage(3.15 * WeaponStats.REPEATING_CROSSBOW.velocityMult(), 2.0 * WeaponStats.REPEATING_CROSSBOW.damageMult());

@@ -46,6 +46,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("repeater_magazine_five", () -> CrossbowGameTests::repeaterMagazineFive);
         FUNCTIONS.register("repeater_burst_lands", () -> CrossbowGameTests::repeaterBurstLands);
         FUNCTIONS.register("repeater_break_drops_ammo", () -> CrossbowGameTests::repeaterBreakDropsAmmo);
+        FUNCTIONS.register("crank_sounds", () -> CrossbowGameTests::crankSounds);
         FUNCTIONS.register("steady_aim_halves_spread", () -> ShotGameTests::steadyAimHalvesSpread);
         FUNCTIONS.register("bow_bash_shoves", () -> ShotGameTests::bowBashShoves);
         FUNCTIONS.register("bow_bash_moves_players", () -> ShotGameTests::bowBashMovesPlayers);

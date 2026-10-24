@@ -3,7 +3,10 @@ package com.panda.fulldraw.item;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.shot.Shots;
 import com.panda.fulldraw.shot.Weapons;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -15,10 +18,23 @@ import net.minecraft.world.level.Level;
  */
 public class FullDrawBowItem extends BowItem implements Weapons.Ranged {
     private final WeaponStats stats;
+    private final boolean startsWhileSprinting;
 
     public FullDrawBowItem(Properties properties, WeaponStats stats) {
+        this(properties, stats, true);
+    }
+
+    /** @param startsWhileSprinting false for a bow too long to raise at a run: sprinting players can't start a draw */
+    public FullDrawBowItem(Properties properties, WeaponStats stats, boolean startsWhileSprinting) {
         super(properties);
         this.stats = stats;
+        this.startsWhileSprinting = startsWhileSprinting;
+    }
+
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (!startsWhileSprinting && player.isSprinting()) return InteractionResult.FAIL;
+        return super.use(level, player, hand);
     }
 
     @Override

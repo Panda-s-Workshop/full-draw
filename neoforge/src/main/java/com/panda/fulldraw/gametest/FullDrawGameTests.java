@@ -34,6 +34,8 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("headshot_and_long_shot", () -> ShotGameTests::headshotAndLongShot);
         FUNCTIONS.register("weak_spot_data_loads", () -> ShotGameTests::weakSpotDataLoads);
         FUNCTIONS.register("weapon_stats_shortbow", () -> ShotGameTests::weaponStatsShortbow);
+        FUNCTIONS.register("weapon_stats_longbow", () -> ShotGameTests::weaponStatsLongbow);
+        FUNCTIONS.register("weapon_stats_recurve_bow", () -> ShotGameTests::weaponStatsRecurveBow);
         FUNCTIONS.register("steady_aim_halves_spread", () -> ShotGameTests::steadyAimHalvesSpread);
         FUNCTIONS.register("bow_bash_shoves", () -> ShotGameTests::bowBashShoves);
         FUNCTIONS.register("bow_bash_moves_players", () -> ShotGameTests::bowBashMovesPlayers);

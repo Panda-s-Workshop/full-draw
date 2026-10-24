@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "minecraft:stick",
+    "S": "minecraft:string",
+    "I": "minecraft:iron_ingot",
+    "H": "minecraft:goat_horn"
+  },
+  "pattern": [
+    "I#S",
+    "H S",
+    "I#S"
+  ],
+  "result": {
+    "id": "fulldraw:recurve_bow"
+  }
+}

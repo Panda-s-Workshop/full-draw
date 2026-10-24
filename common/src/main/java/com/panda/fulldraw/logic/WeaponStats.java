@@ -15,6 +15,14 @@ public record WeaponStats(int drawTicks, double damageMult, double velocityMult,
     /** The vanilla bow, and any bow from another mod that Full Draw doesn't know. */
     public static final WeaponStats VANILLA_BOW = new WeaponStats(20, 1.0, 1.0, 1.0, 0, 1.0);
     public static final WeaponStats SHORTBOW = new WeaponStats(12, 0.7, 2.6 / 3.0, 1.5, 0, 1.0);
+    /**
+     * Slow, heavy and true: a long draw, hard hits, a tight spread and a flatter arc. ×1.2, not more: its fast arrow
+     * already starts from 8, and 8 × 1.2 × the 2.5 skill cap = 24 is the most that still leaves an iron-armoured zombie
+     * standing.
+     */
+    public static final WeaponStats LONGBOW = new WeaponStats(32, 1.2, 3.8 / 3.0, 0.6, 0, 0.75);
+    /** A little slower and harder than vanilla's bow, with a Perfect window two ticks wider. */
+    public static final WeaponStats RECURVE_BOW = new WeaponStats(18, 1.15, 3.2 / 3.0, 0.9, 2, 1.0);
 
     /** Converts ticks held on this weapon to the ticks a vanilla bow would need for the same draw fraction. */
     public int toVanillaTicks(int ticksHeld) {

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "minecraft:stick",
+    "S": "minecraft:string",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    " #S",
+    "#IS",
+    " #S"
+  ],
+  "result": {
+    "id": "fulldraw:longbow"
+  }
+}

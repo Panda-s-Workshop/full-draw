@@ -81,6 +81,61 @@ final class ShotGameTests {
     }
 
     /**
+     * The Longbow: Perfect at 34 ticks (32 + 2), arrows at 3.8 for ×1.2 with three-quarters of an arrow's gravity, a
+     * tenth of walking speed while drawn, and no draw started from a sprint.
+     */
+    static void weaponStatsLongbow(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        Vec3 at = helper.absoluteVec(new Vec3(5.5, 1, 5.5));
+        player.snapTo(at.x, at.y, at.z, 0, -60);
+        ItemStack bow = new ItemStack(com.panda.fulldraw.registry.ModItems.LONGBOW.get());
+        player.setItemInHand(InteractionHand.MAIN_HAND, bow);
+        player.getInventory().add(new ItemStack(Items.ARROW, 8));
+        BowItem item = (BowItem) bow.getItem();
+        int duration = item.getUseDuration(bow, player);
+        AbstractArrow perfect = release(helper, player, item, bow, duration - 34);
+        AbstractArrow early = release(helper, player, item, bow, duration - 30);
+        ShotRecord p = ((ShotHolder) perfect).fulldraw$shot(), e = ((ShotHolder) early).fulldraw$shot();
+        if (p == null || !p.perfect()) helper.fail("a Longbow released at 34 ticks (32 + 2) should be Perfect");
+        else if (e == null || e.perfect()) helper.fail("a Longbow released at 30 ticks is before its window");
+        else if (Math.abs(p.weaponMult() - 1.2) > 1e-6) helper.fail("Longbow damage multiplier " + p.weaponMult());
+        else if (Math.abs(perfect.getDeltaMovement().length() - 3.8) > 0.05) helper.fail("Longbow launch speed " + perfect.getDeltaMovement().length() + ", expected 3.8");
+        else if (Math.abs(perfect.getGravity() - 0.05 * 0.75) > 1e-6) helper.fail("Longbow arrow gravity " + perfect.getGravity() + ", expected 0.0375");
+        else {
+            var use = bow.get(net.minecraft.core.component.DataComponents.USE_EFFECTS);
+            if (use == null || use.canSprint() || use.speedMultiplier() != 0.1F) helper.fail("the Longbow draws at a tenth of walking speed, no sprinting: " + use);
+            else {
+                player.setSprinting(true);
+                var result = item.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+                if (result != net.minecraft.world.InteractionResult.FAIL || player.isUsingItem()) helper.fail("a sprinting player started a Longbow draw: " + result);
+                else helper.succeed();
+            }
+        }
+    }
+
+    /** The Recurve Bow: an 18-tick draw with a Perfect window of 6 ticks (20 to 25), arrows at 3.2 for ×1.15. */
+    static void weaponStatsRecurveBow(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        Vec3 at = helper.absoluteVec(new Vec3(5.5, 1, 5.5));
+        player.snapTo(at.x, at.y, at.z, 0, -60);
+        ItemStack bow = new ItemStack(com.panda.fulldraw.registry.ModItems.RECURVE_BOW.get());
+        player.setItemInHand(InteractionHand.MAIN_HAND, bow);
+        player.getInventory().add(new ItemStack(Items.ARROW, 8));
+        BowItem item = (BowItem) bow.getItem();
+        int duration = item.getUseDuration(bow, player);
+        ShotRecord first = ((ShotHolder) release(helper, player, item, bow, duration - 20)).fulldraw$shot();
+        AbstractArrow lastArrow = release(helper, player, item, bow, duration - 25);
+        ShotRecord last = ((ShotHolder) lastArrow).fulldraw$shot();
+        ShotRecord after = ((ShotHolder) release(helper, player, item, bow, duration - 26)).fulldraw$shot();
+        if (first == null || !first.perfect()) helper.fail("a Recurve Bow released at 20 ticks (18 + 2) should be Perfect");
+        else if (last == null || !last.perfect()) helper.fail("a Recurve Bow released at 25 ticks is still in its 6-tick window");
+        else if (after == null || after.perfect()) helper.fail("a Recurve Bow released at 26 ticks is past its window");
+        else if (Math.abs(last.weaponMult() - 1.15) > 1e-6) helper.fail("Recurve Bow damage multiplier " + last.weaponMult());
+        else if (Math.abs(lastArrow.getDeltaMovement().length() - 3.2) > 0.05) helper.fail("Recurve Bow launch speed " + lastArrow.getDeltaMovement().length() + ", expected 3.2");
+        else helper.succeed();
+    }
+
+    /**
      * Sneaking at full draw holds the breath, and the server's breath sets the spread. A late release (30
      * ticks) by a still archer: 0.5 plain, 0.25 focused, and 1.5 when the breath ran out three seconds ago (the tremble
      * at full). The breath runs out after 2.5 s and the exhale leaves the archer unfocused.

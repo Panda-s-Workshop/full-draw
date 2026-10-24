@@ -16,6 +16,14 @@ public final class ModItems {
     public static final DeferredItem<FullDrawBowItem> SHORTBOW = ITEMS.registerItem("shortbow", p -> new FullDrawBowItem(p, WeaponStats.SHORTBOW),
             p -> p.durability(256).enchantable(1).component(DataComponents.USE_EFFECTS, new UseEffects(true, true, 1.0F)));
 
+    /** The sniper's bow: a long draw for hard, true, flat shots; you all but stand still to draw it, and not from a run. */
+    public static final DeferredItem<FullDrawBowItem> LONGBOW = ITEMS.registerItem("longbow", p -> new FullDrawBowItem(p, WeaponStats.LONGBOW, false),
+            p -> p.durability(448).enchantable(1).component(DataComponents.USE_EFFECTS, new UseEffects(false, true, 0.1F)));
+
+    /** The forgiving bow: a wider Perfect window and a little more punch than vanilla's. */
+    public static final DeferredItem<FullDrawBowItem> RECURVE_BOW = ITEMS.registerItem("recurve_bow", p -> new FullDrawBowItem(p, WeaponStats.RECURVE_BOW),
+            p -> p.durability(512).enchantable(1));
+
     /** Four kinds of arrows anywhere in the inventory, R picks which one the bow draws. */
     public static final DeferredItem<QuiverItem> QUIVER = ITEMS.registerItem("quiver", QuiverItem::new, p -> p.stacksTo(1));
 

@@ -2,6 +2,7 @@ package com.panda.fulldraw.logic;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /** Pins the shot pipeline's rules and its balance targets. */
@@ -141,11 +142,29 @@ class ShotMathTest {
         assertTrue(ShotMath.damage(6, 1, 1, true, 1, 10, T) >= vanillaAverage);
     }
 
-    /** No vanilla-bow arrow kills a full-health zombie (20 HP, 2 natural + 15 iron armour) in one hit. */
+    /**
+     * No arrow from any bow kills a full-health zombie (20 HP, 2 natural + 15 iron armour) in one hit: each bow's
+     * best case, a Perfect weak-spot shot at the skill cap with its arrow still at launch speed.
+     */
     @Test
     void capHoldsAgainstIronZombie() {
-        double best = ShotMath.damage(6, 1, 1, true, T.precisionMobs(), 200, T);
-        assertTrue(afterArmour(best, 17, 0) < 20, "best vanilla-bow shot after armour: " + afterArmour(best, 17, 0));
+        for (WeaponStats w : List.of(BOW, WeaponStats.SHORTBOW, WeaponStats.LONGBOW, WeaponStats.RECURVE_BOW)) {
+            double best = ShotMath.damage(launchBase(w), w.damageMult(), 1, true, T.precisionMobs(), 200, T);
+            assertTrue(afterArmour(best, 17, 0) < 20, w + ": best shot after armour " + afterArmour(best, 17, 0));
+        }
+    }
+
+    /** A Longbow Perfect headshot at 50 m stays under 25, even counting its arrow at launch speed. */
+    @Test
+    void longbowCeiling() {
+        WeaponStats w = WeaponStats.LONGBOW;
+        double headshot = ShotMath.damage(launchBase(w), w.damageMult(), 1, true, T.precisionMobs(), 50, T);
+        assertTrue(headshot < 25, "Longbow Perfect headshot at 50 m: " + headshot);
+    }
+
+    /** Vanilla's arrow damage for this bow's full-draw launch speed and a plain arrow (base 2). */
+    static int launchBase(WeaponStats w) {
+        return ShotMath.vanillaDamage(3.0 * w.velocityMult(), 2.0);
     }
 
     @Test

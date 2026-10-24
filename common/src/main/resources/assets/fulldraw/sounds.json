@@ -178,24 +178,14 @@
     "subtitle": "subtitles.fulldraw.strain",
     "sounds": [
       {
-        "name": "minecraft:item/crossbow/loading_middle1",
-        "volume": 0.7,
-        "pitch": 1.0
+        "name": "minecraft:block/wooden_door/open1",
+        "volume": 0.35,
+        "pitch": 0.6
       },
       {
-        "name": "minecraft:item/crossbow/loading_middle2",
-        "volume": 0.7,
-        "pitch": 1.0
-      },
-      {
-        "name": "minecraft:item/crossbow/loading_middle3",
-        "volume": 0.7,
-        "pitch": 1.0
-      },
-      {
-        "name": "minecraft:item/crossbow/loading_middle4",
-        "volume": 0.7,
-        "pitch": 1.0
+        "name": "minecraft:block/wooden_door/open2",
+        "volume": 0.35,
+        "pitch": 0.6
       }
     ]
   },
@@ -203,9 +193,19 @@
     "subtitle": "subtitles.fulldraw.twang",
     "sounds": [
       {
-        "name": "minecraft:note/guitar",
-        "volume": 0.8,
-        "pitch": 1.0
+        "name": "minecraft:item/crossbow/shoot1",
+        "volume": 0.5,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:item/crossbow/shoot2",
+        "volume": 0.5,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:item/crossbow/shoot3",
+        "volume": 0.5,
+        "pitch": 1.25
       }
     ]
   }

@@ -96,16 +96,27 @@ public final class Shots {
             player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.fulldraw.perfect_hint"));
     }
 
-    /** A Perfect Release chimes for everyone nearby and flashes at the bow. */
+    /**
+     * A Perfect Release chimes for everyone nearby and flashes at the bow. The shooter's own client plays both when it
+     * hears the verdict, so a player can switch them off for themselves; everyone else gets them from here.
+     */
     private static void perfectRelease(LivingEntity shooter) {
         if (!(shooter.level() instanceof ServerLevel level)) return;
-        level.playSound(null, shooter.getX(), shooter.getEyeY(), shooter.getZ(), ModSounds.PERFECT_RELEASE.get(), SoundSource.PLAYERS, 0.8F, 1.0F);
+        Player self = shooter instanceof Player p ? p : null;
+        level.playSound(self, shooter.getX(), shooter.getEyeY(), shooter.getZ(), ModSounds.PERFECT_RELEASE.get(), SoundSource.PLAYERS, 0.8F, 1.0F);
         if (shooter instanceof ServerPlayer player) ModTriggers.EVENT.get().trigger(player, "perfect_release");
-        // a small white flash where the bow is in first person, right of the crosshair and above the HUD: never on the
-        // line to the target, never on the hotbar or the action bar
+        Vec3 bow = flashPoint(shooter);
+        for (ServerPlayer watcher : level.players())
+            if (watcher != self) level.sendParticles(watcher, ParticleTypes.FIREWORK, false, false, bow.x, bow.y, bow.z, 2, 0.02, 0.02, 0.02, 0.01);
+    }
+
+    /**
+     * Where the Perfect flash shows: where the bow is in first person, right of the crosshair and above the HUD, so it's
+     * never on the line to the target, the hotbar or the action bar.
+     */
+    public static Vec3 flashPoint(Entity shooter) {
         double yaw = Math.toRadians(shooter.getYRot());
-        Vec3 bow = shooter.getEyePosition().add(shooter.getLookAngle().scale(1.6)).add(-Math.cos(yaw) * 0.55, -0.2, -Math.sin(yaw) * 0.55);
-        level.sendParticles(ParticleTypes.FIREWORK, bow.x, bow.y, bow.z, 2, 0.02, 0.02, 0.02, 0.01);
+        return shooter.getEyePosition().add(shooter.getLookAngle().scale(1.6)).add(-Math.cos(yaw) * 0.55, -0.2, -Math.sin(yaw) * 0.55);
     }
 
     /** Whether the player has earned Perfect Release (the hint stops then). */
@@ -117,7 +128,7 @@ public final class Shots {
     /** Tells the shooter how their arrow landed: the client plays the hit sounds and the readout. */
     public static void reportHit(Entity owner, ShotRecord shot, Impact impact, ShotMath.Breakdown breakdown) {
         float damage = (float) breakdown.total();
-        if (owner instanceof Player p) LAST.put(p, new LastShot(shot.weapon(), impact.precision(), breakdown));
+        if (owner instanceof Player p) LAST.put(p.getUUID(), new LastShot(shot.weapon(), impact.precision(), breakdown));
         if (impact.precision() && owner != null && owner.level() instanceof ServerLevel level) {
             // a small burst where the weak spot was struck, for the shooter and anyone watching
             Vec3 at = impact.location();
@@ -180,10 +191,16 @@ public final class Shots {
     /** A player's last arrow that landed, for {@code /fulldraw stats}: which weapon, and every factor of its damage. */
     public record LastShot(net.minecraft.resources.Identifier weapon, boolean precision, ShotMath.Breakdown damage) {}
 
-    private static final java.util.Map<Player, LastShot> LAST = new java.util.WeakHashMap<>();
+    /** By UUID, so a respawn (a new player object) keeps it; dropped when the player leaves. */
+    private static final java.util.Map<java.util.UUID, LastShot> LAST = new java.util.concurrent.ConcurrentHashMap<>();
 
     @Nullable
     public static LastShot lastShot(Player player) {
-        return LAST.get(player);
+        return LAST.get(player.getUUID());
+    }
+
+    /** When a player leaves the server. */
+    public static void forget(Player player) {
+        LAST.remove(player.getUUID());
     }
 }

@@ -25,6 +25,10 @@ public final class FullDrawNeoForge {
         modBus.addListener((RegisterEvent e) -> DeferredRegister.all().forEach(register -> registerInto(e, register)));
         container.registerConfig(ModConfig.Type.SYNCED, NeoForgeConfig.SPEC);
         FullDrawConfig.use(new NeoForgeConfig());
+        modBus.addListener((net.neoforged.fml.event.config.ModConfigEvent.Reloading e) -> {
+            var server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+            if (e.getConfig().getSpec() == NeoForgeConfig.SPEC && server != null) server.execute(() -> FullDrawNetwork.onTuningChanged(server));
+        });
         modBus.addListener((RegisterPayloadHandlersEvent e) -> {
             PayloadRegistrar r = e.registrar("1").executesOn(HandlerThread.MAIN).optional();
             r.playToServer(FullDrawNetwork.CycleQuiver.TYPE, FullDrawNetwork.CycleQuiver.STREAM_CODEC, (payload, ctx) -> {
@@ -41,6 +45,8 @@ public final class FullDrawNeoForge {
         game.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer player) FullDrawNetwork.onJoin(player);
         });
+        game.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent e) ->
+                com.panda.fulldraw.shot.Shots.forget(e.getEntity()));
         game.addListener((net.neoforged.neoforge.event.RegisterCommandsEvent e) -> com.panda.fulldraw.command.StatsCommand.register(e.getDispatcher()));
         game.addListener((net.neoforged.neoforge.event.tick.PlayerTickEvent.Post e) -> {
             if (e.getEntity() instanceof ServerPlayer player) com.panda.fulldraw.shot.Focus.tick(player);

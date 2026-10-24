@@ -42,21 +42,37 @@ public final class FullDrawConfig {
         return remote != null;
     }
 
+    private static double clampedFull = Double.NaN;
+
+    /**
+     * The tremble's full point, at least a tick (0.05 s) after its start: a full point before the start would divide by a
+     * negative span. Logs once per value when it has to move it.
+     */
+    public static double trembleFull(double start, double full) {
+        double min = start + 0.05;
+        if (full >= min) return full;
+        if (full != clampedFull) {
+            clampedFull = full;
+            com.panda.fulldraw.FullDrawMod.LOGGER.warn("trembleFullSeconds {} is not after trembleStartSeconds {}, using {}", full, start, min);
+        }
+        return min;
+    }
+
     public static boolean vanillaCritOnFullDraw() {
         return source.vanillaCritOnFullDraw();
     }
 
-    /**
-     * The shot pipeline's numbers: the server's on a client connected to one, this side's own otherwise. In singleplayer
-     * both sides read the same file, so the two agree.
-     */
+    /** The shot pipeline's numbers as this side's config has them now: what the server decides shots with. */
     public static ShotMath.Tuning tuning() {
-        ShotMath.Tuning r = remote;
-        return r != null ? r : source.tuning();
+        return source.tuning();
     }
 
-    /** This side's own numbers, never the remote ones: what a server sends. */
-    public static ShotMath.Tuning localTuning() {
-        return source.tuning();
+    /**
+     * The numbers the client shows (the ring, the tremble): the connected server's, or this side's own before any
+     * arrive. Server code never reads these.
+     */
+    public static ShotMath.Tuning clientTuning() {
+        ShotMath.Tuning r = remote;
+        return r != null ? r : source.tuning();
     }
 }

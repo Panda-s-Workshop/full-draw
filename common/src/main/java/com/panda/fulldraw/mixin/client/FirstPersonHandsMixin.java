@@ -36,6 +36,7 @@ abstract class FirstPersonHandsMixin {
         if (s[0] == 0 && s[1] == 0) return;
         fulldraw$shake = s;
         pose.translate(s[0], s[1], 0);
+        DrawJuice.shakenFrames++;
     }
 
     @Inject(method = "submitArmWithItem", at = @At("TAIL"))

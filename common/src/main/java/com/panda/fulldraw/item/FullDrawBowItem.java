@@ -28,6 +28,8 @@ public class FullDrawBowItem extends BowItem implements Weapons.Ranged {
 
     @Override
     public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
+        // opted out (fulldraw:no_shot_pipeline): a plain vanilla bow, so the quick draw doesn't come without its penalties
+        if (!Weapons.inPipeline(stack)) return super.releaseUsing(stack, level, entity, timeLeft);
         int duration = getUseDuration(stack, entity);
         int held = duration - timeLeft;
         Shots.beginRelease(entity, stack, held);

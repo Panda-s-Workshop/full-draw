@@ -161,6 +161,69 @@ final class ShotGameTests {
     }
 
     /**
+     * A bashed player is shoved too: its own client moves it, so the hit marks it to be sent its new motion. The bow's
+     * rest also blocks drawing: a draw started during it doesn't take, one started before the bash does.
+     */
+    @SuppressWarnings("removal")
+    static void bowBashMovesPlayers(GameTestHelper helper) {
+        net.minecraft.server.level.ServerPlayer attacker = helper.makeMockServerPlayerInLevel();
+        net.minecraft.server.level.ServerPlayer target = helper.makeMockServerPlayerInLevel();
+        attacker.setGameMode(GameType.SURVIVAL);
+        target.setGameMode(GameType.SURVIVAL);
+        // a player is invulnerable until its client says the world has loaded; a mock player's never does
+        target.connection.handleAcceptPlayerLoad(new net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket());
+        Vec3 at = helper.absoluteVec(new Vec3(2.5, 1, 2.5));
+        attacker.snapTo(at.x, at.y, at.z, 0, 0); // facing +Z
+        target.snapTo(at.x, at.y, at.z + 1.2, 180, 0);
+        ItemStack bow = new ItemStack(Items.BOW);
+        attacker.setItemInHand(InteractionHand.MAIN_HAND, bow);
+        attacker.getInventory().add(new ItemStack(Items.ARROW, 4));
+        attacker.gameMode.useItem(attacker, helper.getLevel(), bow, InteractionHand.MAIN_HAND);
+        if (!attacker.isUsingItem()) {
+            helper.fail("before the bash the bow should draw");
+            return;
+        }
+        attacker.stopUsingItem();
+        attacker.attack(target);
+        double shove = target.getDeltaMovement().horizontalDistance();
+        if (shove < BowBash.SHOVE)
+            helper.fail("a bashed player should be shoved at least " + BowBash.SHOVE + ", horizontal speed " + shove + ", health " + target.getHealth());
+        else if (!target.syncVelocity) helper.fail("a bashed player's own client should be sent the shove");
+        else {
+            attacker.gameMode.useItem(attacker, helper.getLevel(), bow, InteractionHand.MAIN_HAND);
+            if (attacker.isUsingItem()) helper.fail("the bow should not draw while it rests after a bash");
+            else helper.succeed();
+        }
+    }
+
+    /** {@code /fulldraw stats} needs no permission: a player who isn't an operator runs it. */
+    @SuppressWarnings("removal")
+    static void statsNeedsNoPermission(GameTestHelper helper) {
+        net.minecraft.server.level.ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        var source = player.createCommandSourceStack().withPermission(net.minecraft.server.permissions.PermissionSet.NO_PERMISSIONS)
+                .withSuppressedOutput();
+        try {
+            int result = helper.getLevel().getServer().getCommands().getDispatcher().execute("fulldraw stats", source);
+            if (result != 1) helper.fail("/fulldraw stats returned " + result + " for a player with no permissions");
+            else helper.succeed();
+        } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+            helper.fail("/fulldraw stats refused a player with no permissions: " + e.getMessage());
+        }
+    }
+
+    /** The server's numbers survive the trip to a client: every field, with values that differ from the defaults. */
+    static void serverTuningCodecRoundTrips(GameTestHelper helper) {
+        var sent = new com.panda.fulldraw.network.FullDrawNetwork.ServerTuning(new com.panda.fulldraw.logic.ShotMath.Tuning(
+                7, 3, 2.25, 1.75, 1.25, 4.5, 12.0, 0.03, 1.8, 3.5, 0.45, 2.5, 7.5, 4.0));
+        var buf = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.getLevel().registryAccess());
+        com.panda.fulldraw.network.FullDrawNetwork.ServerTuning.STREAM_CODEC.encode(buf, sent);
+        var received = com.panda.fulldraw.network.FullDrawNetwork.ServerTuning.STREAM_CODEC.decode(buf);
+        if (!received.equals(sent)) helper.fail("server_tuning changed on the way: sent " + sent + ", got " + received);
+        else if (buf.readableBytes() != 0) helper.fail("server_tuning left " + buf.readableBytes() + " bytes unread");
+        else helper.succeed();
+    }
+
+    /**
      * {@code /fulldraw stats} names the held bow's numbers and breaks down the last arrow that landed: here a
      * Perfect headshot at 10 blocks, 6 × 1.5 × 1.5 = 13.5.
      */
@@ -190,9 +253,16 @@ final class ShotGameTests {
             String text = lines.stream().map(net.minecraft.network.chat.Component::getString).reduce("", (x, y) -> x + " | " + y);
             if (b.base() != 6 || b.perfectMult() != 1.5 || b.precisionMult() != 1.5 || Math.abs(b.total() - 13.5) > 1e-6)
                 helper.fail("breakdown " + b);
-            else if (lines.size() != 3 || !text.contains("Perfect on ticks 22-25") || !text.contains("13.50 damage") || !text.contains("1.50 Perfect"))
+            else if (lines.size() != 3 || !text.contains("Perfect from 1.10 s to 1.30 s") || !text.contains("13.50 damage")
+                    || !text.contains("1.50 Perfect") || !text.contains("1.00 arrow") || text.contains("point-blank"))
                 helper.fail("stats lines: " + text);
-            else helper.succeed();
+            else {
+                // a crossbow keeps vanilla's numbers, so it's shown no Perfect window
+                player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
+                String crossbow = com.panda.fulldraw.command.StatsCommand.lines(player).getFirst().getString();
+                if (!crossbow.contains("no Perfect window")) helper.fail("crossbow stats: " + crossbow);
+                else helper.succeed();
+            }
         });
     }
 

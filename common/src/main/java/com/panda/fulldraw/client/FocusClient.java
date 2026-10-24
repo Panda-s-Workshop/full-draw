@@ -60,6 +60,7 @@ public final class FocusClient {
     }
 
     private static void playEvent(Minecraft mc, Breath.Event event, long now) {
+        if (!com.panda.fulldraw.FullDrawClientConfig.get().drawSounds()) return;
         if (event == Breath.Event.INHALE && now - lastInhale >= Focus.INHALE_SOUND_GAP) {
             lastInhale = now;
             mc.getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.INHALE.get(), 1.0F, 0.6F));
@@ -136,7 +137,7 @@ public final class FocusClient {
     public static double trembleNow(LocalPlayer p) {
         if (!Focus.drawing(p) || breath.focusing()) return 0;
         WeaponStats stats = Weapons.stats(p.getUseItem());
-        return ShotMath.tremble(stats, p.getTicksUsingItem() - stats.drawTicks(), breath.exhaustedTicks(), FullDrawConfig.tuning());
+        return ShotMath.tremble(stats, p.getTicksUsingItem() - stats.drawTicks(), breath.exhaustedTicks(), FullDrawConfig.clientTuning());
     }
 
     /**

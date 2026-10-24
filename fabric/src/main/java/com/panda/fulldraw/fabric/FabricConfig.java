@@ -20,7 +20,7 @@ final class FabricConfig implements FullDrawConfig.Source {
         PropertiesConfig c = new PropertiesConfig("fulldraw.properties");
         ShotMath.Tuning d = ShotMath.DEFAULTS;
         boolean crit = c.bool("vanillaCritOnFullDraw", false, "Players' full-draw bow shots crit as in vanilla; false means only a Perfect Release crits");
-        int window = c.integer("perfectWindowTicks", d.perfectWindow(), 1, 20, "Ticks the Perfect window stays open");
+        int window = c.integer("perfectWindowTicks", d.perfectWindow(), 1, 20, "Ticks the Perfect window stays open (a weapon's own extra window adds to this)");
         int delay = c.integer("perfectDelayTicks", d.perfectDelay(), 0, 20, "Ticks after full draw the Perfect window opens");
         double perfect = c.decimal("perfectMultiplier", d.perfectMult(), 1.0, 5.0, "Damage multiplier of a Perfect Release");
         double mobs = c.decimal("precisionMultiplierMobs", d.precisionMobs(), 1.0, 5.0, "Head or weak-spot multiplier against mobs");
@@ -36,7 +36,7 @@ final class FabricConfig implements FullDrawConfig.Source {
         double max = c.decimal("trembleMaxSpread", d.trembleMaxSpread(), 0.0, 20.0, "Spread at the worst of the tremble (vanilla's bow is 1.0)");
         c.save("Full Draw: server settings. Clients on this server use these numbers.");
         return new FabricConfig(crit, new ShotMath.Tuning(window, delay, perfect, mobs, players, cap, rangeStart, perBlock, rangeCap, pointBlank,
-                pointBlankMult, start, Math.max(start + 0.05, full), max));
+                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max));
     }
 
     @Override

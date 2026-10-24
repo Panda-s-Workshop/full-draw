@@ -36,7 +36,10 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("weapon_stats_shortbow", () -> ShotGameTests::weaponStatsShortbow);
         FUNCTIONS.register("steady_aim_halves_spread", () -> ShotGameTests::steadyAimHalvesSpread);
         FUNCTIONS.register("bow_bash_shoves", () -> ShotGameTests::bowBashShoves);
+        FUNCTIONS.register("bow_bash_moves_players", () -> ShotGameTests::bowBashMovesPlayers);
+        FUNCTIONS.register("server_tuning_codec_round_trips", () -> ShotGameTests::serverTuningCodecRoundTrips);
         FUNCTIONS.register("fulldraw_stats_reports", () -> ShotGameTests::statsReports);
+        FUNCTIONS.register("fulldraw_stats_needs_no_permission", () -> ShotGameTests::statsNeedsNoPermission);
         FUNCTIONS.register("quiver_supplies_selected_arrow", () -> QuiverGameTests::quiverSuppliesSelectedArrow);
         FUNCTIONS.register("quiver_cycle_skips_empty", () -> QuiverGameTests::quiverCycleSkipsEmpty);
         FUNCTIONS.register("quiver_bundle_clicks", () -> QuiverGameTests::quiverBundleClicks);

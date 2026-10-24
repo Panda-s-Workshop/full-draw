@@ -64,6 +64,9 @@ public final class DrawJuice {
         return stats.drawTicks() <= 14 ? 1.35F : stats.drawTicks() >= 26 ? 0.8F : 1.1F;
     }
 
+    /** Frames the hand renderer moved the bow by a non-zero shake (for tests). */
+    public static int shakenFrames;
+
     /** The bow's offset in the hand this frame (x, y in blocks), or zeros. */
     public static float[] shake(LocalPlayer p, float partialTick) {
         if (!FullDrawClientConfig.get().bowShake()) return new float[] {0, 0};

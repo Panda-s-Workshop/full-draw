@@ -16,8 +16,10 @@ public final class NeoForgeClientConfig implements FullDrawClientConfig.Source {
             .define("fovEffects", D.fovEffects());
     private static final ModConfigSpec.BooleanValue TRAIL = B.comment("The particle trail behind Perfect arrows.")
             .define("perfectTrail", D.perfectTrail());
-    private static final ModConfigSpec.BooleanValue DRAW = B.comment("The draw creak, the strain of a held draw and the twang on release.")
+    private static final ModConfigSpec.BooleanValue DRAW = B.comment("The draw creak, the strain of a held draw, the twang on release and your own breath.")
             .define("drawSounds", D.drawSounds());
+    private static final ModConfigSpec.BooleanValue CHIME = B.comment("The chime and the flash at the bow of your own Perfect Release.")
+            .define("perfectChime", D.perfectChime());
     private static final ModConfigSpec.BooleanValue HIT = B.comment("The hit tick and the precision thock.")
             .define("hitSounds", D.hitSounds());
     private static final ModConfigSpec.BooleanValue SHAKE = B.comment("The bow shaking in the hand when a draw is held too long.")
@@ -37,6 +39,7 @@ public final class NeoForgeClientConfig implements FullDrawClientConfig.Source {
     @Override public boolean fovEffects() { return on(FOV, D.fovEffects()); }
     @Override public boolean perfectTrail() { return on(TRAIL, D.perfectTrail()); }
     @Override public boolean drawSounds() { return on(DRAW, D.drawSounds()); }
+    @Override public boolean perfectChime() { return on(CHIME, D.perfectChime()); }
     @Override public boolean hitSounds() { return on(HIT, D.hitSounds()); }
     @Override public boolean bowShake() { return on(SHAKE, D.bowShake()); }
 

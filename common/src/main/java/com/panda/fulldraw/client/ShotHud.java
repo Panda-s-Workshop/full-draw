@@ -64,7 +64,7 @@ public final class ShotHud {
         WeaponStats stats = Weapons.stats(p.getUseItem());
         int held = p.getTicksUsingItem();
         double fraction = ShotMath.drawFraction(held, stats);
-        boolean perfect = ShotMath.isPerfect(held, stats, FullDrawConfig.tuning(), 0);
+        boolean perfect = ShotMath.isPerfect(held, stats, FullDrawConfig.clientTuning(), 0);
         boolean full = fraction >= 1.0;
         int lit = (int) Math.round(fraction * RING_DOTS);
         // the tremble: the ring fades and its dots shiver, more as the hold drags on
@@ -122,6 +122,15 @@ public final class ShotHud {
         if (result.verdict() == FullDrawNetwork.ReleaseResult.PERFECT) {
             missKey = null;
             mc.gui.hud.setOverlayMessage(Component.empty(), false);
+            if (com.panda.fulldraw.FullDrawClientConfig.get().perfectChime()) {
+                mc.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                        com.panda.fulldraw.registry.ModSounds.PERFECT_RELEASE.get(), 1.0F, 0.8F));
+                var bow = com.panda.fulldraw.shot.Shots.flashPoint(mc.player);
+                var random = mc.level.getRandom();
+                for (int i = 0; i < 2; i++)
+                    mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.FIREWORK, bow.x, bow.y, bow.z,
+                            random.nextGaussian() * 0.01, random.nextGaussian() * 0.01, random.nextGaussian() * 0.01);
+            }
             return;
         }
         missKey = result.verdict() == FullDrawNetwork.ReleaseResult.EARLY ? "hud.fulldraw.early" : "hud.fulldraw.late";

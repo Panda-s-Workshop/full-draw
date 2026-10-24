@@ -74,7 +74,7 @@ public final class FullDrawNetwork {
         }
     }
 
-    /** The server's shot numbers, sent to each player on joining. */
+    /** The server's shot numbers, sent to each player on joining and again when the server's config reloads. */
     public record ServerTuning(ShotMath.Tuning tuning) implements CustomPacketPayload {
         public static final Type<ServerTuning> TYPE = new Type<>(FullDrawMod.id("server_tuning"));
         public static final StreamCodec<RegistryFriendlyByteBuf, ServerTuning> STREAM_CODEC = StreamCodec.of((buf, p) -> {
@@ -96,7 +96,12 @@ public final class FullDrawNetwork {
 
     /** When a player joins: the server's numbers for their ring and HUD. */
     public static void onJoin(ServerPlayer player) {
-        send(player, new ServerTuning(com.panda.fulldraw.FullDrawConfig.localTuning()));
+        send(player, new ServerTuning(com.panda.fulldraw.FullDrawConfig.tuning()));
+    }
+
+    /** When the server's config changes while it runs: everyone online gets the new numbers. */
+    public static void onTuningChanged(net.minecraft.server.MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) onJoin(player);
     }
 
     public static Consumer<CustomPacketPayload> toServer = payload -> {};

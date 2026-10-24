@@ -11,6 +11,7 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 /**
  * Bow Bash: a melee hit with a bow or crossbow shoves the target back about three blocks, then the weapon
  * rests for a second (no bash, no draw), shown as the item's cooldown. The hit's damage is vanilla's empty-hand 1.
+ * A weapon in {@code fulldraw:no_shot_pipeline} hits as in vanilla.
  */
 public final class BowBash {
     /**
@@ -24,10 +25,12 @@ public final class BowBash {
 
     /** After a melee hit lands, on the server. */
     public static void onHit(ItemStack weapon, LivingEntity target, LivingEntity attacker) {
-        if (!(weapon.getItem() instanceof ProjectileWeaponItem) || !(attacker instanceof Player player)) return;
+        if (!(weapon.getItem() instanceof ProjectileWeaponItem) || !Weapons.inPipeline(weapon) || !(attacker instanceof Player player)) return;
         if (!(player.level() instanceof ServerLevel level) || player.getCooldowns().isOnCooldown(weapon)) return;
         double yaw = Math.toRadians(player.getYRot());
         target.knockback(SHOVE, Math.sin(yaw), -Math.cos(yaw), player.damageSources().playerAttack(player), 1.0F);
+        // knockback only marks the entity for its trackers; a player's own client moves it, so it needs the motion too
+        target.syncVelocity = true;
         player.getCooldowns().addCooldown(weapon, COOLDOWN_TICKS);
         level.playSound(null, target.getX(), target.getY(0.5), target.getZ(), ModSounds.BOW_BASH.get(), SoundSource.PLAYERS, 0.9F, 1.0F);
     }

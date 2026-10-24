@@ -21,8 +21,11 @@ public final class FullDrawClientConfig {
         /** The particle trail behind Perfect arrows. */
         boolean perfectTrail();
 
-        /** The draw creak, the strain under tremble and the twang on release. */
+        /** The draw creak, the strain under tremble, the twang on release and the archer's own breath. */
         boolean drawSounds();
+
+        /** The chime and the flash at the bow of your own Perfect Release (others still hear yours). */
+        boolean perfectChime();
 
         /** The hit tick and the precision thock. */
         boolean hitSounds();
@@ -39,6 +42,7 @@ public final class FullDrawClientConfig {
         @Override public boolean fovEffects() { return true; }
         @Override public boolean perfectTrail() { return true; }
         @Override public boolean drawSounds() { return true; }
+        @Override public boolean perfectChime() { return true; }
         @Override public boolean hitSounds() { return true; }
         @Override public boolean bowShake() { return true; }
         @Override public QuiverStrip quiverStrip() { return QuiverStrip.LEFT; }

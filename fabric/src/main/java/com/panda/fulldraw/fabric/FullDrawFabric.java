@@ -44,6 +44,8 @@ public final class FullDrawFabric implements ModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(FullDrawNetwork.ServerTuning.TYPE, FullDrawNetwork.ServerTuning.STREAM_CODEC);
         net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 FullDrawNetwork.onJoin(handler.getPlayer()));
+        net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+                com.panda.fulldraw.shot.Shots.forget(handler.getPlayer()));
         net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, context, selection) ->
                 com.panda.fulldraw.command.StatsCommand.register(dispatcher));
         ServerPlayNetworking.registerGlobalReceiver(FullDrawNetwork.CycleQuiver.TYPE, (payload, ctx) -> FullDrawNetwork.handleCycleQuiver(payload, ctx.player()));

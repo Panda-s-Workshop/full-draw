@@ -17,7 +17,7 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
         B.comment("The Perfect Release").push("perfect");
     }
 
-    private static final ModConfigSpec.IntValue WINDOW = B.comment("Ticks the Perfect window stays open.")
+    private static final ModConfigSpec.IntValue WINDOW = B.comment("Ticks the Perfect window stays open (a weapon's own extra window adds to this).")
             .defineInRange("perfectWindowTicks", D.perfectWindow(), 1, 20);
     private static final ModConfigSpec.IntValue DELAY = B.comment("Ticks after full draw the Perfect window opens.")
             .defineInRange("perfectDelayTicks", D.perfectDelay(), 0, 20);
@@ -70,10 +70,9 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
     @Override
     public ShotMath.Tuning tuning() {
         if (!SPEC.isLoaded()) return D;
-        // a full tremble before its start would divide by a negative span: keep it at least a tick later
         double start = TREMBLE_START.get();
         return new ShotMath.Tuning(WINDOW.get(), DELAY.get(), PERFECT.get(), PRECISION_MOBS.get(), PRECISION_PLAYERS.get(), CAP.get(),
                 RANGE_START.get(), RANGE_PER_BLOCK.get(), RANGE_CAP.get(), POINT_BLANK.get(), POINT_BLANK_MULT.get(), start,
-                Math.max(start + 0.05, TREMBLE_FULL.get()), TREMBLE_MAX.get());
+                FullDrawConfig.trembleFull(start, TREMBLE_FULL.get()), TREMBLE_MAX.get());
     }
 }

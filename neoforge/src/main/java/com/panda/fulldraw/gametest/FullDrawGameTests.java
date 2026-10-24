@@ -42,6 +42,10 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("arbalest_halves_armour", () -> CrossbowGameTests::arbalestHalvesArmour);
         FUNCTIONS.register("arbalest_knocks_back", () -> CrossbowGameTests::arbalestKnocksBack);
         FUNCTIONS.register("arbalest_breaks_shield_block", () -> CrossbowGameTests::arbalestBreaksShieldBlock);
+        FUNCTIONS.register("weapon_stats_repeating_crossbow", () -> CrossbowGameTests::weaponStatsRepeatingCrossbow);
+        FUNCTIONS.register("repeater_magazine_five", () -> CrossbowGameTests::repeaterMagazineFive);
+        FUNCTIONS.register("repeater_burst_lands", () -> CrossbowGameTests::repeaterBurstLands);
+        FUNCTIONS.register("repeater_break_drops_ammo", () -> CrossbowGameTests::repeaterBreakDropsAmmo);
         FUNCTIONS.register("steady_aim_halves_spread", () -> ShotGameTests::steadyAimHalvesSpread);
         FUNCTIONS.register("bow_bash_shoves", () -> ShotGameTests::bowBashShoves);
         FUNCTIONS.register("bow_bash_moves_players", () -> ShotGameTests::bowBashMovesPlayers);

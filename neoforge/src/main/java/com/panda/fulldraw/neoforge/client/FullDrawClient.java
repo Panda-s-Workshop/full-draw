@@ -40,6 +40,8 @@ public final class FullDrawClient {
             e.register(FullDrawNetwork.ServerTuning.TYPE, (payload, ctx) -> com.panda.fulldraw.FullDrawConfig.useRemote(payload.tuning()));
             e.register(FullDrawNetwork.ArrowGravity.TYPE, (payload, ctx) -> ShotFeedback.onArrowGravity(payload));
         });
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterRangeSelectItemModelPropertyEvent e) ->
+                e.register(FullDrawMod.id("magazine"), com.panda.fulldraw.client.MagazineShots.MAP_CODEC));
         modBus.addListener((RegisterKeyMappingsEvent e) -> {
             KeyMapping.Category category = new KeyMapping.Category(FullDrawKeys.CATEGORY_ID);
             e.registerCategory(category);

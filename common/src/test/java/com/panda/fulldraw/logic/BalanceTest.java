@@ -42,6 +42,20 @@ class BalanceTest {
         assertTrue(arbalest / 60 < DIAMOND_SWORD_DPS, "Arbalest " + arbalest / 60 + " damage a second, a diamond sword does " + DIAMOND_SWORD_DPS);
     }
 
+    /**
+     * A full magazine from the Repeating Crossbow, every bolt landing, deals at most 1.5 × one Arbalest bolt (a burst,
+     * not a heavier hit) and at least one Arbalest bolt (else it has no reason to exist). Plain arrows, no crit on either.
+     * That every bolt does land on one target is the GameTest {@code repeater_burst_lands}.
+     */
+    @Test
+    void repeaterBurst() {
+        int bolt = ShotMath.vanillaDamage(3.15 * WeaponStats.REPEATING_CROSSBOW.velocityMult(), 2.0 * WeaponStats.REPEATING_CROSSBOW.damageMult());
+        int magazine = bolt * Magazine.REPEATING_CROSSBOW.shots();
+        int arbalest = ShotMath.vanillaDamage(3.15 * WeaponStats.ARBALEST.velocityMult(), 2.0 * WeaponStats.ARBALEST.damageMult());
+        assertTrue(magazine <= 1.5 * arbalest, "a magazine deals " + magazine + ", one Arbalest bolt " + arbalest);
+        assertTrue(magazine >= arbalest, "a magazine deals " + magazine + ", less than one Arbalest bolt's " + arbalest);
+    }
+
     private static void assertRatio(double armour, double toughness, double ceiling) {
         double vanilla = perMinute(WeaponStats.VANILLA_CROSSBOW, true, armour, toughness, 1.0);
         double arbalest = perMinute(WeaponStats.ARBALEST, false, armour, toughness, BoltTraits.ARBALEST.armourKept());

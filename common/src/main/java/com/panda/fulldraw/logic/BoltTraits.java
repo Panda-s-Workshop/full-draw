@@ -9,6 +9,8 @@ package com.panda.fulldraw.logic;
  */
 public record BoltTraits(int pierce, double armourKept, float knockback) {
     public static final BoltTraits ARBALEST = new BoltTraits(2, 0.5, 2.0F);
+    /** Plain bolts. */
+    public static final BoltTraits NONE = new BoltTraits(0, 1.0, 0.0F);
 
     /** How long a shield-cracking weapon's bolt knocks a raised shield down, as an axe does (an axe: 5 s). */
     public static final float SHIELD_CRACK_SECONDS = 3.0F;

@@ -1,5 +1,6 @@
 package com.panda.fulldraw.gametest;
 
+import com.panda.fulldraw.item.RepeatingCrossbowItem;
 import com.panda.fulldraw.registry.ModItems;
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-/** The Arbalest in a real world. */
+/** The Arbalest and the Repeating Crossbow in a real world. */
 final class CrossbowGameTests {
     private CrossbowGameTests() {}
 
@@ -196,6 +197,149 @@ final class CrossbowGameTests {
                 else helper.succeed();
             }
         });
+    }
+
+    /**
+     * Loaded after 80 ticks of cranking (not 79); each bolt leaves at 3.0 with ×0.45 of the arrow's damage (0.9 from a
+     * plain arrow's 2), strays at most 0.0172 × 2.0 per axis and further than a vanilla bolt can; 520 uses; walking
+     * while cranking as with vanilla's crossbow.
+     */
+    static void weaponStatsRepeatingCrossbow(GameTestHelper helper) {
+        Player player = shooter(helper, new Vec3(2.5, 1, 2.5), -90, -10);
+        player.getInventory().setItem(9, new ItemStack(Items.ARROW, 64));
+        ItemStack repeater = new ItemStack(ModItems.REPEATING_CROSSBOW.get());
+        player.setItemInHand(InteractionHand.MAIN_HAND, repeater);
+        CrossbowItem item = (CrossbowItem) repeater.getItem();
+        int duration = item.getUseDuration(repeater, player);
+        item.onUseTick(helper.getLevel(), player, repeater, duration - 79);
+        boolean earlyLoaded = CrossbowItem.isCharged(repeater);
+        item.onUseTick(helper.getLevel(), player, repeater, duration - 80);
+        var use = repeater.get(DataComponents.USE_EFFECTS);
+        if (CrossbowItem.getChargeDuration(repeater, player) != 80) helper.fail("the Repeating Crossbow should load in 80 ticks, not " + CrossbowItem.getChargeDuration(repeater, player));
+        else if (earlyLoaded || !CrossbowItem.isCharged(repeater)) helper.fail("the Repeating Crossbow should load at 80 ticks of cranking, not 79: early " + earlyLoaded);
+        else if (repeater.getMaxDamage() != 520) helper.fail("the Repeating Crossbow should last 520 uses, not " + repeater.getMaxDamage());
+        else if (use != null && !use.equals(new ItemStack(Items.CROSSBOW).get(DataComponents.USE_EFFECTS)))
+            helper.fail("cranking the Repeating Crossbow should slow you as vanilla's crossbow does: " + use);
+        else {
+            // vanilla adds the spread to the aim without rescaling, so one bolt's speed is off by up to a tenth: average them
+            double worst = 0, speeds = 0;
+            AbstractArrow first = null;
+            for (int i = 0; i < 35; i++) {
+                if (i > 0 && i % 5 == 0) load(helper, player, repeater);
+                AbstractArrow bolt = fire(helper, player, item, repeater);
+                if (first == null) first = bolt;
+                worst = Math.max(worst, stray(bolt));
+                speeds += bolt.getDeltaMovement().length();
+            }
+            double speed = speeds / 35, limit = 0.0172275 * 2.0 + 1e-4;
+            if (Math.abs(speed - 3.0) > 0.03) helper.fail("Repeating Crossbow bolts' mean speed " + speed + ", expected 3.0");
+            else if (Math.abs(first.baseDamage - 0.9) > 1e-6) helper.fail("Repeating Crossbow bolt base damage " + first.baseDamage + ", expected 0.9 (2 × 0.45)");
+            else if (first.isCritArrow()) helper.fail("a Repeating Crossbow bolt shouldn't crit");
+            else if (worst > limit) helper.fail(String.format(java.util.Locale.ROOT, "a Repeating Crossbow bolt strayed %.4f, more than %.4f", worst, limit));
+            else if (worst <= 0.0172275) helper.fail(String.format(java.util.Locale.ROOT, "35 Repeating Crossbow bolts stayed within a vanilla bolt's %.4f", worst));
+            else helper.succeed();
+        }
+    }
+
+    /**
+     * One crank loads five shots and takes five arrows; each use fires one bolt and puts the crossbow on a 12-tick
+     * cooldown; the fifth empties it. With three arrows it loads three shots. With Multishot each shot is three bolts,
+     * for one arrow, and stays three after the enchantment is taken off.
+     */
+    static void repeaterMagazineFive(GameTestHelper helper) {
+        Player player = shooter(helper, new Vec3(2.5, 1, 2.5), -90, -10);
+        ItemStack repeater = load(helper, player, new ItemStack(ModItems.REPEATING_CROSSBOW.get()));
+        CrossbowItem item = (CrossbowItem) repeater.getItem();
+        int loaded = repeater.get(DataComponents.CHARGED_PROJECTILES).size(), arrowsLeft = player.getInventory().getItem(9).getCount();
+        if (loaded != 5 || arrowsLeft != 3) {
+            helper.fail("one crank should load 5 bolts from 8 arrows: loaded " + loaded + ", " + arrowsLeft + " arrows left");
+            return;
+        }
+        fire(helper, player, item, repeater);
+        if (repeater.get(DataComponents.CHARGED_PROJECTILES).size() != 4 || !player.getCooldowns().isOnCooldown(repeater)) {
+            helper.fail("a shot should leave 4 loaded and a 12-tick cooldown: " + repeater.get(DataComponents.CHARGED_PROJECTILES).size()
+                    + " loaded, cooldown " + player.getCooldowns().isOnCooldown(repeater));
+            return;
+        }
+        // nothing ticks a mock player's cooldowns
+        for (int i = 0; i < 11; i++) player.getCooldowns().tick();
+        boolean downAt11 = player.getCooldowns().isOnCooldown(repeater);
+        player.getCooldowns().tick();
+        if (!downAt11 || player.getCooldowns().isOnCooldown(repeater)) {
+            helper.fail("the cooldown between shots should be exactly 12 ticks: at 11 " + downAt11 + ", at 12 " + player.getCooldowns().isOnCooldown(repeater));
+            return;
+        }
+        for (int i = 0; i < 4; i++) fire(helper, player, item, repeater);
+        if (CrossbowItem.isCharged(repeater)) {
+            helper.fail("five shots should empty the magazine");
+            return;
+        }
+        // three arrows load three shots
+        Player few = shooter(helper, new Vec3(2.5, 1, 6.5), -90, -10);
+        few.getInventory().setItem(9, new ItemStack(Items.ARROW, 3));
+        ItemStack partial = load(helper, few, new ItemStack(ModItems.REPEATING_CROSSBOW.get()));
+        // Multishot: three bolts a shot, still one arrow a shot
+        Player multi = shooter(helper, new Vec3(2.5, 1, 9.5), -90, -10);
+        ItemStack fan = load(helper, multi, enchanted(helper, ModItems.REPEATING_CROSSBOW.get(), Enchantments.MULTISHOT, 1));
+        // a grindstone after loading: the shots stay as they were loaded
+        fan.set(DataComponents.ENCHANTMENTS, net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+        AABB box = new AABB(multi.blockPosition()).inflate(4);
+        int before = helper.getLevel().getEntitiesOfClass(AbstractArrow.class, box).size();
+        item.use(helper.getLevel(), multi, InteractionHand.MAIN_HAND);
+        int fired = helper.getLevel().getEntitiesOfClass(AbstractArrow.class, box).size() - before;
+        if (partial.get(DataComponents.CHARGED_PROJECTILES).size() != 3) helper.fail("three arrows should load three shots, not " + partial.get(DataComponents.CHARGED_PROJECTILES).size());
+        else if (fan.get(DataComponents.CHARGED_PROJECTILES).size() != 12 || fired != 3 || multi.getInventory().getItem(9).getCount() != 3)
+            helper.fail("Multishot should load 5 shots of 3 for 5 arrows and fire 3 a shot: " + fan.get(DataComponents.CHARGED_PROJECTILES).size()
+                    + " left after a shot, " + fired + " fired, " + multi.getInventory().getItem(9).getCount() + " arrows left");
+        else if (RepeatingCrossbowItem.shotsLoaded(fan) != 4) helper.fail("the sprite should count 4 shots left, not " + RepeatingCrossbowItem.shotsLoaded(fan));
+        else helper.succeed();
+    }
+
+    /**
+     * A full magazine lands on one target: five bolts 12 ticks apart all hurt a husk 8 blocks away, 3 each through its 2
+     * armour (2.94), 14.7 in all. Fired 8 ticks apart, the husk's damage cooldown turns bolts 2 and 4 away, which is why
+     * the Repeating Crossbow waits 12.
+     */
+    static void repeaterBurstLands(GameTestHelper helper) {
+        Husk spaced = husk(helper, 10.5, 2.5), crowded = husk(helper, 10.5, 8.5);
+        burst(helper, shooter(helper, new Vec3(2.5, 1, 2.5), -90, 0), com.panda.fulldraw.logic.Magazine.REPEATING_CROSSBOW.shotTicks());
+        burst(helper, shooter(helper, new Vec3(2.5, 1, 8.5), -90, 0), 8);
+        helper.runAfterDelay(80, () -> {
+            float a = spaced.getMaxHealth() - spaced.getHealth(), b = crowded.getMaxHealth() - crowded.getHealth();
+            if (Math.abs(a - 14.7) > 0.05) helper.fail("five bolts 12 ticks apart should all land: lost " + a + ", expected 14.7");
+            else if (b > 9.0) helper.fail("bolts 8 ticks apart were expected to lose two to the damage cooldown, but the husk lost " + b);
+            else helper.succeed();
+        });
+    }
+
+    /** Loads a Repeating Crossbow and fires its five shots {@code gap} ticks apart (calling use directly skips the cooldown). */
+    private static void burst(GameTestHelper helper, Player player, int gap) {
+        ItemStack repeater = load(helper, player, new ItemStack(ModItems.REPEATING_CROSSBOW.get()));
+        for (int i = 0; i < 5; i++)
+            helper.runAfterDelay(1 + i * gap, () -> ((CrossbowItem) repeater.getItem()).use(helper.getLevel(), player, InteractionHand.MAIN_HAND));
+    }
+
+    /** A shot that breaks the Repeating Crossbow drops the four arrows still loaded instead of losing them. */
+    static void repeaterBreakDropsAmmo(GameTestHelper helper) {
+        Player player = shooter(helper, new Vec3(2.5, 1, 2.5), -90, 0);
+        ItemStack worn = new ItemStack(ModItems.REPEATING_CROSSBOW.get());
+        worn.setDamageValue(worn.getMaxDamage() - 1);
+        load(helper, player, worn);
+        ((CrossbowItem) worn.getItem()).use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+        int dropped = helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new AABB(player.blockPosition()).inflate(3),
+                e -> e.getItem().is(Items.ARROW)).stream().mapToInt(e -> e.getItem().getCount()).sum();
+        if (!player.getMainHandItem().isEmpty()) helper.fail("the last use should have broken the crossbow");
+        else if (dropped != 4) helper.fail("the four loaded arrows should drop when the crossbow breaks, not " + dropped);
+        else helper.succeed();
+    }
+
+    /** Cranks the crossbow in the shooter's hand to full and returns it loaded. */
+    private static ItemStack load(GameTestHelper helper, Player player, ItemStack stack) {
+        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+        CrossbowItem item = (CrossbowItem) stack.getItem();
+        item.onUseTick(helper.getLevel(), player, stack, item.getUseDuration(stack, player) - CrossbowItem.getChargeDuration(stack, player));
+        if (!CrossbowItem.isCharged(stack)) throw helper.assertionException("the crossbow didn't load");
+        return stack;
     }
 
     private static Player shooter(GameTestHelper helper, Vec3 local, float yaw, float pitch) {

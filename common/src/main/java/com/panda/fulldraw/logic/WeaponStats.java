@@ -18,6 +18,12 @@ public record WeaponStats(int drawTicks, double damageMult, double velocityMult,
     public static final WeaponStats VANILLA_CROSSBOW = new WeaponStats(25, 1.0, 1.0, 1.0, 0, 1.0);
     /** The siege crossbow: a 3 s crank, bolts at 3.6 for ×1.6 with a 0.4 spread. Its bolts' extras are {@link BoltTraits#ARBALEST}. */
     public static final WeaponStats ARBALEST = new WeaponStats(60, 1.6, 3.6 / 3.15, 0.4, 0, 1.0);
+    /**
+     * The burst crossbow: a 4 s crank loads a magazine ({@link Magazine#REPEATING_CROSSBOW}), each bolt at 3.0 for ×0.45
+     * with a 2.0 spread. A bolt hits for ceil(speed × 0.9) = 3 at any speed from 2.23 to 3.33, so the spread's swing in
+     * speed doesn't make some bolts 4, and a magazine of 15 stays within 1.5 × one Arbalest bolt (12).
+     */
+    public static final WeaponStats REPEATING_CROSSBOW = new WeaponStats(80, 0.45, 3.0 / 3.15, 2.0, 0, 1.0);
     public static final WeaponStats SHORTBOW = new WeaponStats(12, 0.7, 2.6 / 3.0, 1.5, 0, 1.0);
     /**
      * Slow, heavy and true: a long draw, hard hits, a tight spread and a flatter arc. ×1.2, not more: its fast arrow

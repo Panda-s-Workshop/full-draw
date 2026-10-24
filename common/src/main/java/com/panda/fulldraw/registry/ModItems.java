@@ -4,7 +4,9 @@ import com.panda.fulldraw.FullDrawMod;
 import com.panda.fulldraw.item.FullDrawBowItem;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import com.panda.fulldraw.item.QuiverItem;
+import com.panda.fulldraw.item.RepeatingCrossbowItem;
 import com.panda.fulldraw.logic.BoltTraits;
+import com.panda.fulldraw.logic.Magazine;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.platform.registry.DeferredItem;
 import com.panda.fulldraw.platform.registry.DeferredRegister;
@@ -35,6 +37,11 @@ public final class ModItems {
             p -> new FullDrawCrossbowItem(p, WeaponStats.ARBALEST, BoltTraits.ARBALEST),
             p -> p.stacksTo(1).durability(600).component(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).enchantable(1)
                     .component(DataComponents.USE_EFFECTS, new UseEffects(false, true, 0.0F)));
+
+    /** The burst crossbow: one long crank loads five bolts, fired one a click. */
+    public static final DeferredItem<RepeatingCrossbowItem> REPEATING_CROSSBOW = ITEMS.registerItem("repeating_crossbow",
+            p -> new RepeatingCrossbowItem(p, WeaponStats.REPEATING_CROSSBOW, Magazine.REPEATING_CROSSBOW),
+            p -> p.stacksTo(1).durability(520).component(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).enchantable(1));
 
     /** Four kinds of arrows anywhere in the inventory, R picks which one the bow draws. */
     public static final DeferredItem<QuiverItem> QUIVER = ITEMS.registerItem("quiver", QuiverItem::new, p -> p.stacksTo(1));

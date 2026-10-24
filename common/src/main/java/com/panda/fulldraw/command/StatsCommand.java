@@ -3,7 +3,9 @@ package com.panda.fulldraw.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.panda.fulldraw.FullDrawConfig;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
+import com.panda.fulldraw.item.RepeatingCrossbowItem;
 import com.panda.fulldraw.logic.BoltTraits;
+import com.panda.fulldraw.logic.Magazine;
 import com.panda.fulldraw.logic.ShotMath;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.shot.Shots;
@@ -53,8 +55,10 @@ public final class StatsCommand {
             WeaponStats s = Weapons.stats(weapon);
             out.add(Component.translatable("command.fulldraw.stats.crossbow", weapon.getHoverName(), seconds(CrossbowItem.getChargeDuration(weapon, player)),
                     f2(s.damageMult()), f0(3.15 * s.velocityMult() * 20), f1(s.spread())));
+            Magazine magazine = RepeatingCrossbowItem.magazineOf(weapon);
+            if (magazine != null) out.add(Component.translatable("command.fulldraw.stats.magazine", magazine.shots(), seconds(magazine.shotTicks())));
             BoltTraits bolts = FullDrawCrossbowItem.boltsOf(weapon);
-            if (bolts != null)
+            if (bolts != null && !bolts.equals(BoltTraits.NONE))
                 out.add(Component.translatable("command.fulldraw.stats.bolts", bolts.pierce(), Math.round((1.0 - bolts.armourKept()) * 100), f0(bolts.knockback()),
                         weapon.is(Weapons.SHIELD_PIERCING) ? Component.translatable("command.fulldraw.stats.shield", f0(BoltTraits.SHIELD_CRACK_SECONDS)) : Component.empty()));
         } else if (!(weapon.getItem() instanceof BowItem)) {

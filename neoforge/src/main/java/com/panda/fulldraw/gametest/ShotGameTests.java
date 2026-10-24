@@ -345,9 +345,17 @@ final class ShotGameTests {
                 if (!crossbow.contains("loads in 1.25 s, no Perfect window") || !crossbow.contains("63 blocks/s")) helper.fail("crossbow stats: " + crossbow);
                 else if (!arbalest.contains("loads in 3.00 s") || !arbalest.contains("72 blocks/s, spread 0.4") || !arbalest.contains("pierce 2 more mobs, ignore 50% of armour")
                         || !arbalest.contains("knock raised shields down for 3 s")) helper.fail("Arbalest stats: " + arbalest);
+                else if (!repeaterStats(player).contains("loads in 4.00 s") || !repeaterStats(player).contains("a crank loads 5 shots, fired one a click, 0.60 s apart")
+                        || repeaterStats(player).contains("bolts pierce")) helper.fail("Repeating Crossbow stats: " + repeaterStats(player));
                 else helper.succeed();
             }
         });
+    }
+
+    private static String repeaterStats(Player player) {
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(com.panda.fulldraw.registry.ModItems.REPEATING_CROSSBOW.get()));
+        return com.panda.fulldraw.command.StatsCommand.lines(player).stream()
+                .map(net.minecraft.network.chat.Component::getString).reduce("", (x, y) -> x + " | " + y);
     }
 
     /** The spread the server recorded for a late (30-tick) release. */

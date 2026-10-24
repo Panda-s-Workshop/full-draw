@@ -1,0 +1,122 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:charge_type",
+    "cases": [
+      {
+        "when": "arrow",
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "property": "fulldraw:magazine",
+          "entries": [
+            {
+              "threshold": 2,
+              "model": {
+                "type": "minecraft:model",
+                "model": "fulldraw:item/repeating_crossbow_arrow_2"
+              }
+            },
+            {
+              "threshold": 3,
+              "model": {
+                "type": "minecraft:model",
+                "model": "fulldraw:item/repeating_crossbow_arrow_3"
+              }
+            },
+            {
+              "threshold": 4,
+              "model": {
+                "type": "minecraft:model",
+                "model": "fulldraw:item/repeating_crossbow_arrow_4"
+              }
+            },
+            {
+              "threshold": 5,
+              "model": {
+                "type": "minecraft:model",
+                "model": "fulldraw:item/repeating_crossbow_arrow_5"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "fulldraw:item/repeating_crossbow_arrow_1"
+          }
+        }
+      },
+      {
+        "when": "rocket",
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "property": "fulldraw:magazine",
+          "entries": [
+            {
+              "threshold": 2,
+              "model": {
+                "type": "minecraft:model",
+                "model": "fulldraw:item/repeating_crossbow_firework_2"
+              }
+            },
+            {
+              "threshold": 3,
+              "model": {
+                "type": "minecraft:model",
+                "model": "fulldraw:item/repeating_crossbow_firework_3"
+              }
+            },
+            {
+              "threshold": 4,
+              "model": {
+                "type": "minecraft:model",
+                "model": "fulldraw:item/repeating_crossbow_firework_4"
+              }
+            },
+            {
+              "threshold": 5,
+              "model": {
+                "type": "minecraft:model",
+                "model": "fulldraw:item/repeating_crossbow_firework_5"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "fulldraw:item/repeating_crossbow_firework_1"
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:condition",
+      "property": "minecraft:using_item",
+      "on_false": {
+        "type": "minecraft:model",
+        "model": "fulldraw:item/repeating_crossbow"
+      },
+      "on_true": {
+        "type": "minecraft:range_dispatch",
+        "property": "minecraft:crossbow/pull",
+        "entries": [
+          {
+            "threshold": 0.58,
+            "model": {
+              "type": "minecraft:model",
+              "model": "fulldraw:item/repeating_crossbow_pulling_1"
+            }
+          },
+          {
+            "threshold": 1.0,
+            "model": {
+              "type": "minecraft:model",
+              "model": "fulldraw:item/repeating_crossbow_pulling_2"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "fulldraw:item/repeating_crossbow_pulling_0"
+        }
+      }
+    }
+  }
+}

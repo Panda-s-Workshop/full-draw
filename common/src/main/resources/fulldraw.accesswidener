@@ -4,3 +4,6 @@ accessible class net/minecraft/world/item/CreativeModeTab$Output
 # Fabric: registrations vanilla keeps private and Fabric API doesn't wrap (NeoForge has events for them)
 accessible class net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
 accessible method net/minecraft/client/gui/screens/MenuScreens register (Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/client/gui/screens/MenuScreens$ScreenConstructor;)V
+# a heavy crossbow's bolts pierce on top of the Piercing enchantment, and hit harder than the ammo's own damage
+accessible method net/minecraft/world/entity/projectile/arrow/AbstractArrow setPierceLevel (B)V
+accessible field net/minecraft/world/entity/projectile/arrow/AbstractArrow baseDamage D

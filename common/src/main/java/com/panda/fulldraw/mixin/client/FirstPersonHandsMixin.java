@@ -1,7 +1,10 @@
 package com.panda.fulldraw.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.panda.fulldraw.client.DrawJuice;
+import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
@@ -10,6 +13,7 @@ import net.minecraft.client.renderer.state.level.FirstPersonHandsAndItemsRenderS
 import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +22,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * The bow shakes in the hand under tremble, on top of vanilla's own full-draw shake. The offset is applied at
- * the head of the arm's submission and taken back at its tail, so nothing leaks to the other hand.
+ * the head of the arm's submission and taken back at its tail, so nothing leaks to the other hand. A Full Draw
+ * crossbow is cranked and held loaded as vanilla's is.
  */
 @Mixin(FirstPersonHandsAndItemsRenderer.class)
 abstract class FirstPersonHandsMixin {
@@ -45,5 +50,12 @@ abstract class FirstPersonHandsMixin {
                                    SubmitNodeCollector collector, int light, CallbackInfo ci) {
         if (fulldraw$shake != null) pose.translate(-fulldraw$shake[0], -fulldraw$shake[1], 0);
         fulldraw$shake = null;
+    }
+
+    /** Vanilla picks the crossbow poses by item; NeoForge already checks for any {@code CrossbowItem} there, so the call isn't required. */
+    @WrapOperation(method = "submitArmWithItem", require = 0,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Ljava/lang/Object;)Z"))
+    private boolean fulldraw$crossbowPose(ItemStack stack, Object item, Operation<Boolean> original) {
+        return original.call(stack, item) || item == Items.CROSSBOW && stack.getItem() instanceof FullDrawCrossbowItem;
     }
 }

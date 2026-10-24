@@ -36,6 +36,12 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("weapon_stats_shortbow", () -> ShotGameTests::weaponStatsShortbow);
         FUNCTIONS.register("weapon_stats_longbow", () -> ShotGameTests::weaponStatsLongbow);
         FUNCTIONS.register("weapon_stats_recurve_bow", () -> ShotGameTests::weaponStatsRecurveBow);
+        FUNCTIONS.register("weapon_stats_arbalest", () -> CrossbowGameTests::weaponStatsArbalest);
+        FUNCTIONS.register("arbalest_spread", () -> CrossbowGameTests::arbalestSpread);
+        FUNCTIONS.register("arbalest_pierces_three", () -> CrossbowGameTests::arbalestPiercesThree);
+        FUNCTIONS.register("arbalest_halves_armour", () -> CrossbowGameTests::arbalestHalvesArmour);
+        FUNCTIONS.register("arbalest_knocks_back", () -> CrossbowGameTests::arbalestKnocksBack);
+        FUNCTIONS.register("arbalest_breaks_shield_block", () -> CrossbowGameTests::arbalestBreaksShieldBlock);
         FUNCTIONS.register("steady_aim_halves_spread", () -> ShotGameTests::steadyAimHalvesSpread);
         FUNCTIONS.register("bow_bash_shoves", () -> ShotGameTests::bowBashShoves);
         FUNCTIONS.register("bow_bash_moves_players", () -> ShotGameTests::bowBashMovesPlayers);
@@ -78,7 +84,7 @@ public final class FullDrawGameTests {
     private static void recipesLoaded(GameTestHelper helper) {
         var recipes = helper.getLevel().getServer().getRecipeManager();
         List<String> missing = new ArrayList<>();
-        for (String id : List.of("shortbow", "quiver")) {
+        for (String id : List.of("shortbow", "longbow", "recurve_bow", "arbalest", "quiver")) {
             if (recipes.byKey(ResourceKey.create(Registries.RECIPE, FullDrawMod.id(id))).isEmpty()) missing.add(id);
             // and the recipe-book unlock, or the recipe never shows in the book
             if (helper.getLevel().getServer().getAdvancements().get(FullDrawMod.id("recipes/combat/" + id)) == null) missing.add("unlock " + id);

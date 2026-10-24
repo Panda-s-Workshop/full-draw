@@ -303,7 +303,7 @@ final class ShotGameTests {
     }
 
     /**
-     * {@code /fulldraw stats} names the held bow's numbers and breaks down the last arrow that landed: here a
+     * {@code /fulldraw stats} names the held weapon's numbers and breaks down the last bow shot that landed: here a
      * Perfect headshot at 10 blocks, 6 × 1.5 × 1.5 = 13.5.
      */
     static void statsReports(GameTestHelper helper) {
@@ -336,10 +336,15 @@ final class ShotGameTests {
                     || !text.contains("1.50 Perfect") || !text.contains("1.00 arrow") || text.contains("point-blank"))
                 helper.fail("stats lines: " + text);
             else {
-                // a crossbow keeps vanilla's numbers, so it's shown no Perfect window
+                // a crossbow has no Perfect window: vanilla's shows its load and bolt; the Arbalest adds what its bolts do
                 player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
                 String crossbow = com.panda.fulldraw.command.StatsCommand.lines(player).getFirst().getString();
-                if (!crossbow.contains("no Perfect window")) helper.fail("crossbow stats: " + crossbow);
+                player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(com.panda.fulldraw.registry.ModItems.ARBALEST.get()));
+                String arbalest = com.panda.fulldraw.command.StatsCommand.lines(player).stream()
+                        .map(net.minecraft.network.chat.Component::getString).reduce("", (x, y) -> x + " | " + y);
+                if (!crossbow.contains("loads in 1.25 s, no Perfect window") || !crossbow.contains("63 blocks/s")) helper.fail("crossbow stats: " + crossbow);
+                else if (!arbalest.contains("loads in 3.00 s") || !arbalest.contains("72 blocks/s, spread 0.4") || !arbalest.contains("pierce 2 more mobs, ignore 50% of armour")
+                        || !arbalest.contains("knock raised shields down for 3 s")) helper.fail("Arbalest stats: " + arbalest);
                 else helper.succeed();
             }
         });

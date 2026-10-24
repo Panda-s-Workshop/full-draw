@@ -2,6 +2,8 @@ package com.panda.fulldraw.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.panda.fulldraw.item.FullDrawCrossbowItem;
+import com.panda.fulldraw.logic.BoltTraits;
 import com.panda.fulldraw.logic.ShotMath;
 import com.panda.fulldraw.shot.ShotHolder;
 import com.panda.fulldraw.shot.ShotRecord;
@@ -101,6 +103,16 @@ public abstract class AbstractArrowMixin implements ShotHolder {
         if (self.tickCount >= 3 || !players) original.call(level, particle, x, y, z, dx, dy, dz);
     }
 
+    /** A heavy crossbow's bolt adds its own knockback to the weapon's (Punch on a bow; nothing on a crossbow). */
+    @WrapOperation(method = "doKnockback", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;modifyKnockback(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;F)F"))
+    private float fulldraw$boltKnockback(ServerLevel level, net.minecraft.world.item.ItemStack weapon, Entity target, DamageSource source, float base,
+                                         Operation<Float> original) {
+        float knockback = original.call(level, weapon, target, source, base);
+        BoltTraits bolts = FullDrawCrossbowItem.boltsOf(weapon);
+        return bolts == null ? knockback : knockback + bolts.knockback();
+    }
+
     @Inject(method = "onHitEntity", at = @At("HEAD"))
     private void fulldraw$measureImpact(EntityHitResult hit, CallbackInfo ci) {
         fulldraw$impact = fulldraw$shot == null ? null : Shots.impact(fulldraw$shot, hit.getEntity(), hit.getLocation(), ((AbstractArrow) (Object) this).getDeltaMovement());
@@ -120,13 +132,42 @@ public abstract class AbstractArrowMixin implements ShotHolder {
         fulldraw$vanillaAmount = vanillaAmount;
         ShotMath.Breakdown breakdown = fulldraw$damage(source);
         float damage = breakdown == null ? vanillaAmount : (float) breakdown.total();
+        net.minecraft.world.item.ItemStack cracked = fulldraw$crackableShield(target, source, damage);
         boolean hurt = original.call(target, source, damage);
+        // not when the hit was cancelled (an invulnerable or creative target)
+        if (cracked != null && target instanceof net.minecraft.world.entity.LivingEntity living && target.level() instanceof ServerLevel level
+                && !living.isInvulnerableTo(level, source))
+            cracked.get(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS).disable(level, living, BoltTraits.SHIELD_CRACK_SECONDS, cracked);
         fulldraw$target = null;
         if (shot != null && impact != null && breakdown != null && target.level() instanceof ServerLevel) {
             if (hurt) Shots.reportHit(((AbstractArrow) (Object) this).getOwner(), shot, impact, breakdown);
             else fulldraw$shot = null;
         }
         return hurt;
+    }
+
+    /**
+     * The raised shield a shield-cracking weapon's bolt is about to knock down (as an axe does), or null. Only a shield
+     * that faces the bolt, by vanilla's own blocking angle: a bolt in the back leaves it up. Read before the hit, since
+     * a piercing bolt goes through the shield and the hit can lower it.
+     */
+    @Unique
+    @Nullable
+    private net.minecraft.world.item.ItemStack fulldraw$crackableShield(Entity target, DamageSource source, float damage) {
+        AbstractArrow self = (AbstractArrow) (Object) this;
+        net.minecraft.world.item.ItemStack weapon = self.getWeaponItem();
+        if (weapon == null || !weapon.is(com.panda.fulldraw.shot.Weapons.SHIELD_PIERCING)
+                || !(target instanceof net.minecraft.world.entity.LivingEntity living)) return null;
+        net.minecraft.world.item.ItemStack shield = living.getItemBlockingWith();
+        var blocks = shield == null ? null : shield.get(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS);
+        if (blocks == null || blocks.bypassedBy().map(types -> types.contains(source.typeHolder())).orElse(false)) return null;
+        // vanilla's angle (LivingEntity.applyItemBlocking): between the target's facing and the source, flat
+        net.minecraft.world.phys.Vec3 from = source.getSourcePosition();
+        if (from == null) return null;
+        net.minecraft.world.phys.Vec3 look = Entity.calculateViewVector(0.0F, living.getYHeadRot());
+        net.minecraft.world.phys.Vec3 to = from.subtract(living.position());
+        double angle = Math.acos(new net.minecraft.world.phys.Vec3(to.x, 0.0, to.z).normalize().dot(look));
+        return blocks.resolveBlockedDamage(source, damage, angle) > 0 ? shield : null;
     }
 
     /** What vanilla would deal for the hit in progress (its crit bonus included). */

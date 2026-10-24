@@ -14,6 +14,10 @@ package com.panda.fulldraw.logic;
 public record WeaponStats(int drawTicks, double damageMult, double velocityMult, double spread, int extraWindow, double gravityMult) {
     /** The vanilla bow, and any bow from another mod that Full Draw doesn't know. */
     public static final WeaponStats VANILLA_BOW = new WeaponStats(20, 1.0, 1.0, 1.0, 0, 1.0);
+    /** Vanilla's crossbow: 25 ticks to load. A crossbow's velocityMult scales vanilla's 3.15 for a bolt. */
+    public static final WeaponStats VANILLA_CROSSBOW = new WeaponStats(25, 1.0, 1.0, 1.0, 0, 1.0);
+    /** The siege crossbow: a 3 s crank, bolts at 3.6 for ×1.6 with a 0.4 spread. Its bolts' extras are {@link BoltTraits#ARBALEST}. */
+    public static final WeaponStats ARBALEST = new WeaponStats(60, 1.6, 3.6 / 3.15, 0.4, 0, 1.0);
     public static final WeaponStats SHORTBOW = new WeaponStats(12, 0.7, 2.6 / 3.0, 1.5, 0, 1.0);
     /**
      * Slow, heavy and true: a long draw, hard hits, a tight spread and a flatter arc. ×1.2, not more: its fast arrow

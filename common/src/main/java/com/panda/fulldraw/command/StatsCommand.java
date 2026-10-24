@@ -2,6 +2,8 @@ package com.panda.fulldraw.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.panda.fulldraw.FullDrawConfig;
+import com.panda.fulldraw.item.FullDrawCrossbowItem;
+import com.panda.fulldraw.logic.BoltTraits;
 import com.panda.fulldraw.logic.ShotMath;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.shot.Shots;
@@ -16,11 +18,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 
 /**
- * {@code /fulldraw stats}: the held weapon's numbers and the breakdown of your last arrow that landed. Any
+ * {@code /fulldraw stats}: the held weapon's numbers and the breakdown of your last bow shot that landed. Any
  * player may run it; it only reads.
  */
 public final class StatsCommand {
@@ -45,8 +48,17 @@ public final class StatsCommand {
             out.add(Component.translatable("command.fulldraw.stats.no_weapon"));
         } else if (!Weapons.inPipeline(weapon)) {
             out.add(Component.translatable("command.fulldraw.stats.opted_out", weapon.getHoverName()));
+        } else if (weapon.getItem() instanceof CrossbowItem) {
+            // a crossbow has no Perfect window: its load, its bolts' speed and spread, and what they do on a hit
+            WeaponStats s = Weapons.stats(weapon);
+            out.add(Component.translatable("command.fulldraw.stats.crossbow", weapon.getHoverName(), seconds(CrossbowItem.getChargeDuration(weapon, player)),
+                    f2(s.damageMult()), f0(3.15 * s.velocityMult() * 20), f1(s.spread())));
+            BoltTraits bolts = FullDrawCrossbowItem.boltsOf(weapon);
+            if (bolts != null)
+                out.add(Component.translatable("command.fulldraw.stats.bolts", bolts.pierce(), Math.round((1.0 - bolts.armourKept()) * 100), f0(bolts.knockback()),
+                        weapon.is(Weapons.SHIELD_PIERCING) ? Component.translatable("command.fulldraw.stats.shield", f0(BoltTraits.SHIELD_CRACK_SECONDS)) : Component.empty()));
         } else if (!(weapon.getItem() instanceof BowItem)) {
-            // only a bow's release goes through the shot pipeline; a crossbow keeps vanilla's numbers
+            // another mod's weapon that is neither: the pipeline only knows a bow's release
             out.add(Component.translatable("command.fulldraw.stats.no_window", weapon.getHoverName()));
         } else {
             WeaponStats s = Weapons.stats(weapon);

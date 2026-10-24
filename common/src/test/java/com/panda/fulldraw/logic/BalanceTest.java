@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** The bows against melee: what the point-blank penalty is for. */
+/** The weapons against each other and against melee. */
 class BalanceTest {
     private static final ShotMath.Tuning T = ShotMath.DEFAULTS;
 
@@ -24,5 +24,47 @@ class BalanceTest {
             double dps = shot / seconds;
             assertTrue(dps < DIAMOND_SWORD_DPS, w + ": " + dps + " damage a second at two blocks, a diamond sword does " + DIAMOND_SWORD_DPS);
         }
+    }
+
+    /**
+     * The Arbalest trades rate for weight: its damage a minute against one target stays at most 1.2 × a vanilla
+     * crossbow's, unarmoured and in full iron, and at most 1.5 × in diamond or netherite, where cutting through armour is
+     * its job. A line of mobs is its other job, so this is per target. A minute is 1200 ticks of back-to-back loads.
+     */
+    @Test
+    void arbalestTradeoff() {
+        assertRatio(0, 0, 1.2);   // unarmoured
+        assertRatio(15, 0, 1.2);  // full iron: 15 points, no toughness
+        assertRatio(20, 8, 1.5);  // full diamond
+        assertRatio(20, 12, 1.5); // full netherite
+        // and up close a sword still wins against it
+        double arbalest = perMinute(WeaponStats.ARBALEST, false, 0, 0, 1.0);
+        assertTrue(arbalest / 60 < DIAMOND_SWORD_DPS, "Arbalest " + arbalest / 60 + " damage a second, a diamond sword does " + DIAMOND_SWORD_DPS);
+    }
+
+    private static void assertRatio(double armour, double toughness, double ceiling) {
+        double vanilla = perMinute(WeaponStats.VANILLA_CROSSBOW, true, armour, toughness, 1.0);
+        double arbalest = perMinute(WeaponStats.ARBALEST, false, armour, toughness, BoltTraits.ARBALEST.armourKept());
+        assertTrue(arbalest <= ceiling * vanilla, "armour " + armour + "/" + toughness + ": Arbalest " + arbalest
+                + " damage a minute against a vanilla crossbow's " + vanilla + " (at most " + ceiling + " ×)");
+    }
+
+    /**
+     * A player's mean damage a minute with a crossbow from a plain arrow (base 2) through armour, firing as fast as it
+     * loads. Vanilla's bolt from a player always crits: ceil(speed × base) plus nextInt(hit / 2 + 2); a Full Draw
+     * crossbow's doesn't.
+     */
+    private static double perMinute(WeaponStats w, boolean crit, double armour, double toughness, double armourKept) {
+        int hit = ShotMath.vanillaDamage(3.15 * w.velocityMult(), 2.0 * w.damageMult());
+        int bonuses = crit ? hit / 2 + 2 : 1;
+        double total = 0;
+        for (int bonus = 0; bonus < bonuses; bonus++) total += afterArmour(hit + bonus, armour * armourKept, toughness);
+        return total / bonuses * 1200.0 / w.drawTicks();
+    }
+
+    /** Vanilla's armour formula ({@code CombatRules.getDamageAfterAbsorb}, no enchantments). */
+    private static double afterArmour(double damage, double armour, double toughness) {
+        double effective = Math.clamp(armour - damage / (2.0 + toughness / 4.0), armour * 0.2, 20.0);
+        return damage * (1.0 - effective / 25.0);
     }
 }

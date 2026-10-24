@@ -2,11 +2,14 @@ package com.panda.fulldraw.registry;
 
 import com.panda.fulldraw.FullDrawMod;
 import com.panda.fulldraw.item.FullDrawBowItem;
+import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import com.panda.fulldraw.item.QuiverItem;
+import com.panda.fulldraw.logic.BoltTraits;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.platform.registry.DeferredItem;
 import com.panda.fulldraw.platform.registry.DeferredRegister;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.UseEffects;
 
 public final class ModItems {
@@ -23,6 +26,15 @@ public final class ModItems {
     /** The forgiving bow: a wider Perfect window and a little more punch than vanilla's. */
     public static final DeferredItem<FullDrawBowItem> RECURVE_BOW = ITEMS.registerItem("recurve_bow", p -> new FullDrawBowItem(p, WeaponStats.RECURVE_BOW),
             p -> p.durability(512).enchantable(1));
+
+    /**
+     * The siege crossbow: a long crank you can't walk through, then a bolt that goes through three mobs, half their armour
+     * and a raised shield.
+     */
+    public static final DeferredItem<FullDrawCrossbowItem> ARBALEST = ITEMS.registerItem("arbalest",
+            p -> new FullDrawCrossbowItem(p, WeaponStats.ARBALEST, BoltTraits.ARBALEST),
+            p -> p.stacksTo(1).durability(600).component(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).enchantable(1)
+                    .component(DataComponents.USE_EFFECTS, new UseEffects(false, true, 0.0F)));
 
     /** Four kinds of arrows anywhere in the inventory, R picks which one the bow draws. */
     public static final DeferredItem<QuiverItem> QUIVER = ITEMS.registerItem("quiver", QuiverItem::new, p -> p.stacksTo(1));

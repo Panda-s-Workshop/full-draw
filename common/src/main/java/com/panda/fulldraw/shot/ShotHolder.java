@@ -7,4 +7,7 @@ public interface ShotHolder {
     @Nullable ShotRecord fulldraw$shot();
 
     void fulldraw$setShot(@Nullable ShotRecord shot);
+
+    /** On a client, which has no shot record: the arrow's gravity multiplier, as the server sent it. */
+    void fulldraw$setClientGravity(float mult);
 }

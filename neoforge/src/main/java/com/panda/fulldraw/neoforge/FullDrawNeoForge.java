@@ -38,6 +38,7 @@ public final class FullDrawNeoForge {
             r.playToClient(FullDrawNetwork.ReleaseResult.TYPE, FullDrawNetwork.ReleaseResult.STREAM_CODEC);
             r.playToClient(FullDrawNetwork.BreathState.TYPE, FullDrawNetwork.BreathState.STREAM_CODEC);
             r.playToClient(FullDrawNetwork.ServerTuning.TYPE, FullDrawNetwork.ServerTuning.STREAM_CODEC);
+            r.playToClient(FullDrawNetwork.ArrowGravity.TYPE, FullDrawNetwork.ArrowGravity.STREAM_CODEC);
         });
 
         IEventBus game = NeoForge.EVENT_BUS;

@@ -41,4 +41,11 @@ public final class ShotFeedback {
             mc.gui.hud.setOverlayMessage(Component.translatable("message.fulldraw.long_shot", Math.round(result.distance())), false);
         }
     }
+
+    /** The server's word on an arrow's gravity: set on this client's copy so its flight matches. */
+    public static void onArrowGravity(FullDrawNetwork.ArrowGravity payload) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null && mc.level.getEntity(payload.entityId()) instanceof com.panda.fulldraw.shot.ShotHolder arrow)
+            arrow.fulldraw$setClientGravity(payload.mult());
+    }
 }

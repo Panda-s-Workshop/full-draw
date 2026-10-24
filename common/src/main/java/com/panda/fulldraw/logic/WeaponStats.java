@@ -21,7 +21,10 @@ public record WeaponStats(int drawTicks, double damageMult, double velocityMult,
      * standing.
      */
     public static final WeaponStats LONGBOW = new WeaponStats(32, 1.2, 3.8 / 3.0, 0.6, 0, 0.75);
-    /** A little slower and harder than vanilla's bow, with a Perfect window two ticks wider. */
+    /**
+     * A little quicker and harder than vanilla's bow (full draw at 18 ticks, not 20), with a Perfect window two ticks
+     * wider.
+     */
     public static final WeaponStats RECURVE_BOW = new WeaponStats(18, 1.15, 3.2 / 3.0, 0.9, 2, 1.0);
 
     /** Converts ticks held on this weapon to the ticks a vanilla bow would need for the same draw fraction. */

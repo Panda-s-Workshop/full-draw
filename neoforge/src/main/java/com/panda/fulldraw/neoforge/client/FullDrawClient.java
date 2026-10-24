@@ -38,6 +38,7 @@ public final class FullDrawClient {
             e.register(FullDrawNetwork.ReleaseResult.TYPE, (payload, ctx) -> ShotHud.onReleaseResult(payload));
             e.register(FullDrawNetwork.BreathState.TYPE, (payload, ctx) -> com.panda.fulldraw.client.FocusClient.onBreathState(payload));
             e.register(FullDrawNetwork.ServerTuning.TYPE, (payload, ctx) -> com.panda.fulldraw.FullDrawConfig.useRemote(payload.tuning()));
+            e.register(FullDrawNetwork.ArrowGravity.TYPE, (payload, ctx) -> ShotFeedback.onArrowGravity(payload));
         });
         modBus.addListener((RegisterKeyMappingsEvent e) -> {
             KeyMapping.Category category = new KeyMapping.Category(FullDrawKeys.CATEGORY_ID);

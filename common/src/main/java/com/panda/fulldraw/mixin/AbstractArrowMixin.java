@@ -38,6 +38,9 @@ public abstract class AbstractArrowMixin implements ShotHolder {
     @Unique @Nullable private ShotRecord fulldraw$shot;
     @Unique @Nullable private Shots.Impact fulldraw$impact;
     @Unique @Nullable private Entity fulldraw$target;
+    /** On a client: the gravity multiplier the server sent (the record never reaches the client). */
+    @Unique private float fulldraw$clientGravity = 1.0F;
+    @Unique private boolean fulldraw$gravitySent;
 
     @Override
     public @Nullable ShotRecord fulldraw$shot() {
@@ -47,6 +50,27 @@ public abstract class AbstractArrowMixin implements ShotHolder {
     @Override
     public void fulldraw$setShot(@Nullable ShotRecord shot) {
         fulldraw$shot = shot;
+    }
+
+    @Override
+    public void fulldraw$setClientGravity(float mult) {
+        fulldraw$clientGravity = mult;
+    }
+
+    /**
+     * An arrow with its own gravity tells the clients near it on its first tick, after its spawn packet has gone out:
+     * clients run the arrow's flight themselves between the server's updates, so without it they'd draw it falling at
+     * vanilla's rate and snap it back up.
+     */
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void fulldraw$sendGravity(CallbackInfo ci) {
+        if (fulldraw$gravitySent || fulldraw$shot == null || fulldraw$shot.gravityMult() == 1.0) return;
+        AbstractArrow self = (AbstractArrow) (Object) this;
+        if (!(self.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+        fulldraw$gravitySent = true;
+        var payload = new com.panda.fulldraw.network.FullDrawNetwork.ArrowGravity(self.getId(), (float) fulldraw$shot.gravityMult());
+        for (net.minecraft.server.level.ServerPlayer player : level.players())
+            if (player.distanceToSqr(self) < 96 * 96) com.panda.fulldraw.network.FullDrawNetwork.send(player, payload);
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
@@ -61,7 +85,8 @@ public abstract class AbstractArrowMixin implements ShotHolder {
 
     @Inject(method = "getDefaultGravity", at = @At("RETURN"), cancellable = true)
     private void fulldraw$gravity(CallbackInfoReturnable<Double> cir) {
-        if (fulldraw$shot != null && fulldraw$shot.gravityMult() != 1.0) cir.setReturnValue(cir.getReturnValueD() * fulldraw$shot.gravityMult());
+        double mult = fulldraw$shot != null ? fulldraw$shot.gravityMult() : fulldraw$clientGravity;
+        if (mult != 1.0) cir.setReturnValue(cir.getReturnValueD() * mult);
     }
 
     /** A player's crit trail starts on the arrow's third tick: drawn from the eye, its first motes cover the target. */

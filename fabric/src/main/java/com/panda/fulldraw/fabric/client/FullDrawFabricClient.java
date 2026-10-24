@@ -27,6 +27,7 @@ public final class FullDrawFabricClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(FullDrawNetwork.ReleaseResult.TYPE, (payload, ctx) -> ShotHud.onReleaseResult(payload));
         ClientPlayNetworking.registerGlobalReceiver(FullDrawNetwork.BreathState.TYPE, (payload, ctx) -> com.panda.fulldraw.client.FocusClient.onBreathState(payload));
         ClientPlayNetworking.registerGlobalReceiver(FullDrawNetwork.ServerTuning.TYPE, (payload, ctx) -> com.panda.fulldraw.FullDrawConfig.useRemote(payload.tuning()));
+        ClientPlayNetworking.registerGlobalReceiver(FullDrawNetwork.ArrowGravity.TYPE, (payload, ctx) -> ShotFeedback.onArrowGravity(payload));
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, mc) ->
                 com.panda.fulldraw.FullDrawConfig.useRemote(null));
         for (KeyMapping key : FullDrawKeys.create(KeyMapping.Category.register(FullDrawKeys.CATEGORY_ID))) KeyMappingHelper.registerKeyMapping(key);

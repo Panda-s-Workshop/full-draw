@@ -74,6 +74,18 @@ public final class FullDrawNetwork {
         }
     }
 
+    /** An arrow's gravity multiplier (the Longbow's flatter arc), sent to the clients near it when it's loosed. */
+    public record ArrowGravity(int entityId, float mult) implements CustomPacketPayload {
+        public static final Type<ArrowGravity> TYPE = new Type<>(FullDrawMod.id("arrow_gravity"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ArrowGravity> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, ArrowGravity::entityId, ByteBufCodecs.FLOAT, ArrowGravity::mult, ArrowGravity::new);
+
+        @Override
+        public Type<ArrowGravity> type() {
+            return TYPE;
+        }
+    }
+
     /** The server's shot numbers, sent to each player on joining and again when the server's config reloads. */
     public record ServerTuning(ShotMath.Tuning tuning) implements CustomPacketPayload {
         public static final Type<ServerTuning> TYPE = new Type<>(FullDrawMod.id("server_tuning"));

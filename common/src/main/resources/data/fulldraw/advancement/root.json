@@ -1,0 +1,34 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:enchantable/bow"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:bow"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.root.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.root.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "background": "minecraft:gui/advancements/backgrounds/adventure"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

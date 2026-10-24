@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "fulldraw:event",
+      "conditions": {
+        "event": "precision_hit"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:zombie_head"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.right_between_the_eyes.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.right_between_the_eyes.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "fulldraw:perfect_release"
+}

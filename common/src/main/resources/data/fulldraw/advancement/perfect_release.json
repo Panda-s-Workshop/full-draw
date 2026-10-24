@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "fulldraw:event",
+      "conditions": {
+        "event": "perfect_release"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:spectral_arrow"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.perfect_release.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.perfect_release.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "fulldraw:root"
+}

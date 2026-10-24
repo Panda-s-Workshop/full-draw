@@ -1,0 +1,212 @@
+{
+  "perfect_release": {
+    "subtitle": "subtitles.fulldraw.perfect_release",
+    "sounds": [
+      {
+        "name": "minecraft:note/icechime",
+        "volume": 0.6,
+        "pitch": 1.6
+      }
+    ]
+  },
+  "precision_hit": {
+    "subtitle": "subtitles.fulldraw.precision_hit",
+    "sounds": [
+      {
+        "name": "minecraft:note/bd",
+        "volume": 0.9,
+        "pitch": 1.2
+      }
+    ]
+  },
+  "hit_tick": {
+    "subtitle": "subtitles.fulldraw.hit_tick",
+    "sounds": [
+      {
+        "name": "minecraft:random/successful_hit",
+        "volume": 0.35,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "quiver_cycle": {
+    "subtitle": "subtitles.fulldraw.quiver_cycle",
+    "sounds": [
+      {
+        "name": "minecraft:item/armor/equip_leather1",
+        "volume": 0.6,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:item/armor/equip_leather2",
+        "volume": 0.6,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:item/armor/equip_leather3",
+        "volume": 0.6,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "quiver_insert": {
+    "subtitle": "subtitles.fulldraw.quiver_insert",
+    "sounds": [
+      {
+        "name": "minecraft:item/bundle/insert1",
+        "volume": 0.8,
+        "pitch": 1.1
+      },
+      {
+        "name": "minecraft:item/bundle/insert2",
+        "volume": 0.8,
+        "pitch": 1.1
+      },
+      {
+        "name": "minecraft:item/bundle/insert3",
+        "volume": 0.8,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "quiver_remove": {
+    "subtitle": "subtitles.fulldraw.quiver_remove",
+    "sounds": [
+      {
+        "name": "minecraft:item/bundle/remove_one1",
+        "volume": 0.8,
+        "pitch": 1.1
+      },
+      {
+        "name": "minecraft:item/bundle/remove_one2",
+        "volume": 0.8,
+        "pitch": 1.1
+      },
+      {
+        "name": "minecraft:item/bundle/remove_one3",
+        "volume": 0.8,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "inhale": {
+    "subtitle": "subtitles.fulldraw.inhale",
+    "sounds": [
+      {
+        "name": "minecraft:mob/panda/nosebreath1",
+        "volume": 0.5,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:mob/panda/nosebreath2",
+        "volume": 0.5,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:mob/panda/nosebreath3",
+        "volume": 0.5,
+        "pitch": 1.25
+      }
+    ]
+  },
+  "exhale": {
+    "subtitle": "subtitles.fulldraw.exhale",
+    "sounds": [
+      {
+        "name": "minecraft:mob/horse/breathe1",
+        "volume": 0.45,
+        "pitch": 1.35
+      },
+      {
+        "name": "minecraft:mob/horse/breathe2",
+        "volume": 0.45,
+        "pitch": 1.35
+      },
+      {
+        "name": "minecraft:mob/horse/breathe3",
+        "volume": 0.45,
+        "pitch": 1.35
+      }
+    ]
+  },
+  "bow_bash": {
+    "subtitle": "subtitles.fulldraw.bow_bash",
+    "sounds": [
+      {
+        "name": "minecraft:item/spear/wood/hit1",
+        "volume": 0.9,
+        "pitch": 1.15
+      },
+      {
+        "name": "minecraft:item/spear/wood/hit2",
+        "volume": 0.9,
+        "pitch": 1.15
+      },
+      {
+        "name": "minecraft:item/spear/wood/hit3",
+        "volume": 0.9,
+        "pitch": 1.15
+      }
+    ]
+  },
+  "draw_creak": {
+    "subtitle": "subtitles.fulldraw.draw_creak",
+    "sounds": [
+      {
+        "name": "minecraft:item/crossbow/loading_middle1",
+        "volume": 0.8,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle2",
+        "volume": 0.8,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle3",
+        "volume": 0.8,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle4",
+        "volume": 0.8,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "strain": {
+    "subtitle": "subtitles.fulldraw.strain",
+    "sounds": [
+      {
+        "name": "minecraft:item/crossbow/loading_middle1",
+        "volume": 0.7,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle2",
+        "volume": 0.7,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle3",
+        "volume": 0.7,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle4",
+        "volume": 0.7,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "twang": {
+    "subtitle": "subtitles.fulldraw.twang",
+    "sounds": [
+      {
+        "name": "minecraft:note/guitar",
+        "volume": 0.8,
+        "pitch": 1.0
+      }
+    ]
+  }
+}

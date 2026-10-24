@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": "minecraft:stick",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    " #S",
+    "# S"
+  ],
+  "result": {
+    "id": "fulldraw:shortbow"
+  }
+}

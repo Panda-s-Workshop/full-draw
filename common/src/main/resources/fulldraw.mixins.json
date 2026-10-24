@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.panda.fulldraw.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["AbstractArrowMixin", "BowItemMixin", "ItemStackMixin", "PlayerMixin", "ProjectileMixin", "ProjectileWeaponItemMixin"],
+  "client": ["client.AbstractClientPlayerMixin", "client.CameraMixin", "client.FirstPersonHandsMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

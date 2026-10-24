@@ -1,0 +1,124 @@
+package com.panda.fulldraw.mixin;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.panda.fulldraw.logic.ShotMath;
+import com.panda.fulldraw.shot.ShotHolder;
+import com.panda.fulldraw.shot.ShotRecord;
+import com.panda.fulldraw.shot.Shots;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.EntityHitResult;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+/**
+ * Gives every arrow a {@link ShotRecord} slot (saved with it), applies the weapon's gravity, and replaces a player
+ * arrow's damage with the shot pipeline's at impact. Arrows without a record (mobs', dispensers') stay vanilla.
+ */
+@Mixin(AbstractArrow.class)
+public abstract class AbstractArrowMixin implements ShotHolder {
+    @Shadow private double baseDamage;
+
+    @Shadow public abstract boolean isCritArrow();
+
+    @Unique @Nullable private ShotRecord fulldraw$shot;
+    @Unique @Nullable private Shots.Impact fulldraw$impact;
+    @Unique @Nullable private Entity fulldraw$target;
+
+    @Override
+    public @Nullable ShotRecord fulldraw$shot() {
+        return fulldraw$shot;
+    }
+
+    @Override
+    public void fulldraw$setShot(@Nullable ShotRecord shot) {
+        fulldraw$shot = shot;
+    }
+
+    @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
+    private void fulldraw$save(ValueOutput output, CallbackInfo ci) {
+        output.storeNullable("fulldraw_shot", ShotRecord.CODEC, fulldraw$shot);
+    }
+
+    @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
+    private void fulldraw$load(ValueInput input, CallbackInfo ci) {
+        fulldraw$shot = input.read("fulldraw_shot", ShotRecord.CODEC).orElse(null);
+    }
+
+    @Inject(method = "getDefaultGravity", at = @At("RETURN"), cancellable = true)
+    private void fulldraw$gravity(CallbackInfoReturnable<Double> cir) {
+        if (fulldraw$shot != null && fulldraw$shot.gravityMult() != 1.0) cir.setReturnValue(cir.getReturnValueD() * fulldraw$shot.gravityMult());
+    }
+
+    /** A player's crit trail starts on the arrow's third tick: drawn from the eye, its first motes cover the target. */
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
+    private void fulldraw$lateTrail(Level level, ParticleOptions particle, double x, double y, double z, double dx, double dy, double dz,
+                                    Operation<Void> original) {
+        AbstractArrow self = (AbstractArrow) (Object) this;
+        boolean players = self.getOwner() instanceof net.minecraft.world.entity.player.Player;
+        // the Perfect trail is vanilla's crit trail: a client toggle hides it on player arrows
+        if (players && particle == net.minecraft.core.particles.ParticleTypes.CRIT && !com.panda.fulldraw.FullDrawClientConfig.get().perfectTrail()) return;
+        if (self.tickCount >= 3 || !players) original.call(level, particle, x, y, z, dx, dy, dz);
+    }
+
+    @Inject(method = "onHitEntity", at = @At("HEAD"))
+    private void fulldraw$measureImpact(EntityHitResult hit, CallbackInfo ci) {
+        fulldraw$impact = fulldraw$shot == null ? null : Shots.impact(fulldraw$shot, hit.getEntity(), hit.getLocation(), ((AbstractArrow) (Object) this).getDeltaMovement());
+        fulldraw$target = hit.getEntity();
+    }
+
+    /**
+     * Replaces a player arrow's damage with the pipeline's, and tells the shooter only about hits that landed: a raised
+     * shield, an enderman's dodge or invulnerability make {@code hurtOrSimulate} return false, and vanilla then deflects
+     * the arrow, which loses its record so the rebound isn't scored as the original shot.
+     */
+    @WrapOperation(method = "onHitEntity", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+    private boolean fulldraw$hurt(Entity target, DamageSource source, float vanillaAmount, Operation<Boolean> original) {
+        ShotRecord shot = fulldraw$shot;
+        Shots.Impact impact = fulldraw$impact;
+        fulldraw$vanillaAmount = vanillaAmount;
+        ShotMath.Breakdown breakdown = fulldraw$damage(source);
+        float damage = breakdown == null ? vanillaAmount : (float) breakdown.total();
+        boolean hurt = original.call(target, source, damage);
+        fulldraw$target = null;
+        if (shot != null && impact != null && breakdown != null && target.level() instanceof ServerLevel) {
+            if (hurt) Shots.reportHit(((AbstractArrow) (Object) this).getOwner(), shot, impact, breakdown);
+            else fulldraw$shot = null;
+        }
+        return hurt;
+    }
+
+    /** What vanilla would deal for the hit in progress (its crit bonus included). */
+    @Unique
+    private float fulldraw$vanillaAmount;
+
+    @Unique
+    @Nullable
+    private ShotMath.Breakdown fulldraw$damage(DamageSource source) {
+        AbstractArrow self = (AbstractArrow) (Object) this;
+        if (fulldraw$shot == null || fulldraw$impact == null || !(self.level() instanceof ServerLevel level)) return null;
+        // vanilla's damage without its random crit bonus: ceil(speed × base damage after enchantments)
+        float base = (float) baseDamage;
+        // as vanilla: only arrows fired from a weapon get its enchantments' damage (commands and tests make arrows without one)
+        if (fulldraw$target != null && self.getWeaponItem() != null)
+            base = EnchantmentHelper.modifyDamage(level, self.getWeaponItem(), fulldraw$target, source, base);
+        int noCrit = ShotMath.vanillaDamage(self.getDeltaMovement().length(), base);
+        return Shots.damage(fulldraw$shot, fulldraw$impact, noCrit, fulldraw$vanillaAmount, isCritArrow());
+    }
+}

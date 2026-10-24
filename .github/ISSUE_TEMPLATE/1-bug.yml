@@ -1,0 +1,104 @@
+name: 🐛 Bug report
+description: Something behaves wrong, without crashing.
+labels: ["type: bug", "status: needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! One problem per issue, please. For crashes use the **Crash report** form, and for problems that only happen together with another mod, **Conflict with another mod**. Questions go to [Discussions](https://github.com/Panda-s-Workshop/full-draw/discussions).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What's wrong, and where. Screenshots help a lot.
+      placeholder: Headshots on a modded mob deal normal damage.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce it
+      placeholder: |
+        1. Equip a Longbow with Deadeye
+        2. Fully draw and release at the head of a modded mob
+        3. Check the damage dealt
+    validations:
+      required: false
+
+  - type: input
+    id: where
+    attributes:
+      label: Seed and coordinates
+      description: The world seed and the coordinates from F3, so the same place can be found again.
+      placeholder: Seed 1111, a Ranger's Watchtower at 210 72 -88
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Shot feel (Perfect Release, headshots, Steady Aim, range, HUD ring)
+        - Bows and crossbows
+        - Arrows, the Quiver and the Fletching Table
+        - Mobs (Shieldbearer, Gale Harrier, Bog Lurker)
+        - The Ranger's Watchtower and the Marksman
+        - Enchantments (Deadeye, Steady, Quickdraw, Ricochet)
+        - Something else
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Full Draw version
+      description: From the jar's name or the mods list, such as 0.1.0.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: neoforge
+    attributes:
+      label: NeoForge version
+      description: Full Draw is for Minecraft 26.3 on NeoForge.
+      placeholder: 26.3.0.89
+    validations:
+      required: true
+
+  - type: textarea
+    id: mods
+    attributes:
+      label: Other mods
+      description: Your mod list, the modpack's name and version, or "none". Mods that add mobs, bows or arrows matter most.
+    validations:
+      required: true
+
+  - type: input
+    id: log
+    attributes:
+      label: Log
+      description: Upload `logs/latest.log` to [mclo.gs](https://mclo.gs) and paste the link.
+      placeholder: https://mclo.gs/...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I'm on the latest Full Draw release.
+          required: false
+        - label: I searched the open and closed issues for this problem.
+          required: true

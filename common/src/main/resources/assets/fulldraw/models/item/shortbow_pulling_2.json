@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/bow",
+  "textures": {
+    "layer0": "fulldraw:item/shortbow_pulling_2"
+  }
+}

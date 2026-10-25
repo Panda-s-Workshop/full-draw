@@ -33,4 +33,9 @@ public record ShotRecord(boolean perfect, Vec3 origin, double weaponMult, double
     public ShotRecord(boolean perfect, Vec3 origin, double weaponMult, double gravityMult, double spread, Identifier weapon) {
         this(perfect, origin, weaponMult, gravityMult, spread, weapon, 0.0);
     }
+
+    /** The same shot, measured from {@code origin}. */
+    public ShotRecord withOrigin(Vec3 origin) {
+        return new ShotRecord(perfect, origin, weaponMult, gravityMult, spread, weapon, precisionBonus);
+    }
 }

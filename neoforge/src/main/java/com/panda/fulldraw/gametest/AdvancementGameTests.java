@@ -96,6 +96,52 @@ final class AdvancementGameTests {
         });
     }
 
+    /**
+     * An arrow through an end gateway (or a portal) is measured from where it comes out: loosed 60 blocks back and
+     * teleported to 3.6 short of a zombie, its hit is no Long Shot, and its record starts where it came out. Across to
+     * the Nether, the new arrow vanilla makes is measured from there too.
+     */
+    static void longShotThroughAGateway(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        Zombie zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(2.5, 1, 6.5));
+        zombie.setBaby(false);
+        Arrow arrow = EntityTypes.ARROW.create(helper.getLevel(), EntitySpawnReason.COMMAND);
+        Vec3 gateway = helper.absoluteVec(new Vec3(2.5, 2.0, 2.5)), loosed = helper.absoluteVec(new Vec3(2.5, 2.0, -57.5));
+        arrow.setPos(loosed);
+        arrow.setOwner(player);
+        arrow.setNoGravity(true);
+        ((ShotHolder) arrow).fulldraw$setShot(new ShotRecord(false, loosed, 1.0, 1.0, 0.0, BuiltInRegistries.ITEM.getKey(Items.BOW)));
+        helper.getLevel().addFreshEntity(arrow);
+        var out = arrow.teleport(new net.minecraft.world.level.portal.TeleportTransition(helper.getLevel(), gateway, new Vec3(0, 0, 3.0), 0.0F, 0.0F,
+                net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING));
+        Vec3 origin = out instanceof ShotHolder holder && holder.fulldraw$shot() != null ? holder.fulldraw$shot().origin() : null;
+        if (origin == null || origin.distanceTo(gateway) > 0.01) {
+            helper.fail("through a gateway the shot should be measured from where it came out, " + gateway + ": " + origin);
+            return;
+        }
+        // across to the Nether: vanilla makes a new arrow there, and that one carries the record
+        net.minecraft.server.level.ServerLevel nether = helper.getLevel().getServer().getLevel(net.minecraft.world.level.Level.NETHER);
+        Arrow away = EntityTypes.ARROW.create(helper.getLevel(), EntitySpawnReason.COMMAND);
+        away.setPos(loosed);
+        away.setNoGravity(true);
+        ((ShotHolder) away).fulldraw$setShot(new ShotRecord(false, loosed, 1.0, 1.0, 0.0, BuiltInRegistries.ITEM.getKey(Items.BOW)));
+        helper.getLevel().addFreshEntity(away);
+        Vec3 there = new Vec3(0.5, 100.0, 0.5);
+        var crossed = away.teleport(new net.minecraft.world.level.portal.TeleportTransition(nether, there, Vec3.ZERO, 0.0F, 0.0F,
+                net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING));
+        Vec3 crossedOrigin = crossed instanceof ShotHolder holder && holder.fulldraw$shot() != null ? holder.fulldraw$shot().origin() : null;
+        if (crossed != null) crossed.discard();
+        if (crossedOrigin == null || crossedOrigin.distanceTo(there) > 0.01) {
+            helper.fail("across to the Nether the new arrow's shot should start where it came out, " + there + ": " + crossedOrigin);
+            return;
+        }
+        helper.runAfterDelay(10, () -> {
+            if (zombie.getHealth() >= zombie.getMaxHealth()) helper.fail("the arrow should hit the zombie after the gateway");
+            else if (done(helper, player, "long_shot")) helper.fail("a hit 3.6 blocks past a gateway shouldn't award Long Shot");
+            else helper.succeed();
+        });
+    }
+
     /** A player's arrow down +z at x, about 3.6 blocks short of a zombie at z 6.5, its shot loosed {@code distance} off. */
     private static void loose(GameTestHelper helper, ServerPlayer player, double x, double distance) {
         Arrow arrow = EntityTypes.ARROW.create(helper.getLevel(), EntitySpawnReason.COMMAND);

@@ -44,6 +44,20 @@ class BalanceTest {
         }
     }
 
+    /**
+     * Vanilla's Power isn't Full Draw's to price, and vanilla's own bow with Power V already out-damages a Sharpness V
+     * sword up close: a full draw is 15 and a crit adds 0 to 8, 19 a second on average, against the sword's 16. Full Draw
+     * adds nothing past that: the vanilla bow's best shot two blocks out, a Perfect headshot with Power V, does no more a
+     * second than vanilla's.
+     */
+    @Test
+    void powerNoStrongerThanVanillaUpClose() {
+        int powered = ShotMath.vanillaDamage(3.0, 2.0 + 3.0);
+        double vanilla = (powered + (powered / 2 + 1) / 2.0) / (WeaponStats.VANILLA_BOW.drawTicks() / 20.0);
+        double fullDraw = ShotMath.damage(powered, 1.0, 1, true, T.precisionMobs(), 2, T) / ((WeaponStats.VANILLA_BOW.drawTicks() + T.perfectDelay()) / 20.0);
+        assertTrue(fullDraw <= vanilla, "a Power V bow's Perfect headshot at two blocks: " + fullDraw + " a second, vanilla's crit " + vanilla);
+    }
+
     private static double closeDps(WeaponStats w, double deadeye) {
         double shot = ShotMath.damage(ShotMathTest.launchBase(w), w.damageMult(), 1, true, T.precisionMobs() + deadeye, 2, T);
         return shot / ((w.drawTicks() + T.perfectDelay()) / 20.0);

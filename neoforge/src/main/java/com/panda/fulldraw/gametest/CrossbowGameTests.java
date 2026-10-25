@@ -307,11 +307,27 @@ final class CrossbowGameTests {
      */
     static void repeaterBurstLands(GameTestHelper helper) {
         Husk spaced = husk(helper, 10.5, 2.5), crowded = husk(helper, 10.5, 8.5);
-        burst(helper, shooter(helper, new Vec3(2.5, 1, 2.5), -90, 0), com.panda.fulldraw.logic.Magazine.REPEATING_CROSSBOW.shotTicks());
+        Player shooter = shooter(helper, new Vec3(2.5, 1, 2.5), -90, 0);
+        burst(helper, shooter, com.panda.fulldraw.logic.Magazine.REPEATING_CROSSBOW.shotTicks());
         burst(helper, shooter(helper, new Vec3(2.5, 1, 8.5), -90, 0), 8);
+        // what happened to each bolt, for a failure's message: the ticks the husk was hurt, and where each bolt ended
+        List<String> hurts = new java.util.ArrayList<>();
+        int[] tick = {0};
+        float[] health = {spaced.getHealth()};
+        helper.onEachTick(() -> {
+            tick[0]++;
+            if (spaced.getHealth() < health[0]) hurts.add(String.format(java.util.Locale.ROOT, "t%d -%.2f at x%.2f y%.2f", tick[0], health[0] - spaced.getHealth(),
+                    spaced.getX() - helper.absoluteVec(Vec3.ZERO).x, spaced.getY() - helper.absoluteVec(Vec3.ZERO).y));
+            health[0] = spaced.getHealth();
+        });
         helper.runAfterDelay(80, () -> {
             float a = spaced.getMaxHealth() - spaced.getHealth(), b = crowded.getMaxHealth() - crowded.getHealth();
-            if (Math.abs(a - 14.7) > 0.05) helper.fail("five bolts 12 ticks apart should all land: lost " + a + ", expected 14.7");
+            if (Math.abs(a - 14.7) > 0.05) {
+                List<String> left = helper.getLevel().getEntitiesOfClass(AbstractArrow.class, spaced.getBoundingBox().inflate(16), e -> e.getOwner() == shooter).stream()
+                        .map(e -> String.format(java.util.Locale.ROOT, "bolt at x%.2f y%.2f z%.2f%s", e.getX() - helper.absoluteVec(Vec3.ZERO).x,
+                                e.getY() - helper.absoluteVec(Vec3.ZERO).y, e.getZ() - helper.absoluteVec(Vec3.ZERO).z, e.getDeltaMovement().length() < 0.01 ? " at rest" : " moving")).toList();
+                helper.fail("five bolts 12 ticks apart should all land: lost " + a + ", expected 14.7; hurt " + hurts + "; left " + left);
+            }
             else if (b > 9.0) helper.fail("bolts 8 ticks apart were expected to lose two to the damage cooldown, but the husk lost " + b);
             else helper.succeed();
         });

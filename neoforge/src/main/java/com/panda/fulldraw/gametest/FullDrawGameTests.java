@@ -62,6 +62,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("breeze_deflection_drops_record", () -> AdvancementGameTests::breezeDeflectionDropsRecord);
         FUNCTIONS.register("slice_advancements", () -> AdvancementGameTests::sliceAdvancements);
         FUNCTIONS.register("long_shot_advancement", () -> AdvancementGameTests::longShotAdvancement);
+        FUNCTIONS.register("long_shot_through_a_gateway", () -> AdvancementGameTests::longShotThroughAGateway);
         FUNCTIONS.register("duel_at_dusk_advancement", () -> AdvancementGameTests::duelAtDuskAdvancement);
         FUNCTIONS.register("duel_at_dusk_blast", () -> AdvancementGameTests::duelAtDuskBlast);
         FUNCTIONS.register("recipes_loaded", () -> FullDrawGameTests::recipesLoaded);

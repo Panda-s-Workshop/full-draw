@@ -33,6 +33,10 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> ROPE_PLACE = sound("rope_place");
     public static final DeferredHolder<SoundEvent, SoundEvent> ROPE_SLIP = sound("rope_slip");
     public static final DeferredHolder<SoundEvent, SoundEvent> BLEED = sound("bleed");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_BLOCK = sound("shieldbearer_block");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_STAGGER = sound("shieldbearer_stagger");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_CRACK = sound("shieldbearer_crack");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_BASH = sound("shieldbearer_bash");
     public static final DeferredHolder<SoundEvent, SoundEvent> FLARE = sound("flare");
 
     private ModSounds() {}

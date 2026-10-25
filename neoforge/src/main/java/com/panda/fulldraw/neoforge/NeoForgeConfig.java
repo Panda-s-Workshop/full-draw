@@ -70,6 +70,13 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
             .defineInRange("arrowPickupLifetimeSeconds", com.panda.fulldraw.logic.ArrowTraits.PICKUP_LIFETIME_SECONDS, 1, com.panda.fulldraw.logic.ArrowTraits.MAX_PICKUP_LIFETIME_SECONDS);
 
     static {
+        B.pop().comment("Mobs").push("mobs");
+    }
+
+    private static final ModConfigSpec.BooleanValue SHIELDBEARER_SPAWNS = B.comment("Shieldbearers join raids from the third wave and guard pillager outposts. false: only spawn eggs and commands make them.")
+            .define("shieldbearerSpawns", true);
+
+    static {
         B.pop();
     }
 
@@ -98,6 +105,11 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
     @Override
     public int arrowPickupLifetimeSeconds() {
         return SPEC.isLoaded() ? PICKUP_LIFETIME.get() : FullDrawConfig.DEFAULTS.arrowPickupLifetimeSeconds();
+    }
+
+    @Override
+    public boolean shieldbearerSpawns() {
+        return SPEC.isLoaded() ? SHIELDBEARER_SPAWNS.get() : FullDrawConfig.DEFAULTS.shieldbearerSpawns();
     }
 
     @Override

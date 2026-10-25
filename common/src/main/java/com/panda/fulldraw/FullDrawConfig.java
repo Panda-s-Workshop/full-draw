@@ -28,6 +28,9 @@ public final class FullDrawConfig {
 
         /** How long an arrow a player can pick up stays in a block, in seconds. */
         int arrowPickupLifetimeSeconds();
+
+        /** Shieldbearers join raids and guard pillager outposts (false: only spawn eggs and commands make them). */
+        boolean shieldbearerSpawns();
     }
 
     public static final Source DEFAULTS = new Source() {
@@ -37,6 +40,7 @@ public final class FullDrawConfig {
         @Override public int ropeArrowLength() { return ArrowTraits.ROPE_LENGTH; }
         @Override public double arrowRecoveryChance() { return ArrowTraits.PLAIN_RECOVERY; }
         @Override public int arrowPickupLifetimeSeconds() { return ArrowTraits.PICKUP_LIFETIME_SECONDS; }
+        @Override public boolean shieldbearerSpawns() { return true; }
     };
 
     private static Source source = DEFAULTS;
@@ -105,6 +109,10 @@ public final class FullDrawConfig {
 
     public static int arrowPickupLifetimeSeconds() {
         return source.arrowPickupLifetimeSeconds();
+    }
+
+    public static boolean shieldbearerSpawns() {
+        return source.shieldbearerSpawns();
     }
 
     /** Whether the client is connected to a server that sent its recovery chance, so a server with Full Draw. */

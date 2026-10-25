@@ -8,19 +8,20 @@ import com.panda.fulldraw.logic.ShotMath;
  * rewritten with every key and comment. Clients on a server use the server's numbers.
  */
 final class FabricConfig implements FullDrawConfig.Source {
-    private final boolean vanillaCritOnFullDraw, blastArrowBreaksBlocks;
+    private final boolean vanillaCritOnFullDraw, blastArrowBreaksBlocks, shieldbearerSpawns;
     private final ShotMath.Tuning tuning;
     private final int ropeArrowLength, arrowPickupLifetimeSeconds;
     private final double arrowRecoveryChance;
 
     private FabricConfig(boolean vanillaCritOnFullDraw, ShotMath.Tuning tuning, boolean blastArrowBreaksBlocks, int ropeArrowLength,
-                         double arrowRecoveryChance, int arrowPickupLifetimeSeconds) {
+                         double arrowRecoveryChance, int arrowPickupLifetimeSeconds, boolean shieldbearerSpawns) {
         this.vanillaCritOnFullDraw = vanillaCritOnFullDraw;
         this.tuning = tuning;
         this.blastArrowBreaksBlocks = blastArrowBreaksBlocks;
         this.ropeArrowLength = ropeArrowLength;
         this.arrowRecoveryChance = arrowRecoveryChance;
         this.arrowPickupLifetimeSeconds = arrowPickupLifetimeSeconds;
+        this.shieldbearerSpawns = shieldbearerSpawns;
     }
 
     static FabricConfig load() {
@@ -47,9 +48,10 @@ final class FabricConfig implements FullDrawConfig.Source {
                 "The chance a plain arrow stuck in a mob drops back when it dies; other arrows keep their ratio to it (a Broadhead's is 5/8 of it, a Blunt's always comes back at the default); 0 means none come back");
         int lifetime = c.integer("arrowPickupLifetimeSeconds", com.panda.fulldraw.logic.ArrowTraits.PICKUP_LIFETIME_SECONDS, 1, com.panda.fulldraw.logic.ArrowTraits.MAX_PICKUP_LIFETIME_SECONDS,
                 "Seconds an arrow a player can pick up stays in a block (vanilla: 60)");
+        boolean bearers = c.bool("shieldbearerSpawns", true, "Shieldbearers join raids from the third wave and guard pillager outposts; false means only spawn eggs and commands make them");
         c.save("Full Draw: server settings. Clients on this server use these numbers.");
         return new FabricConfig(crit, new ShotMath.Tuning(window, delay, perfect, mobs, players, cap, rangeStart, perBlock, rangeCap, pointBlank,
-                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope, recovery, lifetime);
+                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope, recovery, lifetime, bearers);
     }
 
     @Override
@@ -70,6 +72,11 @@ final class FabricConfig implements FullDrawConfig.Source {
     @Override
     public int arrowPickupLifetimeSeconds() {
         return arrowPickupLifetimeSeconds;
+    }
+
+    @Override
+    public boolean shieldbearerSpawns() {
+        return shieldbearerSpawns;
     }
 
     @Override

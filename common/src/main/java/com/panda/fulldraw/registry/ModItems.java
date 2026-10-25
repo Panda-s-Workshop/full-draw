@@ -19,6 +19,7 @@ import com.panda.fulldraw.platform.registry.DeferredItem;
 import com.panda.fulldraw.platform.registry.DeferredRegister;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.UseEffects;
 
@@ -80,6 +81,9 @@ public final class ModItems {
 
     /** Four kinds of arrows anywhere in the inventory, R picks which one the bow draws. */
     public static final DeferredItem<QuiverItem> QUIVER = ITEMS.registerItem("quiver", QuiverItem::new, p -> p.stacksTo(1));
+
+    public static final DeferredItem<Item> SHIELDBEARER_SPAWN_EGG = ITEMS.registerItem("shieldbearer_spawn_egg", Item::new,
+            p -> p.spawnEgg(ModEntities.SHIELDBEARER.get()));
 
     private ModItems() {}
 }

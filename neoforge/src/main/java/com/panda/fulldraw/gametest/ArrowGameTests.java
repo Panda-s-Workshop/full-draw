@@ -429,6 +429,7 @@ final class ArrowGameTests {
                 @Override public int ropeArrowLength() { return before.ropeArrowLength(); }
                 @Override public double arrowRecoveryChance() { return before.arrowRecoveryChance(); }
                 @Override public int arrowPickupLifetimeSeconds() { return before.arrowPickupLifetimeSeconds(); }
+                @Override public boolean shieldbearerSpawns() { return before.shieldbearerSpawns(); }
             });
             shot(helper, player, ModItems.BLAST_ARROW.get(), new Vec3(8.5, 2.5, 4.5), new Vec3(0, 0, 3.0));
             var rules = helper.getLevel().getGameRules();
@@ -735,6 +736,7 @@ final class ArrowGameTests {
             @Override public int ropeArrowLength() { return before.ropeArrowLength(); }
             @Override public double arrowRecoveryChance() { return recovery; }
             @Override public int arrowPickupLifetimeSeconds() { return lifetimeSeconds; }
+            @Override public boolean shieldbearerSpawns() { return before.shieldbearerSpawns(); }
         };
     }
 

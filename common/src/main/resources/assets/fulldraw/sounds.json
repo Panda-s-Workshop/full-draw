@@ -383,5 +383,100 @@
         "pitch": 0.6
       }
     ]
+  },
+  "shieldbearer_block": {
+    "subtitle": "subtitles.fulldraw.shieldbearer_block",
+    "sounds": [
+      {
+        "name": "minecraft:item/shield/block1",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:item/shield/block2",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:item/shield/block3",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:item/shield/block4",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:item/shield/block5",
+        "volume": 1.0,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "shieldbearer_stagger": {
+    "subtitle": "subtitles.fulldraw.shieldbearer_stagger",
+    "sounds": [
+      {
+        "name": "minecraft:mob/zombie/wood1",
+        "volume": 0.8,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:mob/zombie/wood2",
+        "volume": 0.8,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:mob/zombie/wood3",
+        "volume": 0.8,
+        "pitch": 1.0
+      },
+      {
+        "name": "minecraft:mob/zombie/wood4",
+        "volume": 0.8,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "shieldbearer_crack": {
+    "subtitle": "subtitles.fulldraw.shieldbearer_crack",
+    "sounds": [
+      {
+        "name": "minecraft:mob/zombie/woodbreak",
+        "volume": 0.6,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "shieldbearer_bash": {
+    "subtitle": "subtitles.fulldraw.shieldbearer_bash",
+    "sounds": [
+      {
+        "name": "minecraft:item/shield/block1",
+        "volume": 1.0,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:item/shield/block2",
+        "volume": 1.0,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:item/shield/block3",
+        "volume": 1.0,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:item/shield/block4",
+        "volume": 1.0,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:item/shield/block5",
+        "volume": 1.0,
+        "pitch": 0.55
+      }
+    ]
   }
 }

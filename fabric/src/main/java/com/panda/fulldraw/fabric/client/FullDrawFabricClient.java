@@ -19,13 +19,17 @@ public final class FullDrawFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         net.minecraft.client.gui.screens.MenuScreens.register(com.panda.fulldraw.registry.ModMenus.FLETCHING.get(), com.panda.fulldraw.client.FletchingScreen::new);
-        com.panda.fulldraw.client.FullDrawArrowRenderer.register(new com.panda.fulldraw.client.ClientSinks.Renderers() {
+        var renderers = new com.panda.fulldraw.client.ClientSinks.Renderers() {
             @Override
             public <E extends net.minecraft.world.entity.Entity> void register(net.minecraft.world.entity.EntityType<? extends E> type,
                                                                                net.minecraft.client.renderer.entity.EntityRendererProvider<E> provider) {
                 net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(type, provider);
             }
-        });
+        };
+        com.panda.fulldraw.client.FullDrawArrowRenderer.register(renderers);
+        com.panda.fulldraw.client.ShieldbearerRenderer.registerRenderers(renderers);
+        com.panda.fulldraw.client.ShieldbearerRenderer.registerLayers((layer, definition) ->
+                net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(layer, definition::get));
         ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> DevExit.onClientStopping());
         com.panda.fulldraw.FullDrawClientConfig.use(FabricClientConfig.load());
         // Fabric API has no hook for item model properties; vanilla's registry is open until the models load

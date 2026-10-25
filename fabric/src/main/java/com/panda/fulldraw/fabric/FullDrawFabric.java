@@ -36,6 +36,18 @@ public final class FullDrawFabric implements ModInitializer {
                     return i < 0 ? FIRST.size() : i;
                 }))
                 .forEach(FullDrawFabric::registerAll);
+        com.panda.fulldraw.registry.ModEntities.attributes(net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry::register);
+        com.panda.fulldraw.registry.ModEntities.spawnRules(new com.panda.fulldraw.registry.ModEntities.SpawnRules() {
+            @Override
+            public <T extends net.minecraft.world.entity.Mob> void set(net.minecraft.world.entity.EntityType<T> type, net.minecraft.world.entity.SpawnPlacementType placement,
+                                                                       net.minecraft.world.level.levelgen.Heightmap.Types heightmap,
+                                                                       net.minecraft.world.entity.SpawnPlacements.SpawnPredicate<T> predicate) {
+                net.minecraft.world.entity.SpawnPlacements.register(type, placement, heightmap, predicate);
+            }
+        });
+        // the Shieldbearer's egg also sits beside the pillager's in vanilla's Spawn Eggs tab
+        net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.SPAWN_EGGS).register(output ->
+                output.insertAfter(net.minecraft.world.item.Items.PILLAGER_SPAWN_EGG, com.panda.fulldraw.registry.ModItems.SHIELDBEARER_SPAWN_EGG.get()));
         FullDrawMod.setup();
 
         PayloadTypeRegistry.serverboundPlay().register(FullDrawNetwork.CycleQuiver.TYPE, FullDrawNetwork.CycleQuiver.STREAM_CODEC);

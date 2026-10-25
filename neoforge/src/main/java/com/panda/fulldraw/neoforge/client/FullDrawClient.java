@@ -43,14 +43,19 @@ public final class FullDrawClient {
         });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterRangeSelectItemModelPropertyEvent e) ->
                 e.register(FullDrawMod.id("magazine"), com.panda.fulldraw.client.MagazineShots.MAP_CODEC));
-        modBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers e) ->
-                com.panda.fulldraw.client.FullDrawArrowRenderer.register(new com.panda.fulldraw.client.ClientSinks.Renderers() {
-                    @Override
-                    public <E extends net.minecraft.world.entity.Entity> void register(net.minecraft.world.entity.EntityType<? extends E> type,
-                                                                                       net.minecraft.client.renderer.entity.EntityRendererProvider<E> provider) {
-                        e.registerEntityRenderer(type, provider);
-                    }
-                }));
+        modBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers e) -> {
+            var renderers = new com.panda.fulldraw.client.ClientSinks.Renderers() {
+                @Override
+                public <E extends net.minecraft.world.entity.Entity> void register(net.minecraft.world.entity.EntityType<? extends E> type,
+                                                                                   net.minecraft.client.renderer.entity.EntityRendererProvider<E> provider) {
+                    e.registerEntityRenderer(type, provider);
+                }
+            };
+            com.panda.fulldraw.client.FullDrawArrowRenderer.register(renderers);
+            com.panda.fulldraw.client.ShieldbearerRenderer.registerRenderers(renderers);
+        });
+        modBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions e) ->
+                com.panda.fulldraw.client.ShieldbearerRenderer.registerLayers(e::registerLayerDefinition));
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterMenuScreensEvent e) ->
                 e.register(com.panda.fulldraw.registry.ModMenus.FLETCHING.get(), com.panda.fulldraw.client.FletchingScreen::new));
         modBus.addListener((RegisterKeyMappingsEvent e) -> {

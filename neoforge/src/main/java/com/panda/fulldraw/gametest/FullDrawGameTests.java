@@ -82,7 +82,21 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("fletcher_trades", () -> FletchingGameTests::fletcherTrades);
         FUNCTIONS.register("arrows_recovered_on_kill", () -> ArrowGameTests::arrowsRecoveredOnKill);
         FUNCTIONS.register("arrow_pickup_lifetime", () -> ArrowGameTests::arrowPickupLifetime);
+        // the Shieldbearer
+        FUNCTIONS.register("shieldbearer_blocks_front", () -> ShieldbearerGameTests::shieldbearerBlocksFront);
+        FUNCTIONS.register("shieldbearer_hit_from_side", () -> ShieldbearerGameTests::shieldbearerHitFromSide);
+        FUNCTIONS.register("shieldbearer_blunt_stagger", () -> ShieldbearerGameTests::shieldbearerBluntStagger);
+        FUNCTIONS.register("shieldbearer_bolt_cracks", () -> ShieldbearerGameTests::shieldbearerBoltCracks);
+        FUNCTIONS.register("shieldbearer_bashes", () -> ShieldbearerGameTests::shieldbearerBashes);
+        FUNCTIONS.register("shieldbearer_dazed_while_down", () -> ShieldbearerGameTests::shieldbearerDazedWhileDown);
+        FUNCTIONS.register("shieldbearer_turns_slowly_in_a_fight", () -> ShieldbearerGameTests::shieldbearerTurnsSlowlyInAFight);
+        FUNCTIONS.register("shieldbearer_shield_saves", () -> ShieldbearerGameTests::shieldbearerShieldSaves);
+        FUNCTIONS.register("shieldbearers_join_raid_waves", () -> ShieldbearerGameTests::shieldbearersJoinRaidWaves);
+        FUNCTIONS.register("shieldbearer_outpost_spawns", () -> ShieldbearerGameTests::shieldbearerOutpostSpawns);
     }
+
+    /** Tests that swap the server config for longer than one tick. */
+    private static final java.util.Set<String> HOLDS_CONFIG = java.util.Set.of("blast_arrow_explodes", "arrows_recovered_on_kill", "arrow_pickup_lifetime");
 
     private FullDrawGameTests() {}
 
@@ -95,7 +109,11 @@ public final class FullDrawGameTests {
         Holder<TestEnvironmentDefinition<?>> env = event.registerEnvironment(FullDrawMod.id("default"));
         for (var entry : FUNCTIONS.getEntries()) {
             ResourceKey<Consumer<GameTestHelper>> key = ResourceKey.create(Registries.TEST_FUNCTION, entry.getId());
-            event.registerTest(key.identifier(), new FunctionGameTestInstance(key, new TestData<>(env, ARENA, 100, 0, true)));
+            String name = entry.getId().getPath();
+            // a test that holds a changed server config over several ticks runs in a batch of its own: batches run one
+            // after another, so no other test sees its config, and no other test puts the config back under it
+            Holder<TestEnvironmentDefinition<?>> own = HOLDS_CONFIG.contains(name) ? event.registerEnvironment(FullDrawMod.id("alone_" + name)) : env;
+            event.registerTest(key.identifier(), new FunctionGameTestInstance(key, new TestData<>(own, ARENA, 100, 0, true)));
         }
     }
 

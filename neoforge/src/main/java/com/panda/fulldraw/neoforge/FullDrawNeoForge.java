@@ -24,6 +24,24 @@ public final class FullDrawNeoForge {
         FullDrawMod.init();
         modBus.addListener((RegisterEvent e) -> DeferredRegister.all().forEach(register -> registerInto(e, register)));
         modBus.addListener((net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent e) -> e.enqueueWork(FullDrawMod::setup));
+        modBus.addListener((net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent e) -> com.panda.fulldraw.registry.ModEntities.attributes(e::put));
+        modBus.addListener((net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent e) ->
+                com.panda.fulldraw.registry.ModEntities.spawnRules(new com.panda.fulldraw.registry.ModEntities.SpawnRules() {
+                    @Override
+                    public <T extends net.minecraft.world.entity.Mob> void set(net.minecraft.world.entity.EntityType<T> type,
+                                                                               net.minecraft.world.entity.SpawnPlacementType placement,
+                                                                               net.minecraft.world.level.levelgen.Heightmap.Types heightmap,
+                                                                               net.minecraft.world.entity.SpawnPlacements.SpawnPredicate<T> predicate) {
+                        e.register(type, placement, heightmap, predicate, net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
+                    }
+                }));
+        // the Shieldbearer's egg also sits beside the pillager's in vanilla's Spawn Eggs tab
+        modBus.addListener((net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent e) -> {
+            if (e.getTabKey() == net.minecraft.world.item.CreativeModeTabs.SPAWN_EGGS)
+                e.insertAfter(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.PILLAGER_SPAWN_EGG),
+                        new net.minecraft.world.item.ItemStack(com.panda.fulldraw.registry.ModItems.SHIELDBEARER_SPAWN_EGG.get()),
+                        net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        });
         container.registerConfig(ModConfig.Type.SYNCED, NeoForgeConfig.SPEC);
         FullDrawConfig.use(new NeoForgeConfig());
         modBus.addListener((net.neoforged.fml.event.config.ModConfigEvent.Reloading e) -> {

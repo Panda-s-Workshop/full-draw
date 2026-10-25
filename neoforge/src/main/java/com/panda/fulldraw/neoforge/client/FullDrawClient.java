@@ -51,6 +51,8 @@ public final class FullDrawClient {
                         e.registerEntityRenderer(type, provider);
                     }
                 }));
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterMenuScreensEvent e) ->
+                e.register(com.panda.fulldraw.registry.ModMenus.FLETCHING.get(), com.panda.fulldraw.client.FletchingScreen::new));
         modBus.addListener((RegisterKeyMappingsEvent e) -> {
             KeyMapping.Category category = new KeyMapping.Category(FullDrawKeys.CATEGORY_ID);
             e.registerCategory(category);

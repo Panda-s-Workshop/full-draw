@@ -11,20 +11,43 @@ import java.util.function.IntPredicate;
  * @param armourKept   the share of the target's armour points that still counts
  * @param fixedDamage  when above 0, every hit does exactly this, whatever the bow and the shot
  * @param knockback    knockback added to the weapon's own, in Punch levels
+ * @param recovery     the chance one of these stuck in a mob drops back when it dies, at the default {@link #PLAIN_RECOVERY}
  */
-public record ArrowTraits(double mult, double armouredMult, double armourKept, float fixedDamage, float knockback) {
+public record ArrowTraits(double mult, double armouredMult, double armourKept, float fixedDamage, float knockback, double recovery) {
     /** A wide cutting head: tears into flesh, glances off plate, and the wound bleeds. */
-    public static final ArrowTraits BROADHEAD = new ArrowTraits(1.25, 0.75, 1.0, 0.0F, 0.0F);
+    public static final ArrowTraits BROADHEAD = new ArrowTraits(1.25, 0.75, 1.0, 0.0F, 0.0F, 0.25);
     /** A narrow armour-piercing spike: a little lighter, but 60% of the armour doesn't count. */
-    public static final ArrowTraits BODKIN = new ArrowTraits(0.8, 0.8, 0.4, 0.0F, 0.0F);
+    public static final ArrowTraits BODKIN = new ArrowTraits(0.8, 0.8, 0.4, 0.0F, 0.0F, 0.4);
     /** A padded head: always 1 damage, a hard shove, and the target's attack starts over. */
-    public static final ArrowTraits BLUNT = new ArrowTraits(1.0, 1.0, 1.0, 1.0F, 2.0F);
+    public static final ArrowTraits BLUNT = new ArrowTraits(1.0, 1.0, 1.0, 1.0F, 2.0F, 1.0);
     /** A coil of rope behind a hook: a weak hit; what it's for is the rope it hangs where it strikes. */
-    public static final ArrowTraits ROPE = new ArrowTraits(0.5, 0.5, 1.0, 0.0F, 0.0F);
+    public static final ArrowTraits ROPE = new ArrowTraits(0.5, 0.5, 1.0, 0.0F, 0.0F, 0.4);
     /** A burning head: a weak hit; what it's for is the light and the glow where it lands. */
-    public static final ArrowTraits FLARE = new ArrowTraits(0.5, 0.5, 1.0, 0.0F, 0.0F);
+    public static final ArrowTraits FLARE = new ArrowTraits(0.5, 0.5, 1.0, 0.0F, 0.0F, 0.0);
     /** A charge behind the head: a weak hit, then the explosion. */
-    public static final ArrowTraits BLAST = new ArrowTraits(0.5, 0.5, 1.0, 0.0F, 0.0F);
+    public static final ArrowTraits BLAST = new ArrowTraits(0.5, 0.5, 1.0, 0.0F, 0.0F, 0.0);
+
+    /**
+     * The chance a plain arrow (or any arrow without one of these heads) stuck in a mob drops back when the mob dies, by
+     * default (config {@code arrowRecoveryChance}).
+     */
+    public static final double PLAIN_RECOVERY = 0.4;
+
+    /**
+     * By default an arrow a player can pick up stays in a block for 5 minutes; all others keep vanilla's minute (config
+     * {@code arrowPickupLifetimeSeconds}).
+     */
+    public static final int PICKUP_LIFETIME_SECONDS = 300;
+    /** The longest lifetime the config takes: an arrow's age is saved as a short (32767 ticks). */
+    public static final int MAX_PICKUP_LIFETIME_SECONDS = 1638;
+
+    /**
+     * The chance an arrow whose head recovers {@code recovery} at the default comes back when the plain arrow's is
+     * {@code plain}: every head keeps its ratio to the plain arrow's, up to certain, so 0 turns recovery off.
+     */
+    public static double recoveryChance(double recovery, double plain) {
+        return Math.clamp(recovery * plain / PLAIN_RECOVERY, 0.0, 1.0);
+    }
 
     /** Armour points at which {@link #armouredMult} is reached (iron armour is 15, a zombie's own 2). */
     public static final double FULL_ARMOUR = 10.0;

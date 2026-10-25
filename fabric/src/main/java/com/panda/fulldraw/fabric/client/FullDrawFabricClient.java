@@ -18,6 +18,7 @@ import net.minecraft.client.KeyMapping;
 public final class FullDrawFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        net.minecraft.client.gui.screens.MenuScreens.register(com.panda.fulldraw.registry.ModMenus.FLETCHING.get(), com.panda.fulldraw.client.FletchingScreen::new);
         com.panda.fulldraw.client.FullDrawArrowRenderer.register(new com.panda.fulldraw.client.ClientSinks.Renderers() {
             @Override
             public <E extends net.minecraft.world.entity.Entity> void register(net.minecraft.world.entity.EntityType<? extends E> type,

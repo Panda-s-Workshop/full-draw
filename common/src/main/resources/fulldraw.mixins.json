@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "com.panda.fulldraw.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["AbstractArrowMixin", "BowItemMixin", "CrossbowItemMixin", "ItemStackMixin", "LivingEntityMixin", "PlayerMixin", "ProjectileMixin", "ProjectileWeaponItemMixin"],
+  "mixins": ["AbstractArrowMixin", "BlockBehaviourMixin", "BowItemMixin", "CrossbowItemMixin", "ItemStackMixin", "LivingEntityMixin", "PlayerMixin", "ProjectileMixin", "ProjectileWeaponItemMixin"],
   "client": ["client.AbstractClientPlayerMixin", "client.AvatarRendererMixin", "client.CameraMixin", "client.FirstPersonHandsAndItemsMixin", "client.FirstPersonHandsMixin"],
   "injectors": { "defaultRequire": 1 }
 }

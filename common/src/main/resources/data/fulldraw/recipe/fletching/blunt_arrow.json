@@ -1,0 +1,16 @@
+{
+  "type": "fulldraw:fletching",
+  "head": {
+    "ingredient": "#minecraft:wool"
+  },
+  "shaft": {
+    "ingredient": "minecraft:stick"
+  },
+  "fletching": {
+    "ingredient": "minecraft:feather"
+  },
+  "result": {
+    "id": "fulldraw:blunt_arrow",
+    "count": 8
+  }
+}

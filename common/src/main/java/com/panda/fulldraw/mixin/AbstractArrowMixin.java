@@ -1,8 +1,11 @@
 package com.panda.fulldraw.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.panda.fulldraw.FullDrawConfig;
 import com.panda.fulldraw.entity.FullDrawArrow;
+import com.panda.fulldraw.entity.StuckArrows;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import com.panda.fulldraw.logic.ArrowTraits;
 import com.panda.fulldraw.logic.BoltTraits;
@@ -116,6 +119,35 @@ public abstract class AbstractArrowMixin implements ShotHolder {
         return bolts == null ? knockback : knockback + bolts.knockback();
     }
 
+    /**
+     * The arrow about to strike a living creature, remembered on it as vanilla will count it there if the hit lands (a
+     * server-side, non-piercing hit). Kept before the hit, so the arrow that kills is in the list when the death drops
+     * run inside it; the caller forgets it again when the hit is turned away. Only an arrow its shooter paid for (one
+     * that can be picked up) has anything to give back: mobs' and Creative players' arrows, Infinity's and Multishot's
+     * copies, and the heads spent on impact hold their place in the count with nothing. Null when vanilla won't count it.
+     */
+    @Unique
+    @Nullable
+    private StuckArrows.Stuck fulldraw$keep(Entity target) {
+        AbstractArrow self = (AbstractArrow) (Object) this;
+        if (!(target instanceof StuckArrows stuck) || !(self.level() instanceof ServerLevel) || self.getPierceLevel() > 0) return null;
+        StuckArrows.Stuck kept;
+        if (self.pickup == AbstractArrow.Pickup.ALLOWED) {
+            ArrowTraits head = FullDrawArrow.traitsOf(self);
+            kept = new StuckArrows.Stuck(self.getPickupItemStackOrigin().copyWithCount(1), head == null ? ArrowTraits.PLAIN_RECOVERY : head.recovery());
+        } else kept = new StuckArrows.Stuck(net.minecraft.world.item.ItemStack.EMPTY, 0.0);
+        stuck.fulldraw$stick(kept);
+        return kept;
+    }
+
+    /** An arrow a player can pick up stays in its block for the config's lifetime; all others keep vanilla's minute. */
+    @ModifyExpressionValue(method = "tickDespawn", at = @At(value = "CONSTANT", args = "intValue=1200"))
+    private int fulldraw$pickupLifetime(int vanilla) {
+        AbstractArrow self = (AbstractArrow) (Object) this;
+        return self.pickup == AbstractArrow.Pickup.ALLOWED && self.typeHolder().is(net.minecraft.tags.EntityTypeTags.ARROWS)
+                ? FullDrawConfig.arrowPickupLifetimeSeconds() * 20 : vanilla;
+    }
+
     @Inject(method = "onHitEntity", at = @At("HEAD"))
     private void fulldraw$measureImpact(EntityHitResult hit, CallbackInfo ci) {
         fulldraw$impact = fulldraw$shot == null ? null : Shots.impact(fulldraw$shot, hit.getEntity(), hit.getLocation(), ((AbstractArrow) (Object) this).getDeltaMovement());
@@ -146,7 +178,9 @@ public abstract class AbstractArrowMixin implements ShotHolder {
         }
         float damage = breakdown == null ? vanillaAmount : (float) breakdown.total();
         net.minecraft.world.item.ItemStack cracked = fulldraw$crackableShield(target, source, damage);
+        StuckArrows.Stuck kept = fulldraw$keep(target);
         boolean hurt = original.call(target, source, damage);
+        if (!hurt && kept != null) ((StuckArrows) target).fulldraw$stuck().removeIf(s -> s == kept);
         // a hit the damage cooldown turned away (not a shield, not invulnerability) still lands what a head does besides damage
         if (!hurt && (Object) this instanceof FullDrawArrow arrow && target instanceof net.minecraft.world.entity.LivingEntity living
                 && living.damageCooldownTime > 10 && living.getItemBlockingWith() == null && target.level() instanceof ServerLevel level

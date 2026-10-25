@@ -6,6 +6,8 @@ import com.panda.fulldraw.registry.ModComponents;
 import com.panda.fulldraw.registry.ModEffects;
 import com.panda.fulldraw.registry.ModEntities;
 import com.panda.fulldraw.registry.ModItems;
+import com.panda.fulldraw.registry.ModMenus;
+import com.panda.fulldraw.registry.ModRecipes;
 import com.panda.fulldraw.registry.ModSounds;
 import com.panda.fulldraw.registry.ModTabs;
 import com.panda.fulldraw.registry.ModTriggers;
@@ -20,7 +22,7 @@ public final class FullDrawMod {
 
     /** The classes whose static DeferredRegisters hold the mod's content. */
     private static final List<Class<?>> CONTENT = List.of(ModComponents.class, ModSounds.class, ModTriggers.class, ModEffects.class, ModEntities.class,
-            ModBlocks.class, ModItems.class, ModTabs.class);
+            ModBlocks.class, ModItems.class, ModTabs.class, ModRecipes.class, ModMenus.class);
 
     private FullDrawMod() {}
 

@@ -36,6 +36,23 @@ class ArrowTraitsTest {
     }
 
     @Test
+    void recoveryFollowsThePlainArrow() {
+        // each head's chance at the default
+        assertEquals(0.4, ArrowTraits.recoveryChance(ArrowTraits.PLAIN_RECOVERY, ArrowTraits.PLAIN_RECOVERY), EPS);
+        assertEquals(0.25, ArrowTraits.recoveryChance(ArrowTraits.BROADHEAD.recovery(), ArrowTraits.PLAIN_RECOVERY), EPS);
+        assertEquals(0.4, ArrowTraits.recoveryChance(ArrowTraits.BODKIN.recovery(), ArrowTraits.PLAIN_RECOVERY), EPS);
+        assertEquals(1.0, ArrowTraits.recoveryChance(ArrowTraits.BLUNT.recovery(), ArrowTraits.PLAIN_RECOVERY), EPS);
+        assertEquals(0.0, ArrowTraits.recoveryChance(ArrowTraits.FLARE.recovery(), ArrowTraits.PLAIN_RECOVERY), EPS);
+        assertEquals(0.0, ArrowTraits.recoveryChance(ArrowTraits.BLAST.recovery(), ArrowTraits.PLAIN_RECOVERY), EPS);
+        // the config moves every head with the plain arrow, up to certain; 0 turns it off
+        assertEquals(0.5, ArrowTraits.recoveryChance(ArrowTraits.BROADHEAD.recovery(), 0.8), EPS);
+        assertEquals(1.0, ArrowTraits.recoveryChance(ArrowTraits.BLUNT.recovery(), 0.8), EPS, "no more than certain");
+        assertEquals(0.5, ArrowTraits.recoveryChance(ArrowTraits.BLUNT.recovery(), 0.2), EPS);
+        for (ArrowTraits head : new ArrowTraits[] {ArrowTraits.BROADHEAD, ArrowTraits.BODKIN, ArrowTraits.BLUNT, ArrowTraits.ROPE})
+            assertEquals(0.0, ArrowTraits.recoveryChance(head.recovery(), 0.0), EPS);
+    }
+
+    @Test
     void bluntAlwaysDoesItsOwnDamage() {
         for (double damage : new double[] {2, 6, 13.5, 30})
             assertEquals(1.0, damage * ArrowTraits.BLUNT.multFor(damage, 7), EPS, "a " + damage + " hit");

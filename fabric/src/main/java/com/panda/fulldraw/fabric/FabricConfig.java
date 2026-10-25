@@ -10,13 +10,17 @@ import com.panda.fulldraw.logic.ShotMath;
 final class FabricConfig implements FullDrawConfig.Source {
     private final boolean vanillaCritOnFullDraw, blastArrowBreaksBlocks;
     private final ShotMath.Tuning tuning;
-    private final int ropeArrowLength;
+    private final int ropeArrowLength, arrowPickupLifetimeSeconds;
+    private final double arrowRecoveryChance;
 
-    private FabricConfig(boolean vanillaCritOnFullDraw, ShotMath.Tuning tuning, boolean blastArrowBreaksBlocks, int ropeArrowLength) {
+    private FabricConfig(boolean vanillaCritOnFullDraw, ShotMath.Tuning tuning, boolean blastArrowBreaksBlocks, int ropeArrowLength,
+                         double arrowRecoveryChance, int arrowPickupLifetimeSeconds) {
         this.vanillaCritOnFullDraw = vanillaCritOnFullDraw;
         this.tuning = tuning;
         this.blastArrowBreaksBlocks = blastArrowBreaksBlocks;
         this.ropeArrowLength = ropeArrowLength;
+        this.arrowRecoveryChance = arrowRecoveryChance;
+        this.arrowPickupLifetimeSeconds = arrowPickupLifetimeSeconds;
     }
 
     static FabricConfig load() {
@@ -39,9 +43,13 @@ final class FabricConfig implements FullDrawConfig.Source {
         double max = c.decimal("trembleMaxSpread", d.trembleMaxSpread(), 0.0, 20.0, "Spread at the worst of the tremble (vanilla's bow is 1.0)");
         boolean blast = c.bool("blastArrowBreaksBlocks", false, "Blast Arrows break blocks, as TNT does, where the tnt_explodes game rule allows (a mob's under mobGriefing); false means they only hurt and knock back");
         int rope = c.integer("ropeArrowLength", com.panda.fulldraw.logic.ArrowTraits.ROPE_LENGTH, 1, 64, "The most rope one Rope Arrow hangs, counting its knot");
+        double recovery = c.decimal("arrowRecoveryChance", com.panda.fulldraw.logic.ArrowTraits.PLAIN_RECOVERY, 0.0, 1.0,
+                "The chance a plain arrow stuck in a mob drops back when it dies; other arrows keep their ratio to it (a Broadhead's is 5/8 of it, a Blunt's always comes back at the default); 0 means none come back");
+        int lifetime = c.integer("arrowPickupLifetimeSeconds", com.panda.fulldraw.logic.ArrowTraits.PICKUP_LIFETIME_SECONDS, 1, com.panda.fulldraw.logic.ArrowTraits.MAX_PICKUP_LIFETIME_SECONDS,
+                "Seconds an arrow a player can pick up stays in a block (vanilla: 60)");
         c.save("Full Draw: server settings. Clients on this server use these numbers.");
         return new FabricConfig(crit, new ShotMath.Tuning(window, delay, perfect, mobs, players, cap, rangeStart, perBlock, rangeCap, pointBlank,
-                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope);
+                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope, recovery, lifetime);
     }
 
     @Override
@@ -52,6 +60,16 @@ final class FabricConfig implements FullDrawConfig.Source {
     @Override
     public int ropeArrowLength() {
         return ropeArrowLength;
+    }
+
+    @Override
+    public double arrowRecoveryChance() {
+        return arrowRecoveryChance;
+    }
+
+    @Override
+    public int arrowPickupLifetimeSeconds() {
+        return arrowPickupLifetimeSeconds;
     }
 
     @Override

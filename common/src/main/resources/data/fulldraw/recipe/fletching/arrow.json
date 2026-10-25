@@ -1,0 +1,16 @@
+{
+  "type": "fulldraw:fletching",
+  "head": {
+    "ingredient": "minecraft:flint"
+  },
+  "shaft": {
+    "ingredient": "minecraft:stick"
+  },
+  "fletching": {
+    "ingredient": "minecraft:feather"
+  },
+  "result": {
+    "id": "minecraft:arrow",
+    "count": 8
+  }
+}

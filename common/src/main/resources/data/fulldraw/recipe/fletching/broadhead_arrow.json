@@ -1,0 +1,17 @@
+{
+  "type": "fulldraw:fletching",
+  "head": {
+    "ingredient": "minecraft:iron_nugget",
+    "count": 2
+  },
+  "shaft": {
+    "ingredient": "minecraft:stick"
+  },
+  "fletching": {
+    "ingredient": "minecraft:feather"
+  },
+  "result": {
+    "id": "fulldraw:broadhead_arrow",
+    "count": 8
+  }
+}

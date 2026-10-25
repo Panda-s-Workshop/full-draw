@@ -22,6 +22,12 @@ public final class FullDrawConfig {
 
         /** The most rope one Rope Arrow hangs, counting its knot. */
         int ropeArrowLength();
+
+        /** The chance a plain arrow stuck in a mob drops back when it dies; other heads keep their ratio to it (0: none come back). */
+        double arrowRecoveryChance();
+
+        /** How long an arrow a player can pick up stays in a block, in seconds. */
+        int arrowPickupLifetimeSeconds();
     }
 
     public static final Source DEFAULTS = new Source() {
@@ -29,6 +35,8 @@ public final class FullDrawConfig {
         @Override public ShotMath.Tuning tuning() { return ShotMath.DEFAULTS; }
         @Override public boolean blastArrowBreaksBlocks() { return false; }
         @Override public int ropeArrowLength() { return ArrowTraits.ROPE_LENGTH; }
+        @Override public double arrowRecoveryChance() { return ArrowTraits.PLAIN_RECOVERY; }
+        @Override public int arrowPickupLifetimeSeconds() { return ArrowTraits.PICKUP_LIFETIME_SECONDS; }
     };
 
     private static Source source = DEFAULTS;
@@ -86,6 +94,14 @@ public final class FullDrawConfig {
     /** The rope length the server hangs. */
     public static int ropeArrowLength() {
         return source.ropeArrowLength();
+    }
+
+    public static double arrowRecoveryChance() {
+        return source.arrowRecoveryChance();
+    }
+
+    public static int arrowPickupLifetimeSeconds() {
+        return source.arrowPickupLifetimeSeconds();
     }
 
     /** The rope length the client's tooltip states: the connected server's, or this side's own. */

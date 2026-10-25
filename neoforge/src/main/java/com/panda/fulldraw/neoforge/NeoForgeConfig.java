@@ -64,6 +64,10 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
             .define("blastArrowBreaksBlocks", false);
     private static final ModConfigSpec.IntValue ROPE_LENGTH = B.comment("The most rope one Rope Arrow hangs, counting its knot.")
             .defineInRange("ropeArrowLength", com.panda.fulldraw.logic.ArrowTraits.ROPE_LENGTH, 1, 64);
+    private static final ModConfigSpec.DoubleValue RECOVERY = B.comment("The chance a plain arrow stuck in a mob drops back when it dies. Other arrows keep their ratio to it (a Broadhead's is 5/8 of it; a Blunt's always comes back at the default). 0: none come back.")
+            .defineInRange("arrowRecoveryChance", com.panda.fulldraw.logic.ArrowTraits.PLAIN_RECOVERY, 0.0, 1.0);
+    private static final ModConfigSpec.IntValue PICKUP_LIFETIME = B.comment("Seconds an arrow a player can pick up stays in a block (vanilla: 60).")
+            .defineInRange("arrowPickupLifetimeSeconds", com.panda.fulldraw.logic.ArrowTraits.PICKUP_LIFETIME_SECONDS, 1, com.panda.fulldraw.logic.ArrowTraits.MAX_PICKUP_LIFETIME_SECONDS);
 
     static {
         B.pop();
@@ -84,6 +88,16 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
     @Override
     public int ropeArrowLength() {
         return SPEC.isLoaded() ? ROPE_LENGTH.get() : FullDrawConfig.DEFAULTS.ropeArrowLength();
+    }
+
+    @Override
+    public double arrowRecoveryChance() {
+        return SPEC.isLoaded() ? RECOVERY.get() : FullDrawConfig.DEFAULTS.arrowRecoveryChance();
+    }
+
+    @Override
+    public int arrowPickupLifetimeSeconds() {
+        return SPEC.isLoaded() ? PICKUP_LIFETIME.get() : FullDrawConfig.DEFAULTS.arrowPickupLifetimeSeconds();
     }
 
     @Override

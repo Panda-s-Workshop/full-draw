@@ -1,0 +1,20 @@
+{
+  "type": "fulldraw:fletching",
+  "head": {
+    "ingredient": "minecraft:iron_nugget"
+  },
+  "shaft": {
+    "ingredient": "minecraft:stick"
+  },
+  "fletching": {
+    "ingredient": "minecraft:feather"
+  },
+  "extra": {
+    "ingredient": "minecraft:string",
+    "count": 4
+  },
+  "result": {
+    "id": "fulldraw:rope_arrow",
+    "count": 4
+  }
+}

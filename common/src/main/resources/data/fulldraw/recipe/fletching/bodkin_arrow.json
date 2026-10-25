@@ -1,0 +1,16 @@
+{
+  "type": "fulldraw:fletching",
+  "head": {
+    "ingredient": "minecraft:iron_ingot"
+  },
+  "shaft": {
+    "ingredient": "minecraft:stick"
+  },
+  "fletching": {
+    "ingredient": "minecraft:feather"
+  },
+  "result": {
+    "id": "fulldraw:bodkin_arrow",
+    "count": 8
+  }
+}

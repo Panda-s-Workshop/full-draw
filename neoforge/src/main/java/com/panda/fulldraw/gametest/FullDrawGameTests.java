@@ -75,6 +75,12 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("blast_hit_adds_copies_plain", () -> ArrowGameTests::blastHitAddsAndCopiesArePlain);
         FUNCTIONS.register("flare_burns_above_cover", () -> ArrowGameTests::flareBurnsAboveCover);
         FUNCTIONS.register("flare_adventure_and_mob_flares", () -> ArrowGameTests::flareAdventureAndMobFlares);
+        FUNCTIONS.register("fletching_recipes_load", () -> FletchingGameTests::fletchingRecipesLoad);
+        FUNCTIONS.register("fletching_menu_crafts_eight", () -> FletchingGameTests::fletchingMenuCraftsEight);
+        FUNCTIONS.register("fletching_menu_edges", () -> FletchingGameTests::fletchingMenuEdges);
+        FUNCTIONS.register("fletcher_trades", () -> FletchingGameTests::fletcherTrades);
+        FUNCTIONS.register("arrows_recovered_on_kill", () -> ArrowGameTests::arrowsRecoveredOnKill);
+        FUNCTIONS.register("arrow_pickup_lifetime", () -> ArrowGameTests::arrowPickupLifetime);
     }
 
     private FullDrawGameTests() {}

@@ -167,7 +167,7 @@ class ShotMathTest {
     }
 
     /** Every head, and a plain arrow's (×1, all armour). */
-    private static final List<ArrowTraits> HEADS = List.of(new ArrowTraits(1, 1, 1, 0, 0), ArrowTraits.BROADHEAD, ArrowTraits.BODKIN);
+    private static final List<ArrowTraits> HEADS = List.of(new ArrowTraits(1, 1, 1, 0, 0, ArrowTraits.PLAIN_RECOVERY), ArrowTraits.BROADHEAD, ArrowTraits.BODKIN);
 
     /** A head's bonus sits inside the skill cap: a plain broadhead is under a Perfect plain arrow, a capped shot can't grow. */
     @Test

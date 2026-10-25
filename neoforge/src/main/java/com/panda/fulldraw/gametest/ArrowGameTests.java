@@ -8,6 +8,7 @@ import com.panda.fulldraw.entity.BlastArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
 import com.panda.fulldraw.entity.FlareArrow;
 import com.panda.fulldraw.entity.RopeArrow;
+import com.panda.fulldraw.entity.StuckArrows;
 import com.panda.fulldraw.registry.ModBlocks;
 import com.panda.fulldraw.registry.ModEffects;
 import com.panda.fulldraw.logic.ArrowTraits;
@@ -424,6 +425,8 @@ final class ArrowGameTests {
                 @Override public com.panda.fulldraw.logic.ShotMath.Tuning tuning() { return before.tuning(); }
                 @Override public boolean blastArrowBreaksBlocks() { return true; }
                 @Override public int ropeArrowLength() { return before.ropeArrowLength(); }
+                @Override public double arrowRecoveryChance() { return before.arrowRecoveryChance(); }
+                @Override public int arrowPickupLifetimeSeconds() { return before.arrowPickupLifetimeSeconds(); }
             });
             shot(helper, player, ModItems.BLAST_ARROW.get(), new Vec3(8.5, 2.5, 4.5), new Vec3(0, 0, 3.0));
             var rules = helper.getLevel().getGameRules();
@@ -567,6 +570,181 @@ final class ArrowGameTests {
         arrow.setDeltaMovement(motion);
         helper.getLevel().addFreshEntity(arrow);
         return arrow;
+    }
+
+    /**
+     * Husks keep the arrows stuck in them and drop the paid-for ones back by their chance when they die, one husk per
+     * case, each checked a tick after it dies with the items cleared between:
+     * <ul>
+     * <li>a Blunt that leaves its husk standing is kept (certain); a Flare after it is counted with nothing to give;</li>
+     * <li>a Blunt that kills its husk comes back: the killing arrow counts;</li>
+     * <li>400 plain arrows and 400 Broadheads (the husk's random seeded) come back near 40% and 25%;</li>
+     * <li>an arrow no one can pick up (a Multishot or Infinity copy) gives nothing, and a tipped arrow keeps its potion;</li>
+     * <li>a baby husk gives its arrows back, though it drops no loot; none come back with {@code doMobLoot} off or with
+     * {@code arrowRecoveryChance} at 0;</li>
+     * <li>as vanilla's count falls, the oldest arrows go first, the unpaid ones among them.</li>
+     * </ul>
+     */
+    static void arrowsRecoveredOnKill(GameTestHelper helper) {
+        Player player = shooter(helper);
+        LivingEntity standing = target(helper, 2.5, 0), dying = target(helper, 5.5, 0), mixed = target(helper, 8.5, 0);
+        dying.setHealth(1.0F);
+        shot(helper, player, ModItems.BLUNT_ARROW.get(), new Vec3(2.5, 2.0, 4.5), new Vec3(0, 0, 3.0));
+        shot(helper, player, ModItems.BLUNT_ARROW.get(), new Vec3(5.5, 2.0, 4.5), new Vec3(0, 0, 3.0));
+        shot(helper, player, Items.ARROW, new Vec3(8.5, 2.0, 4.5), new Vec3(0, 0, 3.0)).pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+        ItemStack tipped = net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.TIPPED_ARROW, net.minecraft.world.item.alchemy.Potions.SWIFTNESS);
+        // past the first hits' damage cooldown, so these land too
+        helper.runAfterDelay(15, () -> {
+            shot(helper, player, ModItems.FLARE_ARROW.get(), new Vec3(2.5, 2.0, 4.5), new Vec3(0, 0, 3.0));
+            shot(helper, player, tipped, new Vec3(8.5, 2.0, 4.5), new Vec3(0, 0, 3.0));
+        });
+        FullDrawConfig.Source before = FullDrawConfig.source();
+        var rules = helper.getLevel().getGameRules();
+        var server = helper.getLevel().getServer();
+        Vec3[] died = new Vec3[1];
+        helper.runAfterDelay(22, () -> {
+            if (dying.isAlive()) throw helper.assertionException("a Blunt should kill a husk on its last point of health");
+            // the only loose Blunt in the arena (the corpse slides and the item bounces, so not by where it lies)
+            int back = arrowsNear(helper, helper.absoluteVec(new Vec3(5.5, 1, 6.5)), 16, ModItems.BLUNT_ARROW.get());
+            if (back != 1) throw helper.assertionException("the Blunt that killed its husk should come back, " + back + " did: " + drops(helper));
+            List<StuckArrows.Stuck> stuck = ((StuckArrows) standing).fulldraw$stuck();
+            if (standing.getArrowCount() != 2 || stuck.size() != 2 || !stuck.get(0).arrow().is(ModItems.BLUNT_ARROW.get())
+                    || stuck.get(0).recovery() != 1.0 || !stuck.get(1).arrow().isEmpty())
+                throw helper.assertionException("the standing husk should count 2 arrows, the Blunt kept and the Flare empty: " + standing.getArrowCount() + " " + stuck);
+            clearItems(helper);
+            standing.setArrowCount(802);
+            for (int i = 0; i < 400; i++) ((StuckArrows) standing).fulldraw$stick(new StuckArrows.Stuck(new ItemStack(Items.ARROW), ArrowTraits.PLAIN_RECOVERY));
+            for (int i = 0; i < 400; i++) ((StuckArrows) standing).fulldraw$stick(new StuckArrows.Stuck(new ItemStack(ModItems.BROADHEAD_ARROW.get()), ArrowTraits.BROADHEAD.recovery()));
+            standing.getRandom().setSeed(1234L);
+            died[0] = standing.position();
+            standing.kill(helper.getLevel());
+        });
+        helper.runAfterDelay(24, () -> {
+            int blunts = arrowsNear(helper, died[0], ModItems.BLUNT_ARROW.get()), flares = arrowsNear(helper, died[0], ModItems.FLARE_ARROW.get()),
+                    plain = arrowsNear(helper, died[0], Items.ARROW), broadheads = arrowsNear(helper, died[0], ModItems.BROADHEAD_ARROW.get());
+            if (blunts != 1 || flares != 0) throw helper.assertionException("the Blunt should come back and no Flare: " + blunts + ", " + flares);
+            // 40% of 400 is 160 and 25% is 100, each about ±10 at one standard deviation
+            if (plain < 130 || plain > 190) throw helper.assertionException("near 160 of 400 plain arrows should come back, " + plain + " did");
+            if (broadheads < 74 || broadheads > 126) throw helper.assertionException("near 100 of 400 Broadheads should come back, " + broadheads + " did");
+            clearItems(helper);
+            List<StuckArrows.Stuck> stuck = ((StuckArrows) mixed).fulldraw$stuck();
+            if (stuck.size() != 2 || !stuck.get(0).arrow().isEmpty() || !ItemStack.isSameItemSameComponents(stuck.get(1).arrow(), tipped))
+                throw helper.assertionException("the copy should be kept empty and the tipped arrow with its potion: " + stuck);
+            FullDrawConfig.use(config(before, 1.0, before.arrowPickupLifetimeSeconds()));
+            try {
+                died[0] = mixed.position();
+                mixed.kill(helper.getLevel());
+            } finally {
+                FullDrawConfig.use(before);
+            }
+        });
+        helper.runAfterDelay(26, () -> {
+            var items = helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(died[0], died[0]).inflate(2, 3, 2),
+                    e -> e.getItem().is(net.minecraft.tags.ItemTags.ARROWS));
+            if (items.size() != 1 || !ItemStack.isSameItemSameComponents(items.getFirst().getItem(), tipped))
+                throw helper.assertionException("only the tipped arrow, with its potion, should come back: " + drops(helper));
+            clearItems(helper);
+            Mob baby = helper.spawnWithNoFreeWill(EntityTypes.HUSK, new Vec3(5.5, 1, 6.5));
+            ((net.minecraft.world.entity.monster.zombie.Zombie) baby).setBaby(true);
+            stick(baby, 3);
+            died[0] = baby.position();
+            baby.kill(helper.getLevel());
+        });
+        helper.runAfterDelay(28, () -> {
+            int back = arrowsNear(helper, died[0], ModItems.BLUNT_ARROW.get());
+            if (back != 3) throw helper.assertionException("a baby husk drops no loot but should give its 3 Blunts back, gave " + back);
+            clearItems(helper);
+            LivingEntity noLoot = target(helper, 5.5, 0);
+            stick(noLoot, 3);
+            rules.set(GameRules.MOB_DROPS, false, server);
+            try {
+                died[0] = noLoot.position();
+                noLoot.kill(helper.getLevel());
+            } finally {
+                rules.set(GameRules.MOB_DROPS, true, server);
+            }
+        });
+        helper.runAfterDelay(30, () -> {
+            int back = arrowsNear(helper, died[0], ModItems.BLUNT_ARROW.get());
+            if (back != 0) throw helper.assertionException("with doMobLoot off nothing should come back, " + back + " Blunts did");
+            LivingEntity off = target(helper, 2.5, 0);
+            stick(off, 3);
+            FullDrawConfig.use(config(before, 0.0, before.arrowPickupLifetimeSeconds()));
+            try {
+                died[0] = off.position();
+                off.kill(helper.getLevel());
+            } finally {
+                FullDrawConfig.use(before);
+            }
+        });
+        helper.runAfterDelay(32, () -> {
+            int back = arrowsNear(helper, died[0], ModItems.BLUNT_ARROW.get());
+            if (back != 0) throw helper.assertionException("with arrowRecoveryChance 0 nothing should come back, " + back + " Blunts did");
+            // a paid arrow, then two no one paid for: as the count falls to 2, the paid one (the oldest) goes
+            LivingEntity trimmed = target(helper, 8.5, 0);
+            trimmed.setArrowCount(3);
+            StuckArrows list = (StuckArrows) trimmed;
+            list.fulldraw$stick(new StuckArrows.Stuck(new ItemStack(ModItems.BLUNT_ARROW.get()), 1.0));
+            list.fulldraw$stick(new StuckArrows.Stuck(ItemStack.EMPTY, 0.0));
+            list.fulldraw$stick(new StuckArrows.Stuck(ItemStack.EMPTY, 0.0));
+            trimmed.setArrowCount(2);
+            if (list.fulldraw$stuck().size() != 2 || list.fulldraw$stuck().stream().anyMatch(s -> !s.arrow().isEmpty()))
+                throw helper.assertionException("the oldest arrow should go first as the count falls: " + list.fulldraw$stuck());
+            helper.succeed();
+        });
+    }
+
+    /** Sets the creature's arrow count to {@code blunts} and keeps that many Blunts in it, as their hits would. */
+    private static void stick(LivingEntity entity, int blunts) {
+        entity.setArrowCount(blunts);
+        for (int i = 0; i < blunts; i++) ((StuckArrows) entity).fulldraw$stick(new StuckArrows.Stuck(new ItemStack(ModItems.BLUNT_ARROW.get()), 1.0));
+    }
+
+    private static void clearItems(GameTestHelper helper) {
+        helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(24)).forEach(e -> e.discard());
+    }
+
+    /**
+     * With {@code arrowPickupLifetimeSeconds} at 1, a player's arrow in a block is gone after a second while a husk's
+     * (which no one can pick up) stays for vanilla's minute.
+     */
+    static void arrowPickupLifetime(GameTestHelper helper) {
+        for (int x = 1; x <= 6; x++) helper.setBlock(new BlockPos(x, 2, 9), Blocks.STONE);
+        FullDrawConfig.Source before = FullDrawConfig.source();
+        FullDrawConfig.use(config(before, before.arrowRecoveryChance(), 1));
+        AbstractArrow players = shot(helper, shooter(helper), Items.ARROW, new Vec3(2.5, 2.5, 4.5), new Vec3(0, 0, 3.0));
+        AbstractArrow husks = shot(helper, husk(helper, 5.5, 1.5), new ItemStack(Items.ARROW), new Vec3(5.5, 2.5, 4.5), new Vec3(0, 0, 3.0));
+        helper.runAfterDelay(40, () -> {
+            FullDrawConfig.use(before);
+            if (players.pickup != AbstractArrow.Pickup.ALLOWED || husks.pickup == AbstractArrow.Pickup.ALLOWED)
+                throw helper.assertionException("expected a pickable player's arrow and a husk's that isn't");
+            if (husks.isRemoved() || husks.getDeltaMovement().lengthSqr() > 1.0E-6) throw helper.assertionException("the husk's arrow should still be in the stone");
+            if (!players.isRemoved()) throw helper.assertionException("the player's arrow should be gone after its 1 s lifetime");
+            helper.succeed();
+        });
+    }
+
+    /** The loader's config with the recovery chance and pickup lifetime replaced. */
+    private static FullDrawConfig.Source config(FullDrawConfig.Source before, double recovery, int lifetimeSeconds) {
+        return new FullDrawConfig.Source() {
+            @Override public boolean vanillaCritOnFullDraw() { return before.vanillaCritOnFullDraw(); }
+            @Override public com.panda.fulldraw.logic.ShotMath.Tuning tuning() { return before.tuning(); }
+            @Override public boolean blastArrowBreaksBlocks() { return before.blastArrowBreaksBlocks(); }
+            @Override public int ropeArrowLength() { return before.ropeArrowLength(); }
+            @Override public double arrowRecoveryChance() { return recovery; }
+            @Override public int arrowPickupLifetimeSeconds() { return lifetimeSeconds; }
+        };
+    }
+
+    /** How many of this item lie within 2 blocks of an absolute point. */
+    private static int arrowsNear(GameTestHelper helper, Vec3 at, net.minecraft.world.item.Item item) {
+        return arrowsNear(helper, at, 2, item);
+    }
+
+    /** How many of this item lie within {@code reach} blocks (sideways) of an absolute point. */
+    private static int arrowsNear(GameTestHelper helper, Vec3 at, double reach, net.minecraft.world.item.Item item) {
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(at, at).inflate(reach, 3, reach),
+                e -> e.getItem().is(item)).stream().mapToInt(e -> e.getItem().getCount()).sum();
     }
 
     /** Every rope item in the arena, where it lies, for a failure message. */

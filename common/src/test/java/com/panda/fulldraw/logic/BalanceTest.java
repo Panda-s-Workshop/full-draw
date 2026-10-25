@@ -150,6 +150,20 @@ class BalanceTest {
         assertTrue(inTheOpen - healed >= 20, "trading shots in the open should lose: the archer loses " + inTheOpen + " and heals " + healed);
     }
 
+    @Test
+    void marksmanDuelableWithAVanillaBow() {
+        // from the ground, up at its head in the gap 14 above the player's eyes
+        int draw = WeaponStats.VANILLA_BOW.drawTicks();
+        // up to 18 blocks out, a vanilla bow drawn at its creak lands before it looses
+        int near = MarksmanRules.flightTicks(18, MarksmanRules.pitch(18, 14, 3.0, MarksmanRules.ARROW_GRAVITY), 3.0);
+        assertTrue(draw + near <= MarksmanRules.drawTicks(false), "drawn at its creak from 18 blocks, a vanilla bow lands after " + (draw + near) + " ticks");
+        // farther out, and below half health anywhere, it is too slow for that: the bow is drawn as it ducks, held through
+        // its cover, and let go as it shows in the gap, before the tremble starts
+        int far = MarksmanRules.flightTicks(25, MarksmanRules.pitch(25, 14, 3.0, MarksmanRules.ARROW_GRAVITY), 3.0);
+        assertTrue(far <= MarksmanRules.drawTicks(true), "from 25 blocks the arrow flies " + far + " ticks");
+        assertTrue(MarksmanRules.COVER_TICKS - draw <= T.trembleStartSeconds() * 20, "held " + (MarksmanRules.COVER_TICKS - draw) + " ticks at full draw");
+    }
+
     private static void assertRatio(double armour, double toughness, double ceiling) {
         double vanilla = perMinute(WeaponStats.VANILLA_CROSSBOW, true, armour, toughness, 1.0);
         double arbalest = perMinute(WeaponStats.ARBALEST, false, armour, toughness, BoltTraits.ARBALEST.armourKept());

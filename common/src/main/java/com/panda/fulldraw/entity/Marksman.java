@@ -2,6 +2,7 @@ package com.panda.fulldraw.entity;
 
 import com.panda.fulldraw.logic.MarksmanRules;
 import com.panda.fulldraw.logic.WeaponStats;
+import com.panda.fulldraw.registry.ModEnchantments;
 import com.panda.fulldraw.registry.ModItems;
 import com.panda.fulldraw.registry.ModSounds;
 import com.panda.fulldraw.shot.ShotHolder;
@@ -12,9 +13,12 @@ import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -78,6 +82,8 @@ public class Marksman extends AbstractSkeleton {
     private static final ProjectileDeflection PARAPET = (projectile, entity, random, power) -> {
         if (entity instanceof Marksman marksman) marksman.turnAway(projectile);
     };
+    /** The gold glint at its arrowhead while it draws. */
+    private static final DustParticleOptions GLINT = new DustParticleOptions(0xFFC83C, 2.0F);
     /** How far from home it looks for crenels. */
     private static final int CRENEL_REACH = 8;
     /** How many of its last shots it remembers (for tests). */
@@ -144,14 +150,19 @@ public class Marksman extends AbstractSkeleton {
 
     @Override
     protected void populateDefaultEquipmentSlots(RandomSource random, DifficultyInstance difficulty) {
-        setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+        // the Recurve it drops, Deadeye II and named, so the prize is the bow it fights with (its shots keep a vanilla
+        // bow's numbers: MarksmanRules.BOW)
+        ItemStack bow = new ItemStack(ModItems.RECURVE_BOW.get());
+        bow.enchant(registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(ModEnchantments.DEADEYE), 2);
+        bow.set(DataComponents.ITEM_NAME, Component.translatable("item.fulldraw.marksmans_recurve"));
+        setItemSlot(EquipmentSlot.MAINHAND, bow);
     }
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
                                         @Nullable SpawnGroupData data) {
         SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, data);
-        // no pumpkins or random enchantments: it always carries a plain bow
+        // no pumpkins or random enchantments: it always carries its own bow
         setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
         populateDefaultEquipmentSlots(random, difficulty);
         setHome(blockPosition());
@@ -515,6 +526,11 @@ public class Marksman extends AbstractSkeleton {
             Vec3 aim = shot == MarksmanRules.Shot.ARROW && seen ? foe.getEyePosition() : lastSeen;
             getLookControl().setLookAt(aim.x, aim.y, aim.z, 30.0F, 30.0F);
             yBodyRot = yHeadRot;
+            // a gold glint at the arrowhead while it draws, seen from the ground where the creak can't say which gap
+            if (ticks % 3 == 0 && level() instanceof ServerLevel level) {
+                Vec3 tip = getEyePosition().add(getLookAngle().scale(0.9)).subtract(0.0, 0.25, 0.0);
+                level.sendParticles(GLINT, true, false, tip.x, tip.y, tip.z, 3, 0.04, 0.04, 0.04, 0.0);
+            }
             if (ticks < MarksmanRules.drawTicks(phaseTwo())) return;
             loose(shot, shot == MarksmanRules.Shot.BLAST ? foe.position() : shot == MarksmanRules.Shot.FLARE ? lastSeen.subtract(0, 1.5, 0)
                     : seen ? lead(foe.getEyePosition().subtract(0, 0.5, 0)) : lastSeen.subtract(0, 0.5, 0));
@@ -598,7 +614,8 @@ public class Marksman extends AbstractSkeleton {
         };
         if (kind == MarksmanRules.Shot.ARROW && arrow instanceof ShotHolder holder) {
             WeaponStats stats = MarksmanRules.BOW;
-            holder.fulldraw$setShot(new ShotRecord(true, eye, stats.damageMult(), stats.gravityMult(), 0.5, BuiltInRegistries.ITEM.getKey(Items.BOW)));
+            holder.fulldraw$setShot(new ShotRecord(true, eye, stats.damageMult(), stats.gravityMult(), 0.5,
+                    BuiltInRegistries.ITEM.getKey(bow.isEmpty() ? Items.BOW : bow.getItem())));
             // a plain arrow's damage, not a mob's (which grows with the difficulty: the difficulty already scales what a
             // player takes)
             arrow.setBaseDamage(MarksmanRules.ARROW_BASE_DAMAGE);

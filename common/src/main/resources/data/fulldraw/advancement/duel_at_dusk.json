@@ -1,0 +1,44 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "fulldraw:marksman"
+          }
+        },
+        "killing_blow": {
+          "direct_entity": {
+            "minecraft:entity_type": "#minecraft:arrows"
+          }
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "fulldraw:marksmans_eye"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.duel_at_dusk.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.duel_at_dusk.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "parent": "fulldraw:right_between_the_eyes"
+}

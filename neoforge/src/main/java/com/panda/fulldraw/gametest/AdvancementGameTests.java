@@ -126,6 +126,44 @@ final class AdvancementGameTests {
         });
     }
 
+    /**
+     * Duel at Dusk: a Marksman brought down by a player's arrow awards it; one brought down by a player's blow doesn't
+     * (an archer's duel, as vanilla's Sniper Duel asks of a skeleton).
+     */
+    static void duelAtDuskAdvancement(GameTestHelper helper) {
+        ServerPlayer archer = helper.makeMockServerPlayerInLevel(), fighter = helper.makeMockServerPlayerInLevel();
+        var shot = helper.spawnWithNoFreeWill(com.panda.fulldraw.registry.ModEntities.MARKSMAN.get(), new Vec3(6.5, 1, 6.5));
+        var struck = helper.spawnWithNoFreeWill(com.panda.fulldraw.registry.ModEntities.MARKSMAN.get(), new Vec3(2.5, 1, 6.5));
+        shot.setHealth(1.0F);
+        struck.setHealth(1.0F);
+        loose(helper, archer, 6.5, 4.0);
+        struck.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(fighter), 5.0F);
+        helper.runAfterDelay(10, () -> {
+            if (shot.isAlive() || struck.isAlive()) helper.fail("both Marksmen should be down: shot " + shot.isAlive() + ", struck " + struck.isAlive());
+            else if (!done(helper, archer, "duel_at_dusk")) helper.fail("bringing the Marksman down with an arrow should award Duel at Dusk");
+            else if (done(helper, fighter, "duel_at_dusk")) helper.fail("bringing it down with a blow shouldn't award Duel at Dusk");
+            else helper.succeed();
+        });
+    }
+
+    /** A Blast Arrow's blast is an arrow's kill too: its direct source is the arrow. */
+    static void duelAtDuskBlast(GameTestHelper helper) {
+        ServerPlayer bomber = helper.makeMockServerPlayerInLevel();
+        var marksman = helper.spawnWithNoFreeWill(com.panda.fulldraw.registry.ModEntities.MARKSMAN.get(), new Vec3(6.5, 1, 7.5));
+        marksman.setHealth(1.0F);
+        var arrow = new com.panda.fulldraw.entity.BlastArrow(helper.getLevel(), bomber, new ItemStack(com.panda.fulldraw.registry.ModItems.BLAST_ARROW.get()), null);
+        Vec3 from = helper.absoluteVec(new Vec3(6.5, 2.0, 3.5));
+        arrow.setPos(from);
+        arrow.setNoGravity(true);
+        arrow.setDeltaMovement(0, 0, 2.0);
+        helper.getLevel().addFreshEntity(arrow);
+        helper.runAfterDelay(10, () -> {
+            if (marksman.isAlive()) helper.fail("the Blast Arrow should have brought the Marksman down");
+            else if (!done(helper, bomber, "duel_at_dusk")) helper.fail("a Blast Arrow's kill should award Duel at Dusk");
+            else helper.succeed();
+        });
+    }
+
     /** Whether the player has earned the advancement fulldraw:{@code id}. */
     static boolean done(GameTestHelper helper, ServerPlayer player, String id) {
         var holder = helper.getLevel().getServer().getAdvancements().get(FullDrawMod.id(id));

@@ -183,7 +183,8 @@ final class MarksmanGameTests {
         if (!marksman.blockPosition().equals(top)) wrong.add("it should stand on the top's middle " + top + ", not " + marksman.blockPosition());
         if (!top.equals(marksman.home())) wrong.add("its home should be where it stands: " + marksman.home());
         if (!marksman.isPersistenceRequired()) wrong.add("it should never despawn");
-        if (!marksman.getMainHandItem().is(Items.BOW)) wrong.add("it should hold a bow: " + marksman.getMainHandItem());
+        ItemStack held = marksman.getMainHandItem();
+        if (!held.is(ModItems.RECURVE_BOW.get()) || !prize(held)) wrong.add("it should hold the Recurve it drops, Deadeye II and named: " + held);
         if (marksman.crenels().size() != 12) wrong.add("it should find the 12 crenels, found " + marksman.crenels());
         var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
         marksman.saveWithoutId(out);
@@ -275,6 +276,13 @@ final class MarksmanGameTests {
     }
 
     /** Every death: the Marksman's Eye and a Recurve Bow with Deadeye II, 1 to 3 bones and 2 to 6 arrows. */
+    /** Whether the Recurve is the Marksman's own: Deadeye II, named The Marksman's Recurve. */
+    private static boolean prize(ItemStack stack) {
+        var name = stack.get(net.minecraft.core.component.DataComponents.ITEM_NAME);
+        return com.panda.fulldraw.registry.ModEnchantments.level(stack, com.panda.fulldraw.registry.ModEnchantments.DEADEYE) == 2 && name != null
+                && name.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t && t.getKey().equals("item.fulldraw.marksmans_recurve");
+    }
+
     static void marksmanDrops(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         Marksman marksman = helper.spawnWithNoFreeWill(ModEntities.MARKSMAN.get(), new Vec3(6.5, 1, 6.5));
@@ -292,8 +300,7 @@ final class MarksmanGameTests {
                 if (stack.is(ModItems.MARKSMANS_EYE.get())) eyes += stack.getCount();
                 else if (stack.is(ModItems.RECURVE_BOW.get())) {
                     bows += stack.getCount();
-                    int deadeye = com.panda.fulldraw.registry.ModEnchantments.level(stack, com.panda.fulldraw.registry.ModEnchantments.DEADEYE);
-                    if (deadeye != 2) wrong.add("its Recurve has Deadeye " + deadeye + ", not II");
+                    if (!prize(stack)) wrong.add("its Recurve should be Deadeye II and named The Marksman's Recurve: " + stack + " " + stack.getComponents());
                 }
                 else if (stack.is(Items.BONE)) bones += stack.getCount();
                 else if (stack.is(Items.ARROW)) arrows += stack.getCount();
@@ -305,6 +312,26 @@ final class MarksmanGameTests {
         marksman.discard();
         if (!wrong.isEmpty()) helper.fail("drops: " + wrong.subList(0, Math.min(5, wrong.size())));
         else helper.succeed();
+    }
+
+    /**
+     * Peaceful keeps the Marksman (one to a tower, none to replace it) but it gives up its foe: switched to Peaceful with
+     * an iron golem as its target, a second later it is still there, with no target. Runs alone: the difficulty is the
+     * server's.
+     */
+    static void marksmanKeptOnPeaceful(GameTestHelper helper) {
+        var server = helper.getLevel().getServer();
+        net.minecraft.world.Difficulty before = helper.getLevel().getDifficulty();
+        Marksman marksman = helper.spawn(ModEntities.MARKSMAN.get(), new Vec3(3.5, 1, 3.5));
+        IronGolem golem = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.IRON_GOLEM, new Vec3(8.5, 1, 8.5));
+        marksman.setTarget(golem);
+        server.setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true);
+        helper.runAfterDelay(20, () -> {
+            server.setDifficulty(before, true);
+            if (marksman.isRemoved() || !marksman.isAlive()) helper.fail("Peaceful removed the Marksman: " + marksman.getRemovalReason());
+            else if (marksman.getTarget() != null) helper.fail("on Peaceful it should drop its foe, still targets " + marksman.getTarget());
+            else helper.succeed();
+        });
     }
 
     // ---- helpers -------------------------------------------------------------------------------------------------

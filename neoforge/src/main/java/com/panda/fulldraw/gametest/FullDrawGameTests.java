@@ -62,6 +62,8 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("breeze_deflection_drops_record", () -> AdvancementGameTests::breezeDeflectionDropsRecord);
         FUNCTIONS.register("slice_advancements", () -> AdvancementGameTests::sliceAdvancements);
         FUNCTIONS.register("long_shot_advancement", () -> AdvancementGameTests::longShotAdvancement);
+        FUNCTIONS.register("duel_at_dusk_advancement", () -> AdvancementGameTests::duelAtDuskAdvancement);
+        FUNCTIONS.register("duel_at_dusk_blast", () -> AdvancementGameTests::duelAtDuskBlast);
         FUNCTIONS.register("recipes_loaded", () -> FullDrawGameTests::recipesLoaded);
         FUNCTIONS.register("arrows_fire_from_bow_and_dispenser", () -> ArrowGameTests::arrowsFireFromBowAndDispenser);
         FUNCTIONS.register("broadhead_bleeds", () -> ArrowGameTests::broadheadBleeds);
@@ -123,6 +125,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("marksman_back_to_post", () -> MarksmanGameTests::marksmanBackToPost);
         FUNCTIONS.register("marksman_bashes_a_foe_beside_it", () -> MarksmanGameTests::marksmanBashesAFoeBesideIt);
         FUNCTIONS.register("marksman_drops", () -> MarksmanGameTests::marksmanDrops);
+        FUNCTIONS.register("marksman_kept_on_peaceful", () -> MarksmanGameTests::marksmanKeptOnPeaceful);
         // the enchantments
         FUNCTIONS.register("enchantments_registered", () -> EnchantmentGameTests::enchantmentsRegistered);
         FUNCTIONS.register("quickdraw_shortens_draw", () -> EnchantmentGameTests::quickdrawShortensDraw);
@@ -141,7 +144,7 @@ public final class FullDrawGameTests {
      * test's mobs would count too).
      */
     private static final java.util.Set<String> ALONE = java.util.Set.of("blast_arrow_explodes", "arrows_recovered_on_kill", "arrow_pickup_lifetime",
-            "harrier_spawn_rules", "bog_lurker_spawn_rules");
+            "harrier_spawn_rules", "bog_lurker_spawn_rules", "marksman_kept_on_peaceful");
     /** Tests that need the open sky over their arena (every other test gets a barrier roof). */
     private static final java.util.Set<String> SKY = java.util.Set.of("harrier_spawn_rules", "bog_lurker_spawn_rules", "harrier_steep_dive_headshot",
             "harrier_dive_strikes_and_climbs");

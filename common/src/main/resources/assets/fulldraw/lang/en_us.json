@@ -1,4 +1,6 @@
 {
+  "advancements.fulldraw.duel_at_dusk.description": "Bring down the Marksman of a Ranger's Watchtower with an arrow.",
+  "advancements.fulldraw.duel_at_dusk.title": "Duel at Dusk",
   "advancements.fulldraw.eyes_on_the_water.description": "Hit a Bog Lurker in the eyes while it lurks.",
   "advancements.fulldraw.eyes_on_the_water.title": "Eyes on the Water",
   "advancements.fulldraw.grounded.description": "Bring a diving Gale Harrier down with a Perfect Release or an arrow in its head.",
@@ -92,6 +94,7 @@
   "item.fulldraw.marksman_spawn_egg": "Marksman Spawn Egg",
   "item.fulldraw.marksmans_eye": "Marksman's Eye",
   "item.fulldraw.marksmans_eye.tooltip": "With a book and a spyglass: Deadeye III. With a book and an amethyst shard: Steady II",
+  "item.fulldraw.marksmans_recurve": "The Marksman's Recurve",
   "item.fulldraw.quiver": "Quiver",
   "item.fulldraw.recurve_bow": "Recurve Bow",
   "item.fulldraw.repeating_crossbow": "Repeating Crossbow",

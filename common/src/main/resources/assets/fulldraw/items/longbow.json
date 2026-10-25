@@ -8,8 +8,7 @@
     },
     "on_true": {
       "type": "minecraft:range_dispatch",
-      "property": "minecraft:use_duration",
-      "scale": 0.03125,
+      "property": "fulldraw:draw",
       "entries": [
         {
           "threshold": 0.65,

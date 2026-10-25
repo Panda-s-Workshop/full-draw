@@ -1048,5 +1048,30 @@
         "pitch": 0.7
       }
     ]
+  },
+  "ricochet": {
+    "subtitle": "subtitles.fulldraw.ricochet",
+    "sounds": [
+      {
+        "name": "minecraft:item/trident/ground_impact1",
+        "volume": 0.8,
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:item/trident/ground_impact2",
+        "volume": 0.8,
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:item/trident/ground_impact3",
+        "volume": 0.8,
+        "pitch": 1.6
+      },
+      {
+        "name": "minecraft:item/trident/ground_impact4",
+        "volume": 0.8,
+        "pitch": 1.6
+      }
+    ]
   }
 }

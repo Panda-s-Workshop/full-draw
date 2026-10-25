@@ -20,7 +20,7 @@ public record Breath(double fill, boolean focusing, int exhaustedTicks) {
     public static final double MIN_INHALE = 0.2;
 
     public static int capacityTicks(int steadyLevel) {
-        return BASE_TICKS + TICKS_PER_STEADY * Math.max(0, steadyLevel);
+        return BASE_TICKS + TICKS_PER_STEADY * Math.clamp(steadyLevel, 0, EnchantmentRules.STEADY_MAX);
     }
 
     public boolean exhausted() {

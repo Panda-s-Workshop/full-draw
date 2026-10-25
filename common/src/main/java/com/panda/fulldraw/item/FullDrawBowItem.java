@@ -50,7 +50,7 @@ public class FullDrawBowItem extends BowItem implements Weapons.Ranged {
         int held = duration - timeLeft;
         Shots.beginRelease(entity, stack, held);
         try {
-            return super.releaseUsing(stack, level, entity, duration - stats.toVanillaTicks(held));
+            return super.releaseUsing(stack, level, entity, duration - Weapons.stats(stack).toVanillaTicks(held));
         } finally {
             Shots.endRelease();
         }

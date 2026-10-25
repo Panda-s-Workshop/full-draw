@@ -4,13 +4,20 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import com.panda.fulldraw.item.RepeatingCrossbowItem;
+import com.panda.fulldraw.entity.BlastArrow;
+import com.panda.fulldraw.entity.FlareArrow;
+import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.logic.Magazine;
 import com.panda.fulldraw.registry.ModComponents;
+import com.panda.fulldraw.registry.ModEnchantments;
+import com.panda.fulldraw.shot.RicochetBolt;
 import com.panda.fulldraw.shot.Weapons;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -28,6 +35,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(CrossbowItem.class)
 public abstract class CrossbowItemMixin {
+    /**
+     * A Ricochet crossbow's bolt bounces off a block once per level. Not a Blast, Flare or Rope Arrow: those do their
+     * work where they first strike.
+     */
+    @Inject(method = "createProjectile", at = @At("RETURN"))
+    private void fulldraw$ricochet(Level level, LivingEntity shooter, ItemStack weapon, ItemStack ammo, boolean crit,
+                                   CallbackInfoReturnable<Projectile> cir) {
+        Projectile projectile = cir.getReturnValue();
+        if (!(projectile instanceof RicochetBolt bolt) || projectile instanceof BlastArrow || projectile instanceof FlareArrow
+                || projectile instanceof RopeArrow) return;
+        bolt.fulldraw$setRicochets(Math.min(ModEnchantments.level(weapon, ModEnchantments.RICOCHET), com.panda.fulldraw.logic.EnchantmentRules.RICOCHET_MAX));
+    }
+
     /** A Full Draw crossbow with its own crank plays it where vanilla would play its default loading sounds. */
     @Inject(method = "getChargingSounds", at = @At("RETURN"), cancellable = true)
     private static void fulldraw$crankSounds(ItemStack stack, CallbackInfoReturnable<CrossbowItem.ChargingSounds> cir) {

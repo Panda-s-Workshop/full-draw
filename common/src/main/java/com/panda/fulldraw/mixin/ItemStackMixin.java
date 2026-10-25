@@ -22,7 +22,8 @@ public abstract class ItemStackMixin {
                                   java.util.function.Consumer<net.minecraft.network.chat.Component> lines, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
         ItemStack self = (ItemStack) (Object) this;
         String key = self.is(net.minecraft.world.item.Items.FLETCHING_TABLE) ? "item.fulldraw.fletching_table.tooltip"
-                : self.is(com.panda.fulldraw.registry.ModItems.ROPE.get()) ? "item.fulldraw.rope.tooltip" : null;
+                : self.is(com.panda.fulldraw.registry.ModItems.ROPE.get()) ? "item.fulldraw.rope.tooltip"
+                : self.is(com.panda.fulldraw.registry.ModItems.MARKSMANS_EYE.get()) ? "item.fulldraw.marksmans_eye.tooltip" : null;
         if (key != null) lines.accept(net.minecraft.network.chat.Component.translatable(key).withStyle(net.minecraft.ChatFormatting.GRAY));
         // any other arrow (vanilla's, another mod's) comes back from a kill at the plain arrow's chance, as Full Draw's say
         // of theirs; on a server without Full Draw nothing comes back, so nothing is said

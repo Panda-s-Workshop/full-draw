@@ -15,7 +15,15 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "fulldraw:recurve_bow"
+          "name": "fulldraw:recurve_bow",
+          "modifier": [
+            {
+              "type": "minecraft:set_enchantments",
+              "enchantments": {
+                "fulldraw:deadeye": 2
+              }
+            }
+          ]
         }
       ]
     },

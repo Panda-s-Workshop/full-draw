@@ -43,6 +43,8 @@ public final class FullDrawClient {
         });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterRangeSelectItemModelPropertyEvent e) ->
                 e.register(FullDrawMod.id("magazine"), com.panda.fulldraw.client.MagazineShots.MAP_CODEC));
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterRangeSelectItemModelPropertyEvent e) ->
+                e.register(FullDrawMod.id("draw"), com.panda.fulldraw.client.DrawProgress.MAP_CODEC));
         modBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers e) -> {
             var renderers = new com.panda.fulldraw.client.ClientSinks.Renderers() {
                 @Override

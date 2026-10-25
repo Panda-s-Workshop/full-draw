@@ -44,6 +44,8 @@ public final class FullDrawFabricClient implements ClientModInitializer {
         // Fabric API has no hook for item model properties; vanilla's registry is open until the models load
         net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperties.ID_MAPPER
                 .put(com.panda.fulldraw.FullDrawMod.id("magazine"), com.panda.fulldraw.client.MagazineShots.MAP_CODEC);
+        net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperties.ID_MAPPER
+                .put(com.panda.fulldraw.FullDrawMod.id("draw"), com.panda.fulldraw.client.DrawProgress.MAP_CODEC);
         FullDrawNetwork.toServer = payload -> {
             if (ClientPlayNetworking.canSend(payload.type())) ClientPlayNetworking.send(payload);
         };

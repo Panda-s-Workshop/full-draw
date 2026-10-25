@@ -123,6 +123,14 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("marksman_back_to_post", () -> MarksmanGameTests::marksmanBackToPost);
         FUNCTIONS.register("marksman_bashes_a_foe_beside_it", () -> MarksmanGameTests::marksmanBashesAFoeBesideIt);
         FUNCTIONS.register("marksman_drops", () -> MarksmanGameTests::marksmanDrops);
+        // the enchantments
+        FUNCTIONS.register("enchantments_registered", () -> EnchantmentGameTests::enchantmentsRegistered);
+        FUNCTIONS.register("quickdraw_shortens_draw", () -> EnchantmentGameTests::quickdrawShortensDraw);
+        FUNCTIONS.register("steady_widens_window", () -> EnchantmentGameTests::steadyWidensWindow);
+        FUNCTIONS.register("deadeye_raises_precision", () -> EnchantmentGameTests::deadeyeRaisesPrecision);
+        FUNCTIONS.register("ricochet_bounces", () -> EnchantmentGameTests::ricochetBounces);
+        FUNCTIONS.register("eye_books_craft", () -> EnchantmentGameTests::eyeBooksCraft);
+        FUNCTIONS.register("anvil_keeps_eye_tiers", () -> EnchantmentGameTests::anvilKeepsEyeTiers);
         FUNCTIONS.register("bog_lurker_saves", () -> LurkerGameTests::bogLurkerSaves);
         FUNCTIONS.register("bog_lurker_spawn_rules", () -> LurkerGameTests::bogLurkerSpawnRules);
         FUNCTIONS.register("bog_lurker_drops", () -> LurkerGameTests::bogLurkerDrops);

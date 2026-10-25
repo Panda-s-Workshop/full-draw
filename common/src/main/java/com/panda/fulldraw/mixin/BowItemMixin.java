@@ -2,6 +2,7 @@ package com.panda.fulldraw.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.panda.fulldraw.shot.Shots;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,6 +30,18 @@ public abstract class BowItemMixin {
     private void fulldraw$endRelease(ItemStack stack, Level level, LivingEntity entity, int timeLeft, CallbackInfoReturnable<Boolean> cir) {
         Shots.endRelease();
         com.panda.fulldraw.quiver.Quivers.clearPending();
+    }
+
+    /**
+     * The bow's power follows its own draw time, Quickdraw counted: a bow drawn in 14 ticks is at full power after 14,
+     * as vanilla's is after 20.
+     */
+    @WrapOperation(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/BowItem;getPowerForTime(I)F"))
+    private float fulldraw$power(int ticks, Operation<Float> original, @Local(argsOnly = true) ItemStack stack,
+                                 @Local(argsOnly = true) LivingEntity entity) {
+        Shots.Release release = Shots.release();
+        boolean ours = release != null && release.shooter() == entity && release.weapon() == stack;
+        return original.call(ours ? release.stats().toVanillaTicks(release.ticksHeld()) : ticks);
     }
 
     @WrapOperation(method = "shootProjectile", at = @At(value = "INVOKE",

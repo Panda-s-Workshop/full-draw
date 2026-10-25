@@ -11,7 +11,10 @@ import com.panda.fulldraw.entity.StuckArrows;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import com.panda.fulldraw.logic.ArrowTraits;
 import com.panda.fulldraw.logic.BoltTraits;
+import com.panda.fulldraw.logic.EnchantmentRules;
 import com.panda.fulldraw.logic.ShotMath;
+import com.panda.fulldraw.registry.ModSounds;
+import com.panda.fulldraw.shot.RicochetBolt;
 import com.panda.fulldraw.shot.ShotHolder;
 import com.panda.fulldraw.shot.ShotRecord;
 import com.panda.fulldraw.shot.Shots;
@@ -28,6 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -45,8 +49,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * times their head's if they have one.
  */
 @Mixin(AbstractArrow.class)
-public abstract class AbstractArrowMixin implements ShotHolder {
+public abstract class AbstractArrowMixin implements ShotHolder, RicochetBolt {
     @Shadow private double baseDamage;
+
+    @Shadow protected abstract void setInGround(boolean inGround);
 
     @Shadow public abstract boolean isCritArrow();
 
@@ -58,6 +64,57 @@ public abstract class AbstractArrowMixin implements ShotHolder {
     /** On a client: the gravity multiplier the server sent (the record never reaches the client). */
     @Unique private float fulldraw$clientGravity = 1.0F;
     @Unique private boolean fulldraw$gravitySent;
+    /** Bounces left from a Ricochet crossbow (the server's count; the client sees the bounce as the bolt's new flight). */
+    @Unique private int fulldraw$ricochets;
+    /** Whether it has glanced off a block: after a bounce it no longer strikes whoever loosed it. */
+    @Unique private boolean fulldraw$bounced;
+
+    @Override
+    public int fulldraw$ricochets() {
+        return fulldraw$ricochets;
+    }
+
+    @Override
+    public void fulldraw$setRicochets(int bounces) {
+        fulldraw$ricochets = bounces;
+    }
+
+    /**
+     * Ricochet: a bolt with bounces left glances off the block, mirrored across its face at 70% of its speed, with a
+     * bright knock and a spark, and flies on instead of sticking. The block still feels the hit first (a target lights,
+     * a bell rings), as do the weapon's own block-hit enchantments; like a bolt that sticks, it loses its crit and its
+     * pierce.
+     */
+    @Inject(method = "onHitBlock", at = @At(value = "INVOKE", ordinal = 0,
+            target = "Lnet/minecraft/world/entity/projectile/arrow/AbstractArrow;getDeltaMovement()Lnet/minecraft/world/phys/Vec3;"),
+            cancellable = true)
+    private void fulldraw$ricochet(BlockHitResult hit, CallbackInfo ci) {
+        AbstractArrow self = (AbstractArrow) (Object) this;
+        if (fulldraw$ricochets <= 0 || self.isRemoved() || !(self.level() instanceof ServerLevel level)) return;
+        fulldraw$ricochets--;
+        fulldraw$bounced = true;
+        Vec3 v = self.getDeltaMovement();
+        var normal = hit.getDirection().getUnitVec3i();
+        double[] out = EnchantmentRules.bounce(v.x, v.y, v.z, normal.getX(), normal.getY(), normal.getZ());
+        self.setDeltaMovement(out[0], out[1], out[2]);
+        self.setPos(hit.getLocation().add(hit.getDirection().getUnitVec3().scale(0.05)));
+        self.setCritArrow(false);
+        self.setPierceLevel((byte) 0);
+        // a client that stuck the bolt where it struck is told it flies on
+        setInGround(true);
+        setInGround(false);
+        self.needsSync = true;
+        level.playSound(null, self.getX(), self.getY(), self.getZ(), ModSounds.RICOCHET.get(), self.getSoundSource(), 1.0F,
+                0.9F + level.getRandom().nextFloat() * 0.2F);
+        Vec3 at = hit.getLocation();
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT, at.x, at.y, at.z, 6, 0.05, 0.05, 0.05, 0.25);
+        ci.cancel();
+    }
+
+    @Inject(method = "canHitEntity", at = @At("HEAD"), cancellable = true)
+    private void fulldraw$notTheShooterAfterABounce(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (fulldraw$bounced && entity == ((AbstractArrow) (Object) this).getOwner()) cir.setReturnValue(false);
+    }
 
     @Override
     public @Nullable ShotRecord fulldraw$shot() {
@@ -93,11 +150,15 @@ public abstract class AbstractArrowMixin implements ShotHolder {
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
     private void fulldraw$save(ValueOutput output, CallbackInfo ci) {
         output.storeNullable("fulldraw_shot", ShotRecord.CODEC, fulldraw$shot);
+        if (fulldraw$ricochets > 0) output.putInt("fulldraw_ricochets", fulldraw$ricochets);
+        if (fulldraw$bounced) output.putBoolean("fulldraw_bounced", true);
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     private void fulldraw$load(ValueInput input, CallbackInfo ci) {
         fulldraw$shot = input.read("fulldraw_shot", ShotRecord.CODEC).orElse(null);
+        fulldraw$ricochets = input.getIntOr("fulldraw_ricochets", 0);
+        fulldraw$bounced = input.getBooleanOr("fulldraw_bounced", false);
     }
 
     @Inject(method = "getDefaultGravity", at = @At("RETURN"), cancellable = true)

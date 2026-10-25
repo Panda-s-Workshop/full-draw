@@ -1,6 +1,8 @@
 package com.panda.fulldraw.shot;
 
+import com.panda.fulldraw.logic.EnchantmentRules;
 import com.panda.fulldraw.logic.WeaponStats;
+import com.panda.fulldraw.registry.ModEnchantments;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CrossbowItem;
@@ -30,13 +32,15 @@ public final class Weapons {
         return !weapon.is(NO_SHOT_PIPELINE);
     }
 
+    /** The weapon's numbers as it fires: its own, with Quickdraw's shorter draw and Steady's wider Perfect window. */
     public static WeaponStats stats(ItemStack weapon) {
-        if (weapon.getItem() instanceof Ranged r) return r.stats();
-        return weapon.getItem() instanceof CrossbowItem ? WeaponStats.VANILLA_CROSSBOW : WeaponStats.VANILLA_BOW;
+        WeaponStats base = weapon.getItem() instanceof Ranged r ? r.stats()
+                : weapon.getItem() instanceof CrossbowItem ? WeaponStats.VANILLA_CROSSBOW : WeaponStats.VANILLA_BOW;
+        return EnchantmentRules.apply(base, ModEnchantments.level(weapon, ModEnchantments.QUICKDRAW), steadyLevel(weapon));
     }
 
-    /** The weapon's Steady level (+1 s of breath per level). 0 until the Steady enchantment exists. */
+    /** The weapon's Steady level (+1 s of breath and 2 ticks of Perfect window per level). */
     public static int steadyLevel(ItemStack weapon) {
-        return 0;
+        return ModEnchantments.level(weapon, ModEnchantments.STEADY);
     }
 }

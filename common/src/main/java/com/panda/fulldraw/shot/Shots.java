@@ -52,6 +52,12 @@ public final class Shots {
         RELEASE.set(new Release(shooter, weapon, Weapons.stats(weapon), ticksHeld, now));
     }
 
+    /** The release in progress on this thread, or null. */
+    @Nullable
+    public static Release release() {
+        return RELEASE.get();
+    }
+
     public static void endRelease() {
         RELEASE.remove();
         ANNOUNCED.remove();
@@ -72,7 +78,9 @@ public final class Shots {
         double spread = ShotMath.spread(stats, perfect, release.ticksHeld() - stats.drawTicks(), movementMult(shooter),
                 breath.focusing(), breath.exhaustedTicks(), t);
         ShotRecord shot = new ShotRecord(perfect, shooter.getEyePosition(), stats.damageMult(), stats.gravityMult(), spread,
-                BuiltInRegistries.ITEM.getKey(release.weapon().getItem()));
+                BuiltInRegistries.ITEM.getKey(release.weapon().getItem()),
+                com.panda.fulldraw.logic.EnchantmentRules.deadeyeBonus(
+                        com.panda.fulldraw.registry.ModEnchantments.level(release.weapon(), com.panda.fulldraw.registry.ModEnchantments.DEADEYE)));
         holder.fulldraw$setShot(shot);
         // vanilla's random full-draw crit becomes the Perfect crit; its particle trail now marks Perfect arrows
         if (perfect) arrow.setCritArrow(true);
@@ -213,7 +221,8 @@ public final class Shots {
         }
         ShotMath.Tuning t = FullDrawConfig.tuning();
         double mult = spot.multiplier() > 0 ? spot.multiplier() : target instanceof Player ? t.precisionPlayers() : t.precisionMobs();
-        return new Impact(true, mult, distance, location);
+        // Deadeye: the bow's bonus on every weak spot
+        return new Impact(true, mult + shot.precisionBonus(), distance, location);
     }
 
     /**

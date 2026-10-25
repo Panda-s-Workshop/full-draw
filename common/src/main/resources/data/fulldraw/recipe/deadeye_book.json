@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "fulldraw:marksmans_eye",
+    "minecraft:book",
+    "minecraft:spyglass"
+  ],
+  "result": {
+    "id": "minecraft:enchanted_book",
+    "count": 1,
+    "components": {
+      "minecraft:stored_enchantments": {
+        "fulldraw:deadeye": 3
+      }
+    }
+  }
+}

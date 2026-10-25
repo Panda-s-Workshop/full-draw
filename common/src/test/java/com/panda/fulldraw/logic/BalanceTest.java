@@ -28,6 +28,28 @@ class BalanceTest {
     }
 
     /**
+     * Full Draw's enchantments buy a bow no more up close than Sharpness V buys a sword (7 → 10 damage, ×1.43): the best
+     * of them together (Quickdraw III with Deadeye III; Steady can't join Quickdraw and adds nothing to the rate), on
+     * each bow, Perfect headshots at two blocks, over the same bow bare. So the gap {@link #meleeWinsUpClose} keeps
+     * between bare weapons holds between enchanted ones too. (Power is vanilla's and scales bows past this; it is not
+     * Full Draw's to price here.)
+     */
+    @Test
+    void enchantedBowsKeepMeleeAhead() {
+        double sharpness = (7 + 3) / 7.0;
+        for (WeaponStats w : List.of(WeaponStats.VANILLA_BOW, WeaponStats.SHORTBOW, WeaponStats.LONGBOW, WeaponStats.RECURVE_BOW)) {
+            WeaponStats quick = EnchantmentRules.apply(w, EnchantmentRules.QUICKDRAW_MAX, 0);
+            double bare = closeDps(w, 0), best = closeDps(quick, EnchantmentRules.deadeyeBonus(EnchantmentRules.DEADEYE_MAX));
+            assertTrue(best / bare <= sharpness, w + ": enchanted ×" + best / bare + " up close, Sharpness V gives a sword ×" + sharpness);
+        }
+    }
+
+    private static double closeDps(WeaponStats w, double deadeye) {
+        double shot = ShotMath.damage(ShotMathTest.launchBase(w), w.damageMult(), 1, true, T.precisionMobs() + deadeye, 2, T);
+        return shot / ((w.drawTicks() + T.perfectDelay()) / 20.0);
+    }
+
+    /**
      * The Arbalest trades rate for weight: its damage a minute against one target stays at most 1.2 × a vanilla
      * crossbow's, unarmoured and in full iron, and at most 1.5 × in diamond or netherite, where cutting through armour is
      * its job. A line of mobs is its other job, so this is per target. A minute is 1200 ticks of back-to-back loads.

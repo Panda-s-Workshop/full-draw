@@ -274,7 +274,7 @@ final class MarksmanGameTests {
         });
     }
 
-    /** Every death: the Marksman's Eye and a Recurve Bow, 1 to 3 bones and 2 to 6 arrows. */
+    /** Every death: the Marksman's Eye and a Recurve Bow with Deadeye II, 1 to 3 bones and 2 to 6 arrows. */
     static void marksmanDrops(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         Marksman marksman = helper.spawnWithNoFreeWill(ModEntities.MARKSMAN.get(), new Vec3(6.5, 1, 6.5));
@@ -290,7 +290,11 @@ final class MarksmanGameTests {
             int eyes = 0, bows = 0, bones = 0, arrows = 0;
             for (ItemStack stack : table.getRandomItems(params, random)) {
                 if (stack.is(ModItems.MARKSMANS_EYE.get())) eyes += stack.getCount();
-                else if (stack.is(ModItems.RECURVE_BOW.get())) bows += stack.getCount();
+                else if (stack.is(ModItems.RECURVE_BOW.get())) {
+                    bows += stack.getCount();
+                    int deadeye = com.panda.fulldraw.registry.ModEnchantments.level(stack, com.panda.fulldraw.registry.ModEnchantments.DEADEYE);
+                    if (deadeye != 2) wrong.add("its Recurve has Deadeye " + deadeye + ", not II");
+                }
                 else if (stack.is(Items.BONE)) bones += stack.getCount();
                 else if (stack.is(Items.ARROW)) arrows += stack.getCount();
                 else if (!stack.isEmpty()) wrong.add("also " + stack);

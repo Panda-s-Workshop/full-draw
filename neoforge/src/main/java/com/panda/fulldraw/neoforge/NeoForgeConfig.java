@@ -75,6 +75,8 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
 
     private static final ModConfigSpec.BooleanValue SHIELDBEARER_SPAWNS = B.comment("Shieldbearers join raids from the third wave and guard pillager outposts. false: only spawn eggs and commands make them.")
             .define("shieldbearerSpawns", true);
+    private static final ModConfigSpec.BooleanValue HARRIER_SPAWNS = B.comment("Gale Harriers spawn on their own over the windswept hills and peaks by day. false: only spawn eggs and commands make them.")
+            .define("galeHarrierSpawns", true);
 
     static {
         B.pop();
@@ -105,6 +107,11 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
     @Override
     public int arrowPickupLifetimeSeconds() {
         return SPEC.isLoaded() ? PICKUP_LIFETIME.get() : FullDrawConfig.DEFAULTS.arrowPickupLifetimeSeconds();
+    }
+
+    @Override
+    public boolean galeHarrierSpawns() {
+        return SPEC.isLoaded() ? HARRIER_SPAWNS.get() : FullDrawConfig.DEFAULTS.galeHarrierSpawns();
     }
 
     @Override

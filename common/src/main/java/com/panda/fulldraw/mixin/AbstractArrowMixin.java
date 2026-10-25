@@ -1,10 +1,12 @@
 package com.panda.fulldraw.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.panda.fulldraw.FullDrawConfig;
 import com.panda.fulldraw.entity.FullDrawArrow;
+import com.panda.fulldraw.entity.GaleHarrier;
 import com.panda.fulldraw.entity.StuckArrows;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import com.panda.fulldraw.logic.ArrowTraits;
@@ -13,6 +15,9 @@ import com.panda.fulldraw.logic.ShotMath;
 import com.panda.fulldraw.shot.ShotHolder;
 import com.panda.fulldraw.shot.ShotRecord;
 import com.panda.fulldraw.shot.Shots;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -22,7 +27,9 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,6 +49,8 @@ public abstract class AbstractArrowMixin implements ShotHolder {
     @Shadow private double baseDamage;
 
     @Shadow public abstract boolean isCritArrow();
+
+    @Shadow protected abstract boolean canHitEntity(Entity entity);
 
     @Unique @Nullable private ShotRecord fulldraw$shot;
     @Unique @Nullable private Shots.Impact fulldraw$impact;
@@ -148,6 +157,28 @@ public abstract class AbstractArrowMixin implements ShotHolder {
                 ? FullDrawConfig.arrowPickupLifetimeSeconds() * 20 : vanilla;
     }
 
+    /**
+     * A diving Gale Harrier and an arrow coming at it head on close by more than four blocks a tick, so the harrier's
+     * move can carry its box over the arrow between two ticks, and a box the arrow starts inside is passed over: such a
+     * harrier is hit where the arrow went into its box, as it would have been a moment sooner. Only a diving harrier the arrow is
+     * closing on: any other box an arrow starts inside is passed over, as in vanilla.
+     */
+    @ModifyReturnValue(method = "findHitEntities", at = @At("RETURN"))
+    private Collection<EntityHitResult> fulldraw$harrierOverTheArrow(Collection<EntityHitResult> hits, Vec3 from, Vec3 to) {
+        AbstractArrow self = (AbstractArrow) (Object) this;
+        List<GaleHarrier> over = self.level().getEntitiesOfClass(GaleHarrier.class, AABB.ofSize(from, 1.0E-3, 1.0E-3, 1.0E-3),
+                h -> h.phase() == GaleHarrier.Phase.DIVE && self.getDeltaMovement().dot(h.getDeltaMovement()) < 0.0
+                        && h.getBoundingBox().contains(from) && canHitEntity(h) && hits.stream().noneMatch(hit -> hit.getEntity() == h));
+        if (over.isEmpty()) return hits;
+        List<EntityHitResult> all = new ArrayList<>(hits);
+        for (GaleHarrier harrier : over) {
+            // back along the two's closing motion to where the arrow met the box: its leading face
+            Vec3 closing = self.getDeltaMovement().subtract(harrier.getDeltaMovement());
+            all.add(new EntityHitResult(harrier, harrier.getBoundingBox().clip(from.subtract(closing), from).orElse(from)));
+        }
+        return all;
+    }
+
     @Inject(method = "onHitEntity", at = @At("HEAD"))
     private void fulldraw$measureImpact(EntityHitResult hit, CallbackInfo ci) {
         fulldraw$impact = fulldraw$shot == null ? null : Shots.impact(fulldraw$shot, hit.getEntity(), hit.getLocation(), ((AbstractArrow) (Object) this).getDeltaMovement());
@@ -196,8 +227,11 @@ public abstract class AbstractArrowMixin implements ShotHolder {
             cracked.get(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS).disable(level, living, BoltTraits.SHIELD_CRACK_SECONDS, cracked);
         fulldraw$target = null;
         if (shot != null && impact != null && breakdown != null && target.level() instanceof ServerLevel) {
-            if (hurt) Shots.reportHit(((AbstractArrow) (Object) this).getOwner(), shot, impact, breakdown);
-            else fulldraw$shot = null;
+            if (hurt) {
+                Shots.reportHit(((AbstractArrow) (Object) this).getOwner(), shot, impact, breakdown);
+                // a Perfect Release or a headshot brings a diving Gale Harrier down
+                if (target instanceof GaleHarrier harrier) harrier.struckByShot(shot.perfect(), impact.precision());
+            } else fulldraw$shot = null;
         }
         return hurt;
     }

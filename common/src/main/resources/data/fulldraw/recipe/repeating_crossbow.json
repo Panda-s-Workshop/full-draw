@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "T": "fulldraw:harrier_talon",
+    "R": "minecraft:redstone",
+    "C": "minecraft:crossbow"
+  },
+  "pattern": [
+    "ITI",
+    "RCR",
+    " I "
+  ],
+  "result": {
+    "id": "fulldraw:repeating_crossbow"
+  }
+}

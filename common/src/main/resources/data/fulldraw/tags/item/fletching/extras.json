@@ -1,5 +1,7 @@
 {
   "values": [
-    "minecraft:string"
+    "minecraft:string",
+    "fulldraw:harrier_feather",
+    "fulldraw:harrier_talon"
   ]
 }

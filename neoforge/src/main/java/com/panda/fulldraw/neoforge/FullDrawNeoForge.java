@@ -35,12 +35,16 @@ public final class FullDrawNeoForge {
                         e.register(type, placement, heightmap, predicate, net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operation.REPLACE);
                     }
                 }));
-        // the Shieldbearer's egg also sits beside the pillager's in vanilla's Spawn Eggs tab
+        // the Shieldbearer's egg also sits beside the pillager's in vanilla's Spawn Eggs tab, the Gale Harrier's beside the phantom's
         modBus.addListener((net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent e) -> {
-            if (e.getTabKey() == net.minecraft.world.item.CreativeModeTabs.SPAWN_EGGS)
+            if (e.getTabKey() == net.minecraft.world.item.CreativeModeTabs.SPAWN_EGGS) {
                 e.insertAfter(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.PILLAGER_SPAWN_EGG),
                         new net.minecraft.world.item.ItemStack(com.panda.fulldraw.registry.ModItems.SHIELDBEARER_SPAWN_EGG.get()),
                         net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                e.insertAfter(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.PHANTOM_SPAWN_EGG),
+                        new net.minecraft.world.item.ItemStack(com.panda.fulldraw.registry.ModItems.GALE_HARRIER_SPAWN_EGG.get()),
+                        net.minecraft.world.item.CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+            }
         });
         container.registerConfig(ModConfig.Type.SYNCED, NeoForgeConfig.SPEC);
         FullDrawConfig.use(new NeoForgeConfig());

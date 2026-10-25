@@ -360,6 +360,7 @@ final class ShieldbearerGameTests {
             @Override public double arrowRecoveryChance() { return before.arrowRecoveryChance(); }
             @Override public int arrowPickupLifetimeSeconds() { return before.arrowPickupLifetimeSeconds(); }
             @Override public boolean shieldbearerSpawns() { return false; }
+            @Override public boolean galeHarrierSpawns() { return before.galeHarrierSpawns(); }
         };
     }
 

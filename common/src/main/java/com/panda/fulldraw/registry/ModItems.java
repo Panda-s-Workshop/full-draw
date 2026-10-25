@@ -82,6 +82,15 @@ public final class ModItems {
     /** Four kinds of arrows anywhere in the inventory, R picks which one the bow draws. */
     public static final DeferredItem<QuiverItem> QUIVER = ITEMS.registerItem("quiver", QuiverItem::new, p -> p.stacksTo(1));
 
+    /** A Gale Harrier's flight feather: the Flare Arrow's extra part. */
+    public static final DeferredItem<Item> HARRIER_FEATHER = ITEMS.registerItem("harrier_feather", Item::new);
+
+    /** A Gale Harrier's talon: the Blast Arrow's extra part, and the Repeating Crossbow's trigger. */
+    public static final DeferredItem<Item> HARRIER_TALON = ITEMS.registerItem("harrier_talon", Item::new);
+
+    public static final DeferredItem<Item> GALE_HARRIER_SPAWN_EGG = ITEMS.registerItem("gale_harrier_spawn_egg", Item::new,
+            p -> p.spawnEgg(ModEntities.GALE_HARRIER.get()));
+
     public static final DeferredItem<Item> SHIELDBEARER_SPAWN_EGG = ITEMS.registerItem("shieldbearer_spawn_egg", Item::new,
             p -> p.spawnEgg(ModEntities.SHIELDBEARER.get()));
 

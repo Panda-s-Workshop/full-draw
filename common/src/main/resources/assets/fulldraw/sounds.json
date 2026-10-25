@@ -478,5 +478,195 @@
         "pitch": 0.55
       }
     ]
+  },
+  "gale_harrier_ambient": {
+    "subtitle": "subtitles.fulldraw.gale_harrier_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:mob/parrot/idle1",
+        "volume": 0.8,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/idle2",
+        "volume": 0.8,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/idle3",
+        "volume": 0.8,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/idle4",
+        "volume": 0.8,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/idle5",
+        "volume": 0.8,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/idle6",
+        "volume": 0.8,
+        "pitch": 0.6
+      }
+    ]
+  },
+  "gale_harrier_shriek": {
+    "subtitle": "subtitles.fulldraw.gale_harrier_shriek",
+    "sounds": [
+      {
+        "name": "minecraft:mob/fox/screech1",
+        "volume": 1.0,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:mob/fox/screech2",
+        "volume": 1.0,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:mob/fox/screech3",
+        "volume": 1.0,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:mob/fox/screech4",
+        "volume": 1.0,
+        "pitch": 1.25
+      }
+    ]
+  },
+  "gale_harrier_dive": {
+    "subtitle": "subtitles.fulldraw.gale_harrier_dive",
+    "sounds": [
+      {
+        "name": "minecraft:mob/phantom/swoop1",
+        "volume": 1.0,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:mob/phantom/swoop2",
+        "volume": 1.0,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:mob/phantom/swoop3",
+        "volume": 1.0,
+        "pitch": 1.25
+      },
+      {
+        "name": "minecraft:mob/phantom/swoop4",
+        "volume": 1.0,
+        "pitch": 1.25
+      }
+    ]
+  },
+  "gale_harrier_flap": {
+    "subtitle": "subtitles.fulldraw.gale_harrier_flap",
+    "sounds": [
+      {
+        "name": "minecraft:mob/phantom/flap1",
+        "volume": 0.6,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:mob/phantom/flap2",
+        "volume": 0.6,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:mob/phantom/flap3",
+        "volume": 0.6,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:mob/phantom/flap4",
+        "volume": 0.6,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:mob/phantom/flap5",
+        "volume": 0.6,
+        "pitch": 1.3
+      },
+      {
+        "name": "minecraft:mob/phantom/flap6",
+        "volume": 0.6,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "gale_harrier_grounded": {
+    "subtitle": "subtitles.fulldraw.gale_harrier_grounded",
+    "sounds": [
+      {
+        "name": "minecraft:mob/ravager/stun1",
+        "volume": 0.9,
+        "pitch": 1.5
+      },
+      {
+        "name": "minecraft:mob/ravager/stun2",
+        "volume": 0.9,
+        "pitch": 1.5
+      },
+      {
+        "name": "minecraft:mob/ravager/stun3",
+        "volume": 0.9,
+        "pitch": 1.5
+      }
+    ]
+  },
+  "gale_harrier_land": {
+    "subtitle": "subtitles.fulldraw.gale_harrier_land",
+    "sounds": [
+      {
+        "name": "minecraft:mob/horse/land",
+        "volume": 0.7,
+        "pitch": 1.4
+      }
+    ]
+  },
+  "gale_harrier_hurt": {
+    "subtitle": "subtitles.fulldraw.gale_harrier_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:mob/parrot/hurt1",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/hurt2",
+        "volume": 1.0,
+        "pitch": 0.6
+      }
+    ]
+  },
+  "gale_harrier_death": {
+    "subtitle": "subtitles.fulldraw.gale_harrier_death",
+    "sounds": [
+      {
+        "name": "minecraft:mob/parrot/death1",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/death2",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/death3",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/parrot/death4",
+        "volume": 1.0,
+        "pitch": 0.6
+      }
+    ]
   }
 }

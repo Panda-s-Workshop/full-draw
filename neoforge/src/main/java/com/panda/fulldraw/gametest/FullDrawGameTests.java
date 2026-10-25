@@ -93,10 +93,29 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("shieldbearer_shield_saves", () -> ShieldbearerGameTests::shieldbearerShieldSaves);
         FUNCTIONS.register("shieldbearers_join_raid_waves", () -> ShieldbearerGameTests::shieldbearersJoinRaidWaves);
         FUNCTIONS.register("shieldbearer_outpost_spawns", () -> ShieldbearerGameTests::shieldbearerOutpostSpawns);
+        // the Gale Harrier
+        FUNCTIONS.register("harrier_grounded_by_dive_headshot", () -> HarrierGameTests::harrierGroundedByDiveHeadshot);
+        FUNCTIONS.register("harrier_steep_dive_headshot", () -> HarrierGameTests::harrierSteepDiveHeadshot);
+        FUNCTIONS.register("harrier_perfect_grounds_only_in_dive", () -> HarrierGameTests::harrierPerfectGroundsOnlyInDive);
+        FUNCTIONS.register("harrier_dive_strikes_and_climbs", () -> HarrierGameTests::harrierDiveStrikesAndClimbs);
+        FUNCTIONS.register("harrier_grounded_takes_double_melee", () -> HarrierGameTests::harrierGroundedTakesDoubleMelee);
+        FUNCTIONS.register("harrier_grounded_counts_from_landing", () -> HarrierGameTests::harrierGroundedCountsFromLanding);
+        FUNCTIONS.register("harrier_saves", () -> HarrierGameTests::harrierSaves);
+        FUNCTIONS.register("harrier_spawn_rules", () -> HarrierGameTests::harrierSpawnRules);
+        FUNCTIONS.register("harrier_drops", () -> HarrierGameTests::harrierDrops);
+        FUNCTIONS.register("harrier_drops_with_looting", () -> HarrierGameTests::harrierDropsWithLooting);
+        FUNCTIONS.register("harrier_parts_craft", () -> HarrierGameTests::harrierPartsCraft);
     }
 
-    /** Tests that swap the server config for longer than one tick. */
-    private static final java.util.Set<String> HOLDS_CONFIG = java.util.Set.of("blast_arrow_explodes", "arrows_recovered_on_kill", "arrow_pickup_lifetime");
+    /**
+     * Tests that swap the server config for longer than one tick, or count a mob across the whole test grid (another
+     * test's mobs would count too).
+     */
+    private static final java.util.Set<String> ALONE = java.util.Set.of("blast_arrow_explodes", "arrows_recovered_on_kill", "arrow_pickup_lifetime",
+            "harrier_spawn_rules");
+    /** Tests that need the open sky over their arena (every other test gets a barrier roof). */
+    private static final java.util.Set<String> SKY = java.util.Set.of("harrier_spawn_rules", "harrier_steep_dive_headshot",
+            "harrier_dive_strikes_and_climbs");
 
     private FullDrawGameTests() {}
 
@@ -111,9 +130,11 @@ public final class FullDrawGameTests {
             ResourceKey<Consumer<GameTestHelper>> key = ResourceKey.create(Registries.TEST_FUNCTION, entry.getId());
             String name = entry.getId().getPath();
             // a test that holds a changed server config over several ticks runs in a batch of its own: batches run one
-            // after another, so no other test sees its config, and no other test puts the config back under it
-            Holder<TestEnvironmentDefinition<?>> own = HOLDS_CONFIG.contains(name) ? event.registerEnvironment(FullDrawMod.id("alone_" + name)) : env;
-            event.registerTest(key.identifier(), new FunctionGameTestInstance(key, new TestData<>(own, ARENA, 100, 0, true)));
+            // after another, so no other test sees its config, and no other test puts the config back under it; one
+            // that counts a mob about it runs alone so that no other test's mobs are about
+            Holder<TestEnvironmentDefinition<?>> own = ALONE.contains(name) ? event.registerEnvironment(FullDrawMod.id("alone_" + name)) : env;
+            event.registerTest(key.identifier(), new FunctionGameTestInstance(key, new TestData<>(own, net.minecraft.world.level.Level.OVERWORLD, ARENA,
+                    100, 0, true, net.minecraft.world.level.block.Rotation.NONE, false, 1, 1, SKY.contains(name), 0)));
         }
     }
 
@@ -129,7 +150,7 @@ public final class FullDrawGameTests {
     private static void recipesLoaded(GameTestHelper helper) {
         var recipes = helper.getLevel().getServer().getRecipeManager();
         List<String> missing = new ArrayList<>();
-        for (String id : List.of("shortbow", "longbow", "recurve_bow", "arbalest", "quiver")) {
+        for (String id : List.of("shortbow", "longbow", "recurve_bow", "arbalest", "repeating_crossbow", "quiver")) {
             if (recipes.byKey(ResourceKey.create(Registries.RECIPE, FullDrawMod.id(id))).isEmpty()) missing.add(id);
             // and the recipe-book unlock, or the recipe never shows in the book
             if (helper.getLevel().getServer().getAdvancements().get(FullDrawMod.id("recipes/combat/" + id)) == null) missing.add("unlock " + id);

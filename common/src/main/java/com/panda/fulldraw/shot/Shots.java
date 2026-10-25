@@ -1,6 +1,7 @@
 package com.panda.fulldraw.shot;
 
 import com.panda.fulldraw.FullDrawConfig;
+import com.panda.fulldraw.entity.GaleHarrier;
 import com.panda.fulldraw.logic.ShotMath;
 import com.panda.fulldraw.logic.WeakSpot;
 import com.panda.fulldraw.logic.WeaponStats;
@@ -168,8 +169,11 @@ public final class Shots {
         if (!(target instanceof LivingEntity living)) return new Impact(false, 1.0, distance, location);
         WeakSpot spot = WeakSpots.of(living);
         double dx = location.x - target.getX(), dy = location.y - target.getY(), dz = location.z - target.getZ();
-        boolean hit = WeakSpot.onSilhouette(dx, dy, dz, direction.x, direction.z, target.getBbWidth(), target.getBbHeight())
-                && spot.hit(dx, dy, dz, living.yBodyRot, target.getBbWidth(), target.getBbHeight());
+        // a diving harrier's head leads along its line, which may point anywhere from level to straight down
+        boolean hit = target instanceof GaleHarrier harrier && harrier.phase() == GaleHarrier.Phase.DIVE
+                ? harrier.diveHeadshot(location)
+                : WeakSpot.onSilhouette(dx, dy, dz, direction.x, direction.z, target.getBbWidth(), target.getBbHeight())
+                        && spot.hit(dx, dy, dz, living.yBodyRot, target.getBbWidth(), target.getBbHeight());
         if (!hit) return new Impact(false, 1.0, distance, location);
         ShotMath.Tuning t = FullDrawConfig.tuning();
         double mult = spot.multiplier() > 0 ? spot.multiplier() : target instanceof Player ? t.precisionPlayers() : t.precisionMobs();

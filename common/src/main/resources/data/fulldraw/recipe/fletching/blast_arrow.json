@@ -1,0 +1,20 @@
+{
+  "type": "fulldraw:fletching",
+  "head": {
+    "ingredient": "minecraft:gunpowder",
+    "count": 2
+  },
+  "shaft": {
+    "ingredient": "minecraft:stick"
+  },
+  "fletching": {
+    "ingredient": "minecraft:feather"
+  },
+  "extra": {
+    "ingredient": "fulldraw:harrier_talon"
+  },
+  "result": {
+    "id": "fulldraw:blast_arrow",
+    "count": 4
+  }
+}

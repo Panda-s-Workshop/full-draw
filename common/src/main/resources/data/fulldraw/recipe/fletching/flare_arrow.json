@@ -1,0 +1,19 @@
+{
+  "type": "fulldraw:fletching",
+  "head": {
+    "ingredient": "minecraft:glowstone_dust"
+  },
+  "shaft": {
+    "ingredient": "minecraft:stick"
+  },
+  "fletching": {
+    "ingredient": "minecraft:feather"
+  },
+  "extra": {
+    "ingredient": "fulldraw:harrier_feather"
+  },
+  "result": {
+    "id": "fulldraw:flare_arrow",
+    "count": 4
+  }
+}

@@ -78,12 +78,13 @@ final class FletchingGameTests {
     /**
      * Every Fletching recipe loads, and each is found from its parts: 8 vanilla arrows from flint, a stick and a feather,
      * 8 Broadheads from two iron nuggets, 8 Bodkins from an iron ingot, 8 Blunts from any wool, 4 Rope Arrows with four
-     * string in the extra slot. One nugget makes no Broadhead, and a plain arrow's parts with string in the extra slot
-     * make nothing.
+     * string in the extra slot, 4 Flare Arrows from glowstone dust with a Harrier Feather, 4 Blast Arrows from two
+     * gunpowder with a Harrier Talon. One nugget makes no Broadhead, and a plain arrow's parts with string in the extra
+     * slot make nothing.
      */
     static void fletchingRecipesLoad(GameTestHelper helper) {
         var recipes = helper.getLevel().recipeAccess().getRecipes().stream().filter(r -> r.value() instanceof FletchingRecipe).toList();
-        if (recipes.size() != 5) throw helper.assertionException("expected 5 Fletching recipes, found " + recipes.size());
+        if (recipes.size() != 7) throw helper.assertionException("expected 7 Fletching recipes, found " + recipes.size());
         // a part its slot's tag leaves out can't be put in: the generator writes both from one table
         var untagged = FletchingMenu.untaggedParts(helper.getLevel());
         if (!untagged.isEmpty()) throw helper.assertionException("recipe parts missing from their slot tags: " + untagged);
@@ -93,9 +94,11 @@ final class FletchingGameTests {
                 ModItems.BROADHEAD_ARROW.get(), new FletchingInput(new ItemStack(Items.IRON_NUGGET, 2), stick, feather, ItemStack.EMPTY),
                 ModItems.BODKIN_ARROW.get(), new FletchingInput(new ItemStack(Items.IRON_INGOT), stick, feather, ItemStack.EMPTY),
                 ModItems.BLUNT_ARROW.get(), new FletchingInput(new ItemStack(Items.WOOL.lime()), stick, feather, ItemStack.EMPTY),
-                ModItems.ROPE_ARROW.get(), new FletchingInput(new ItemStack(Items.IRON_NUGGET), stick, feather, new ItemStack(Items.STRING, 4)));
+                ModItems.ROPE_ARROW.get(), new FletchingInput(new ItemStack(Items.IRON_NUGGET), stick, feather, new ItemStack(Items.STRING, 4)),
+                ModItems.FLARE_ARROW.get(), new FletchingInput(new ItemStack(Items.GLOWSTONE_DUST), stick, feather, new ItemStack(ModItems.HARRIER_FEATHER.get())),
+                ModItems.BLAST_ARROW.get(), new FletchingInput(new ItemStack(Items.GUNPOWDER, 2), stick, feather, new ItemStack(ModItems.HARRIER_TALON.get())));
         Map<Item, Integer> counts = Map.of(Items.ARROW, 8, ModItems.BROADHEAD_ARROW.get(), 8, ModItems.BODKIN_ARROW.get(), 8,
-                ModItems.BLUNT_ARROW.get(), 8, ModItems.ROPE_ARROW.get(), 4);
+                ModItems.BLUNT_ARROW.get(), 8, ModItems.ROPE_ARROW.get(), 4, ModItems.FLARE_ARROW.get(), 4, ModItems.BLAST_ARROW.get(), 4);
         for (var entry : inputs.entrySet()) {
             ItemStack made = find(helper, entry.getValue());
             if (!made.is(entry.getKey()) || made.getCount() != counts.get(entry.getKey()))

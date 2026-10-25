@@ -45,9 +45,16 @@ public final class FullDrawFabric implements ModInitializer {
                 net.minecraft.world.entity.SpawnPlacements.register(type, placement, heightmap, predicate);
             }
         });
-        // the Shieldbearer's egg also sits beside the pillager's in vanilla's Spawn Eggs tab
-        net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.SPAWN_EGGS).register(output ->
-                output.insertAfter(net.minecraft.world.item.Items.PILLAGER_SPAWN_EGG, com.panda.fulldraw.registry.ModItems.SHIELDBEARER_SPAWN_EGG.get()));
+        // Gale Harriers over the biomes their tag names (NeoForge reads the same tag through its biome modifier)
+        net.fabricmc.fabric.api.biome.v1.BiomeModifications.addSpawn(
+                net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(com.panda.fulldraw.registry.ModEntities.HARRIER_BIOMES),
+                net.minecraft.world.entity.MobCategory.MONSTER, com.panda.fulldraw.registry.ModEntities.GALE_HARRIER.get(),
+                com.panda.fulldraw.registry.ModEntities.HARRIER_WEIGHT, 1, 2);
+        // the Shieldbearer's egg also sits beside the pillager's in vanilla's Spawn Eggs tab, the Gale Harrier's beside the phantom's
+        net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.SPAWN_EGGS).register(output -> {
+            output.insertAfter(net.minecraft.world.item.Items.PILLAGER_SPAWN_EGG, com.panda.fulldraw.registry.ModItems.SHIELDBEARER_SPAWN_EGG.get());
+            output.insertAfter(net.minecraft.world.item.Items.PHANTOM_SPAWN_EGG, com.panda.fulldraw.registry.ModItems.GALE_HARRIER_SPAWN_EGG.get());
+        });
         FullDrawMod.setup();
 
         PayloadTypeRegistry.serverboundPlay().register(FullDrawNetwork.CycleQuiver.TYPE, FullDrawNetwork.CycleQuiver.STREAM_CODEC);

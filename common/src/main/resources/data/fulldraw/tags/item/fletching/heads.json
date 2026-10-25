@@ -3,6 +3,8 @@
     "minecraft:flint",
     "minecraft:iron_nugget",
     "minecraft:iron_ingot",
-    "#minecraft:wool"
+    "#minecraft:wool",
+    "minecraft:glowstone_dust",
+    "minecraft:gunpowder"
   ]
 }

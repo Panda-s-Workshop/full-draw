@@ -8,6 +8,7 @@ import com.panda.fulldraw.entity.BodkinArrow;
 import com.panda.fulldraw.entity.FlareArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
 import com.panda.fulldraw.entity.FullDrawArrow;
+import com.panda.fulldraw.entity.GaleHarrier;
 import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.entity.Shieldbearer;
 import com.panda.fulldraw.logic.TowerShield;
@@ -54,6 +55,20 @@ public final class ModEntities {
             Shieldbearer::new, MobCategory.MONSTER, b -> b.canSpawnFarFromPlayer().sized(0.6F, 1.95F).passengerAttachments(2.0F)
                     .ridingOffset(-0.6F).clientTrackingRange(8).notInPeaceful());
 
+    /** A raptor of the windswept heights; tracked from far off, as it hunts from 20 to 30 blocks up. */
+    public static final DeferredHolder<EntityType<?>, EntityType<GaleHarrier>> GALE_HARRIER = ENTITIES.registerEntityType("gale_harrier",
+            GaleHarrier::new, MobCategory.MONSTER, b -> b.sized(1.0F, 0.6F).eyeHeight(0.35F).clientTrackingRange(10).notInPeaceful());
+
+    /** Where Gale Harriers spawn: windswept hills and the high peaks. */
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome> HARRIER_BIOMES =
+            net.minecraft.tags.TagKey.create(Registries.BIOME, FullDrawMod.id("spawns/gale_harrier"));
+    /** Their weight among those biomes' monsters (zombies, skeletons, spiders and creepers are about 100 each). */
+    public static final int HARRIER_WEIGHT = 10;
+
+    /** At most this many Gale Harriers hunt within {@link #HARRIER_CAP_RADIUS} blocks of each other. */
+    public static final int HARRIER_CAP = 2;
+    public static final double HARRIER_CAP_RADIUS = 96.0;
+
     /** Outposts keep at most one Shieldbearer about them, among their pillagers. */
     public static final double OUTPOST_GUARD_RADIUS = 48.0;
 
@@ -67,6 +82,7 @@ public final class ModEntities {
     /** Every mob's attributes, for the loader's attribute registration. */
     public static void attributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> sink) {
         sink.accept(SHIELDBEARER.get(), Shieldbearer.createAttributes().build());
+        sink.accept(GALE_HARRIER.get(), GaleHarrier.createAttributes().build());
     }
 
     /** Where a mob may spawn on its own, for the loader's spawn placement registration. */
@@ -77,12 +93,24 @@ public final class ModEntities {
     /** The Shieldbearer spawns on its own only at pillager outposts: on the ground, as a pillager, one at a time. */
     public static void spawnRules(SpawnRules rules) {
         rules.set(SHIELDBEARER.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntities::outpostGuard);
+        rules.set(GALE_HARRIER.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntities::harrierSky);
     }
 
     private static boolean outpostGuard(EntityType<Shieldbearer> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
         if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(type, level, reason, pos, random)) return false;
         if (reason != EntitySpawnReason.NATURAL) return true;
         return FullDrawConfig.shieldbearerSpawns() && level.getEntitiesOfClass(Shieldbearer.class, new AABB(pos).inflate(OUTPOST_GUARD_RADIUS)).isEmpty();
+    }
+
+    /**
+     * Gale Harriers take off from open ground under the sky in daylight (any light: it is the day that counts), no more
+     * than {@link #HARRIER_CAP} to a stretch of mountains. Spawn eggs and commands work anywhere.
+     */
+    private static boolean harrierSky(EntityType<GaleHarrier> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
+        if (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION) return true;
+        if (!FullDrawConfig.galeHarrierSpawns() || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) return false;
+        if (!level.getLevel().isBrightOutside() || !level.canSeeSky(pos)) return false;
+        return level.getEntitiesOfClass(GaleHarrier.class, new AABB(pos).inflate(HARRIER_CAP_RADIUS)).size() < HARRIER_CAP;
     }
 
     /**

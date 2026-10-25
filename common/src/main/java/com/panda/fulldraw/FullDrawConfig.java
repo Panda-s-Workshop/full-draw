@@ -31,6 +31,9 @@ public final class FullDrawConfig {
 
         /** Shieldbearers join raids and guard pillager outposts (false: only spawn eggs and commands make them). */
         boolean shieldbearerSpawns();
+
+        /** Gale Harriers spawn on their own over the windswept hills and peaks (false: only spawn eggs and commands make them). */
+        boolean galeHarrierSpawns();
     }
 
     public static final Source DEFAULTS = new Source() {
@@ -41,6 +44,7 @@ public final class FullDrawConfig {
         @Override public double arrowRecoveryChance() { return ArrowTraits.PLAIN_RECOVERY; }
         @Override public int arrowPickupLifetimeSeconds() { return ArrowTraits.PICKUP_LIFETIME_SECONDS; }
         @Override public boolean shieldbearerSpawns() { return true; }
+        @Override public boolean galeHarrierSpawns() { return true; }
     };
 
     private static Source source = DEFAULTS;
@@ -113,6 +117,10 @@ public final class FullDrawConfig {
 
     public static boolean shieldbearerSpawns() {
         return source.shieldbearerSpawns();
+    }
+
+    public static boolean galeHarrierSpawns() {
+        return source.galeHarrierSpawns();
     }
 
     /** Whether the client is connected to a server that sent its recovery chance, so a server with Full Draw. */

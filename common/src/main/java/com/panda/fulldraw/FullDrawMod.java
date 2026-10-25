@@ -11,6 +11,7 @@ import com.panda.fulldraw.registry.ModRecipes;
 import com.panda.fulldraw.registry.ModSounds;
 import com.panda.fulldraw.registry.ModTabs;
 import com.panda.fulldraw.registry.ModTriggers;
+import com.panda.fulldraw.registry.ModWorldgen;
 import java.util.List;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ public final class FullDrawMod {
 
     /** The classes whose static DeferredRegisters hold the mod's content. */
     private static final List<Class<?>> CONTENT = List.of(ModComponents.class, ModSounds.class, ModTriggers.class, ModEffects.class, ModEntities.class,
-            ModBlocks.class, ModItems.class, ModTabs.class, ModRecipes.class, ModMenus.class);
+            ModBlocks.class, ModItems.class, ModTabs.class, ModRecipes.class, ModMenus.class, ModWorldgen.class);
 
     private FullDrawMod() {}
 

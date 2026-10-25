@@ -113,6 +113,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("bog_lurker_holds_fire_too_close", () -> LurkerGameTests::bogLurkerHoldsFireTooClose);
         FUNCTIONS.register("bog_lurker_flees_close", () -> LurkerGameTests::bogLurkerFleesClose);
         FUNCTIONS.register("bog_lurker_dives_when_struck_from_afar", () -> LurkerGameTests::bogLurkerDivesWhenStruckFromAfar);
+        FUNCTIONS.register("watchtower_places", () -> WatchtowerGameTests::watchtowerPlaces);
         FUNCTIONS.register("bog_lurker_saves", () -> LurkerGameTests::bogLurkerSaves);
         FUNCTIONS.register("bog_lurker_spawn_rules", () -> LurkerGameTests::bogLurkerSpawnRules);
         FUNCTIONS.register("bog_lurker_drops", () -> LurkerGameTests::bogLurkerDrops);

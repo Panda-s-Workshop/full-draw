@@ -11,6 +11,7 @@ import com.panda.fulldraw.entity.FlareArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
 import com.panda.fulldraw.entity.FullDrawArrow;
 import com.panda.fulldraw.entity.GaleHarrier;
+import com.panda.fulldraw.entity.Marksman;
 import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.entity.Shieldbearer;
 import com.panda.fulldraw.logic.TowerShield;
@@ -65,6 +66,13 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<BogLurker>> BOG_LURKER = ENTITIES.registerEntityType("bog_lurker",
             BogLurker::new, MobCategory.MONSTER, b -> b.sized(0.9F, 0.65F).eyeHeight(0.55F).clientTrackingRange(8).notInPeaceful());
 
+    /**
+     * The watchtower's skeletal archer, a skeleton's size; tracked from far off, as it duels from a tower top. Kept on
+     * Peaceful (there is one to a tower, and none to replace it): it only stands watch there.
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<Marksman>> MARKSMAN = ENTITIES.registerEntityType("marksman",
+            Marksman::new, MobCategory.MONSTER, b -> b.sized(0.6F, 1.99F).eyeHeight(1.74F).ridingOffset(-0.7F).clientTrackingRange(10));
+
     /** A Bog Lurker's glob, sized and updated as a snowball. */
     public static final DeferredHolder<EntityType<?>, EntityType<BogSpit>> BOG_SPIT = ENTITIES.registerEntityType("bog_spit",
             BogSpit::new, MobCategory.MISC, b -> b.noLootTable().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
@@ -104,6 +112,7 @@ public final class ModEntities {
         sink.accept(SHIELDBEARER.get(), Shieldbearer.createAttributes().build());
         sink.accept(GALE_HARRIER.get(), GaleHarrier.createAttributes().build());
         sink.accept(BOG_LURKER.get(), BogLurker.createAttributes().build());
+        sink.accept(MARKSMAN.get(), Marksman.createAttributes().build());
     }
 
     /** Where a mob may spawn on its own, for the loader's spawn placement registration. */

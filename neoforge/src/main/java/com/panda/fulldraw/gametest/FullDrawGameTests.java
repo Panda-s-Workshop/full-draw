@@ -114,6 +114,15 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("bog_lurker_flees_close", () -> LurkerGameTests::bogLurkerFleesClose);
         FUNCTIONS.register("bog_lurker_dives_when_struck_from_afar", () -> LurkerGameTests::bogLurkerDivesWhenStruckFromAfar);
         FUNCTIONS.register("watchtower_places", () -> WatchtowerGameTests::watchtowerPlaces);
+        // the Marksman
+        FUNCTIONS.register("marksman_cover_only_precision", () -> MarksmanGameTests::marksmanCoverOnlyPrecision);
+        FUNCTIONS.register("marksman_draws_perfect_shots", () -> MarksmanGameTests::marksmanDrawsPerfectShots);
+        FUNCTIONS.register("marksman_phase_two", () -> MarksmanGameTests::marksmanPhaseTwo);
+        FUNCTIONS.register("marksman_on_the_watchtower", () -> MarksmanGameTests::marksmanOnTheWatchtower);
+        FUNCTIONS.register("marksman_shoots_from_the_gap", () -> MarksmanGameTests::marksmanShootsFromTheGap);
+        FUNCTIONS.register("marksman_back_to_post", () -> MarksmanGameTests::marksmanBackToPost);
+        FUNCTIONS.register("marksman_bashes_a_foe_beside_it", () -> MarksmanGameTests::marksmanBashesAFoeBesideIt);
+        FUNCTIONS.register("marksman_drops", () -> MarksmanGameTests::marksmanDrops);
         FUNCTIONS.register("bog_lurker_saves", () -> LurkerGameTests::bogLurkerSaves);
         FUNCTIONS.register("bog_lurker_spawn_rules", () -> LurkerGameTests::bogLurkerSpawnRules);
         FUNCTIONS.register("bog_lurker_drops", () -> LurkerGameTests::bogLurkerDrops);
@@ -130,7 +139,8 @@ public final class FullDrawGameTests {
             "harrier_dive_strikes_and_climbs");
     /** Tests that watch a mob through more than one round of what it does, or wait on the light: 10 s instead of 5. */
     private static final java.util.Set<String> LONG = java.util.Set.of("bog_lurker_spits_in_range", "bog_lurker_flees_close", "bog_lurker_dives_when_struck_from_afar",
-            "bog_lurker_spawn_rules", "harrier_spawn_rules");
+            "bog_lurker_spawn_rules", "harrier_spawn_rules", "marksman_draws_perfect_shots", "marksman_phase_two", "marksman_on_the_watchtower",
+            "marksman_shoots_from_the_gap", "marksman_back_to_post");
 
     private FullDrawGameTests() {}
 

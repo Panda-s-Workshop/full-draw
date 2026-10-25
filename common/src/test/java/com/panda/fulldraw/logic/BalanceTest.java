@@ -86,6 +86,48 @@ class BalanceTest {
         }
     }
 
+    /**
+     * The Marksman can be beaten with a vanilla bow in iron armour within 3 minutes, by an archer who Perfects half their
+     * draws and takes cover at two of its creaks in three; one who stands in the open and trades shots loses. The duel at
+     * 25 blocks, cycle by cycle of the Marksman's (ducked 2 s, then drawing 1.5 s, 1.2 s below half health): the archer
+     * gets one shot at it standing in a crenel's gap to draw (3 in 4 land, a third of those on the head). From the
+     * ground below its tower, its head ducked behind the parapet sits under the parapet's line: no shot then but a lob. Its arrow lands on an archer who doesn't take cover, on the head 1 time in 3. The archer heals a point
+     * every 4 s (full hunger, no food eaten during the fight), on Normal.
+     */
+    @Test
+    void marksmanBeatable() {
+        double distance = 25, ironArmour = 15;
+        // the archer's shot on it: base 6 from a full draw, Perfect half the time, through its 4 armour
+        double body = 0, head = 0;
+        for (boolean perfect : new boolean[] {true, false}) {
+            body += 0.5 * afterArmour(ShotMath.damage(6, 1.0, 1, perfect, 1.0, distance, T), 4, 0);
+            head += 0.5 * afterArmour(ShotMath.damage(6, 1.0, 1, perfect, T.precisionMobs(), distance, T), 4, 0);
+        }
+        double perCycle = 0.75 * (2.0 / 3.0 * body + 1.0 / 3.0 * head);
+        double health = MarksmanRules.MAX_HEALTH, seconds = 0;
+        int cycles = 0;
+        while (health > 0) {
+            boolean two = MarksmanRules.phaseTwo((float) health, MarksmanRules.MAX_HEALTH);
+            seconds += (MarksmanRules.COVER_TICKS + MarksmanRules.drawTicks(two)) / 20.0;
+            health -= perCycle;
+            cycles++;
+        }
+        assertTrue(seconds <= 180, "the archer takes " + seconds + " s to win");
+        // its arrow on the archer: through iron, the head a third of the time
+        double hit = 2.0 / 3.0 * afterArmour(MarksmanRules.arrowDamage(distance, false, T), ironArmour, 0)
+                + 1.0 / 3.0 * afterArmour(MarksmanRules.arrowDamage(distance, true, T), ironArmour, 0);
+        assertTrue(hit <= 6.5, "its arrow takes " + hit + " from an archer in iron: no more than about three hearts");
+        // on Hard a mob's arrow deals half again: its worst, a Perfect headshot from as far as it fights on a player with
+        // no armour, still leaves them standing from full health, with a heart and a half to spare
+        double worst = 1.5 * MarksmanRules.arrowDamage(MarksmanRules.SIGHT, true, T);
+        assertTrue(worst <= 17.0, "on Hard its worst arrow takes " + worst + " from a bare player");
+        double healed = seconds / 4.0;
+        double takingCover = cycles / 3.0 * hit;
+        assertTrue(takingCover - healed < 20, "taking cover at two creaks in three, the archer loses " + takingCover + " and heals " + healed);
+        double inTheOpen = cycles * hit;
+        assertTrue(inTheOpen - healed >= 20, "trading shots in the open should lose: the archer loses " + inTheOpen + " and heals " + healed);
+    }
+
     private static void assertRatio(double armour, double toughness, double ceiling) {
         double vanilla = perMinute(WeaponStats.VANILLA_CROSSBOW, true, armour, toughness, 1.0);
         double arbalest = perMinute(WeaponStats.ARBALEST, false, armour, toughness, BoltTraits.ARBALEST.armourKept());

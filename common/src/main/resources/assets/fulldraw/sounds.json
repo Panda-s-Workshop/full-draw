@@ -923,5 +923,130 @@
         "pitch": 0.6
       }
     ]
+  },
+  "marksman_draw": {
+    "subtitle": "subtitles.fulldraw.marksman_draw",
+    "sounds": [
+      {
+        "name": "minecraft:item/crossbow/loading_middle1",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle2",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle3",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:item/crossbow/loading_middle4",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "marksman_parapet": {
+    "subtitle": "subtitles.fulldraw.marksman_parapet",
+    "sounds": [
+      {
+        "name": "minecraft:dig/stone1",
+        "volume": 0.9,
+        "pitch": 1.4
+      },
+      {
+        "name": "minecraft:dig/stone2",
+        "volume": 0.9,
+        "pitch": 1.4
+      },
+      {
+        "name": "minecraft:dig/stone3",
+        "volume": 0.9,
+        "pitch": 1.4
+      },
+      {
+        "name": "minecraft:dig/stone4",
+        "volume": 0.9,
+        "pitch": 1.4
+      }
+    ]
+  },
+  "marksman_phase_two": {
+    "subtitle": "subtitles.fulldraw.marksman_phase_two",
+    "sounds": [
+      {
+        "name": "minecraft:mob/stray/convert1",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:mob/stray/convert2",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:mob/stray/convert3",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "marksman_ambient": {
+    "subtitle": "subtitles.fulldraw.marksman_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:mob/skeleton/say1",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:mob/skeleton/say2",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:mob/skeleton/say3",
+        "volume": 1.0,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "marksman_hurt": {
+    "subtitle": "subtitles.fulldraw.marksman_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:mob/skeleton/hurt1",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:mob/skeleton/hurt2",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:mob/skeleton/hurt3",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:mob/skeleton/hurt4",
+        "volume": 1.0,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "marksman_death": {
+    "subtitle": "subtitles.fulldraw.marksman_death",
+    "sounds": [
+      {
+        "name": "minecraft:mob/skeleton/death",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
   }
 }

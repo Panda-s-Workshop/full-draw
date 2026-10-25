@@ -91,6 +91,13 @@ public final class ModItems {
     /** A Bog Lurker's glowing eye: a Flare Arrow's extra part in place of a Harrier Feather, for twice the arrows. */
     public static final DeferredItem<Item> BOG_EYE = ITEMS.registerItem("bog_eye", Item::new);
 
+    /** The Marksman's eye, its one sure drop. */
+    public static final DeferredItem<Item> MARKSMANS_EYE = ITEMS.registerItem("marksmans_eye", Item::new,
+            p -> p.rarity(net.minecraft.world.item.Rarity.RARE));
+
+    public static final DeferredItem<Item> MARKSMAN_SPAWN_EGG = ITEMS.registerItem("marksman_spawn_egg", Item::new,
+            p -> p.spawnEgg(ModEntities.MARKSMAN.get()));
+
     public static final DeferredItem<Item> BOG_LURKER_SPAWN_EGG = ITEMS.registerItem("bog_lurker_spawn_egg", Item::new,
             p -> p.spawnEgg(ModEntities.BOG_LURKER.get()));
 

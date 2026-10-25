@@ -103,7 +103,7 @@ public final class Shots {
      * A Perfect Release chimes for everyone nearby and flashes at the bow. The shooter's own client plays both when it
      * hears the verdict, so a player can switch them off for themselves; everyone else gets them from here.
      */
-    private static void perfectRelease(LivingEntity shooter) {
+    public static void perfectRelease(LivingEntity shooter) {
         if (!(shooter.level() instanceof ServerLevel level)) return;
         Player self = shooter instanceof Player p ? p : null;
         level.playSound(self, shooter.getX(), shooter.getEyeY(), shooter.getZ(), ModSounds.PERFECT_RELEASE.get(), SoundSource.PLAYERS, 0.8F, 1.0F);
@@ -182,6 +182,13 @@ public final class Shots {
      * bonus, or less where something stands between, as water over a Bog Lurker's body), and how far it flew.
      */
     public record Impact(boolean precision, double precisionMult, double distance, Vec3 location) {}
+
+    /** Whether a projectile striking this point while flying this way finds the target's weak spot. */
+    public static boolean strikesWeakSpot(LivingEntity target, Vec3 location, Vec3 direction) {
+        double dx = location.x - target.getX(), dy = location.y - target.getY(), dz = location.z - target.getZ();
+        return WeakSpot.onSilhouette(dx, dy, dz, direction.x, direction.z, target.getBbWidth(), target.getBbHeight())
+                && WeakSpots.of(target).hit(dx, dy, dz, target.yBodyRot, target.getBbWidth(), target.getBbHeight());
+    }
 
     /**
      * Measures an impact against the target's weak spots and the shot's origin: a weak spot struck is a precision hit, and

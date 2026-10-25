@@ -106,6 +106,15 @@ final class QuiverGameTests {
         ItemStack ammo = Quivers.projectileFor(player, new ItemStack(Items.BOW));
         if (ammo == null || !ammo.is(Items.ARROW)) wrong.add("a vanilla bow should draw the quiver's arrows: " + ammo);
         Quivers.clearPending();
+        // the enchantments only the shot rules read are kept off weapons outside them, and still go on a vanilla bow
+        var enchantments = helper.getLevel().registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
+        for (var key : List.of(com.panda.fulldraw.registry.ModEnchantments.DEADEYE, com.panda.fulldraw.registry.ModEnchantments.QUICKDRAW, com.panda.fulldraw.registry.ModEnchantments.STEADY)) {
+            var enchantment = enchantments.getOrThrow(key).value();
+            if (!com.panda.fulldraw.shot.Weapons.worksThroughShotRules(enchantment)) wrong.add(key.identifier() + " should be known as a shot-rules enchantment");
+            if (!enchantment.canEnchant(new ItemStack(Items.BOW)) || !enchantment.isSupportedItem(new ItemStack(Items.BOW))) wrong.add(key.identifier() + " should still go on a vanilla bow");
+        }
+        if (com.panda.fulldraw.shot.Weapons.worksThroughShotRules(enchantments.getOrThrow(net.minecraft.world.item.enchantment.Enchantments.POWER).value()))
+            wrong.add("Power works on any bow");
         if (!wrong.isEmpty()) helper.fail(String.join("; ", wrong));
         helper.succeed();
     }

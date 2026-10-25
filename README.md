@@ -32,9 +32,10 @@ Install it on the client, and on the server too when you play on one.
 ## For pack makers
 
 The server config (NeoForge `config/fulldraw-synced.toml`, Fabric `config/fulldraw.properties`) holds the shot's
-tuning, the creatures' spawns and numbers, and the Marksman's. The shot rules and the Quiver also serve other mods'
-bows and crossbows that fire as vanilla's do. One that overrides how it fires is left alone, and
-`#fulldraw:no_shot_pipeline` leaves any weapon alone. Weak spots and fletching recipes are data.
+tuning, the creatures' spawns and numbers, and the Marksman's. Other mods' bows and crossbows that fire as vanilla's
+do draw from the Quiver, and those bows get the shot rules too (crossbows, Full Draw's included, have no Perfect window
+and take no head or range bonus). A weapon that overrides how it fires is left alone, and `#fulldraw:no_shot_pipeline` leaves any
+weapon alone. Weak spots and fletching recipes are data.
 The website's [Modpacks and config](https://panda-s-workshop.github.io/full-draw/packs.html) page lists every key,
 tag and data format.
 

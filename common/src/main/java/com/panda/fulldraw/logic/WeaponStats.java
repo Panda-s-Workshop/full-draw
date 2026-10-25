@@ -40,6 +40,19 @@ public record WeaponStats(int drawTicks, double damageMult, double velocityMult,
      */
     public static final WeaponStats RECURVE_BOW = new WeaponStats(18, 1.15, 1.0, 0.9, 2, 1.0);
 
+    /** Vanilla's crossbow load in seconds, the time Quick Charge shortens. */
+    public static final float VANILLA_CHARGE_SECONDS = 1.25F;
+
+    /**
+     * This crossbow's load in ticks when Quick Charge has cut vanilla's 1.25 s to {@code vanillaSeconds}: cut by the same
+     * share, so each level takes a fifth of the Arbalest's 3 s as it does of vanilla's 1.25 s. A flat 0.25 s a level
+     * would barely touch a long crank, and at Quick Charge III a vanilla crossbow would out-damage the Arbalest even
+     * through armour.
+     */
+    public int chargeTicks(float vanillaSeconds) {
+        return (int) Math.floor(drawTicks * (double) Math.max(0.0F, vanillaSeconds) / VANILLA_CHARGE_SECONDS);
+    }
+
     /** Converts ticks held on this weapon to the ticks a vanilla bow would need for the same draw fraction. */
     public int toVanillaTicks(int ticksHeld) {
         return (int) Math.round(ticksHeld * (double) VANILLA_BOW.drawTicks / drawTicks);

@@ -95,7 +95,8 @@ public final class Shots {
     /**
      * Once per release: a Perfect chimes; the shooter hears the server's verdict on a full draw (perfect, early, late),
      * which the HUD shows under the ring, so the client never contradicts what the server decided.
-     * A full draw that missed, by someone who has never hit a Perfect, also gets the hint on the action bar.
+     * A full draw that missed, by someone who has never hit a Perfect, also gets the hint on the action bar; one held into
+     * the tremble, by someone who has never held their breath, gets the breath's.
      */
     private static void announce(LivingEntity shooter, Release release, WeaponStats stats, boolean perfect, ShotMath.Tuning t) {
         if (perfect) perfectRelease(shooter);
@@ -103,8 +104,10 @@ public final class Shots {
         int verdict = perfect ? FullDrawNetwork.ReleaseResult.PERFECT
                 : release.ticksHeld() < stats.drawTicks() + t.perfectDelay() ? FullDrawNetwork.ReleaseResult.EARLY : FullDrawNetwork.ReleaseResult.LATE;
         FullDrawNetwork.send(player, new FullDrawNetwork.ReleaseResult(verdict));
-        if (!perfect && !knowsPerfect(player))
+        if (!perfect && !knows(player, "perfect_release"))
             player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.fulldraw.perfect_hint"));
+        else if (!perfect && release.ticksHeld() - stats.drawTicks() >= t.trembleStartSeconds() * 20 && !knows(player, "hold_your_breath"))
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.fulldraw.breath_hint"));
     }
 
     /**
@@ -130,9 +133,9 @@ public final class Shots {
         return shooter.getEyePosition().add(shooter.getLookAngle().scale(1.6)).add(-Math.cos(yaw) * 0.55, -0.2, -Math.sin(yaw) * 0.55);
     }
 
-    /** Whether the player has earned Perfect Release (the hint stops then). */
-    private static boolean knowsPerfect(ServerPlayer player) {
-        var advancement = player.level().getServer().getAdvancements().get(com.panda.fulldraw.FullDrawMod.id("perfect_release"));
+    /** Whether the player has earned a hint's advancement (Perfect Release, Hold Your Breath): the hint stops then. */
+    private static boolean knows(ServerPlayer player, String advancementId) {
+        var advancement = player.level().getServer().getAdvancements().get(com.panda.fulldraw.FullDrawMod.id(advancementId));
         return advancement == null || player.getAdvancements().getOrStartProgress(advancement).isDone();
     }
 

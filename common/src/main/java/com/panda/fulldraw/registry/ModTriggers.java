@@ -10,7 +10,7 @@ import net.minecraft.core.registries.Registries;
 public final class ModTriggers {
     private static final DeferredRegister<CriterionTrigger<?>> TRIGGERS = DeferredRegister.create(Registries.TRIGGER_TYPE, FullDrawMod.MODID);
 
-    /** {@code fulldraw:event}: perfect_release, precision_hit, long_shot (value: metres), rope_trick (value: ropes hung). */
+    /** {@code fulldraw:event}: perfect_release, hold_your_breath, precision_hit, long_shot (value: metres), rope_trick (value: ropes hung). */
     public static final Supplier<FullDrawTrigger> EVENT = TRIGGERS.register("event", FullDrawTrigger::new);
 
     private ModTriggers() {}

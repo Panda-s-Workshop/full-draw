@@ -41,16 +41,16 @@ public final class PropertiesConfig {
         boolean value = fallback;
         if (raw != null) {
             if (raw.trim().equalsIgnoreCase("true") || raw.trim().equalsIgnoreCase("false")) value = Boolean.parseBoolean(raw.trim());
-            else return invalid(key, raw, fallback, comment + " (true/false)");
+            else return invalid(key, raw, fallback, comment + " (true/false, default " + fallback + ")");
         }
-        put(key, String.valueOf(value), comment + " (true/false)");
+        put(key, String.valueOf(value), comment + " (true/false, default " + fallback + ")");
         return value;
     }
 
     public int integer(String key, int fallback, int min, int max, String comment) {
         String raw = read.getProperty(key);
         int value = fallback;
-        String range = comment + " (" + min + " to " + max + ")";
+        String range = comment + " (" + min + " to " + max + ", default " + fallback + ")";
         if (raw != null) {
             try {
                 int v = Integer.parseInt(raw.trim());
@@ -67,7 +67,7 @@ public final class PropertiesConfig {
     public double decimal(String key, double fallback, double min, double max, String comment) {
         String raw = read.getProperty(key);
         double value = fallback;
-        String range = comment + " (" + min + " to " + max + ")";
+        String range = comment + " (" + min + " to " + max + ", default " + fallback + ")";
         if (raw != null) {
             try {
                 double v = Double.parseDouble(raw.trim());
@@ -90,10 +90,10 @@ public final class PropertiesConfig {
             try {
                 value = Enum.valueOf(fallback.getDeclaringClass(), raw.trim().toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
-                return invalid(key, raw, fallback, comment + " (" + names + ")");
+                return invalid(key, raw, fallback, comment + " (" + names + ", default " + fallback.name() + ")");
             }
         }
-        put(key, value.name(), comment + " (" + names + ")");
+        put(key, value.name(), comment + " (" + names + ", default " + fallback.name() + ")");
         return value;
     }
 

@@ -134,29 +134,55 @@ final class MarksmanGameTests {
     }
 
     /**
-     * A Blunt Arrow's knock in the middle of its draw costs it that shot: its bow comes down, it ducks again, and no
-     * arrow comes when the draw would have ended. (The foe is an iron golem: a mock player can't be held as a mob's
-     * target.)
+     * A Blunt Arrow's knock in the middle of its draw costs it the draw so far: it draws again at once where it stands,
+     * and, steadied, holds that second draw through another knock, so its arrow comes a full draw after the first knock.
+     * (The foe is an iron golem: a mock player can't be held as a mob's target.)
      */
     static void marksmanLosesTheShotToABlunt(GameTestHelper helper) {
         LivingEntity foe = golem(helper, 1.5, 6.5);
         Marksman marksman = helper.spawn(ModEntities.MARKSMAN.get(), new Vec3(10.5, 1, 6.5));
         marksman.setTarget(foe);
-        long[] knocked = {-1};
+        long[] knocked = {-1, -1};
         helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
             if (knocked[0] < 0 && marksman.isUsingItem() && marksman.getTicksUsingItem() >= 5) {
                 if (!marksman.loosed.isEmpty()) helper.fail("it loosed before it was knocked: " + marksman.loosed);
                 com.panda.fulldraw.entity.BluntArrow.interrupt(marksman);
-                knocked[0] = helper.getLevel().getGameTime();
+                knocked[0] = now;
+            } else if (knocked[0] >= 0 && knocked[1] < 0 && now - knocked[0] >= 5) {
+                if (!marksman.isUsingItem() || marksman.getPose() == Pose.CROUCHING) helper.fail("knocked once, it should draw again at once where it stands");
+                com.panda.fulldraw.entity.BluntArrow.interrupt(marksman);
+                knocked[1] = now;
             }
         });
         helper.succeedWhen(() -> {
-            if (knocked[0] < 0) throw helper.assertionException("it hasn't drawn yet");
-            long after = helper.getLevel().getGameTime() - knocked[0];
-            if (!marksman.loosed.isEmpty()) helper.fail("knocked out of its draw it loosed anyway, " + after + " ticks later: " + marksman.loosed);
-            if (marksman.isUsingItem() && after < MarksmanRules.COVER_TICKS) helper.fail("knocked out of its draw it should let its bow down and duck");
-            if (after < MarksmanRules.DRAW_TICKS) throw helper.assertionException("waiting past when the draw would have ended");
-            if (marksman.getPose() != Pose.CROUCHING) helper.fail("knocked out of its draw it should duck again");
+            if (knocked[1] < 0) throw helper.assertionException("not knocked twice yet");
+            if (marksman.loosed.isEmpty()) throw helper.assertionException("waiting for its arrow");
+            long after = marksman.loosed.getFirst().gameTime() - knocked[0];
+            int draw = com.panda.fulldraw.FullDrawConfig.marksman().drawTicks(false);
+            if (after < draw - 1) helper.fail("the knock should cost it the draw so far: it loosed " + after + " ticks after, a draw is " + draw);
+            if (after > draw + 4) helper.fail("steadied, a second knock shouldn't cost it the redraw: it loosed " + after + " ticks after the first, a draw is " + draw);
+        });
+    }
+
+    /**
+     * A foe it gives up on (here gone far above its arrow's reach) leaves it with no target, so it doesn't take them
+     * straight back with their hiding place known.
+     */
+    static void marksmanDropsAFoeItGivesUpOn(GameTestHelper helper) {
+        LivingEntity foe = golem(helper, 1.5, 6.5);
+        Marksman marksman = helper.spawn(ModEntities.MARKSMAN.get(), new Vec3(10.5, 1, 6.5));
+        marksman.setTarget(foe);
+        double[] high = {Double.NaN};
+        helper.runAfterDelay(5, () -> {
+            if (marksman.getTarget() != foe) helper.fail("it should hold its foe before they go: " + marksman.getTarget());
+            foe.teleportTo(foe.getX(), foe.getY() + 120, foe.getZ());
+            high[0] = foe.getY();
+        });
+        helper.succeedWhen(() -> {
+            if (Double.isNaN(high[0])) throw helper.assertionException("the foe is still near");
+            if (foe.getY() < high[0] - 40) helper.fail("the foe fell back near before it was given up on");
+            if (marksman.getTarget() != null) throw helper.assertionException("it still targets " + marksman.getTarget());
         });
     }
 

@@ -62,6 +62,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("blocked_hit_reports_nothing", () -> AdvancementGameTests::blockedHitReportsNothing);
         FUNCTIONS.register("breeze_deflection_drops_record", () -> AdvancementGameTests::breezeDeflectionDropsRecord);
         FUNCTIONS.register("slice_advancements", () -> AdvancementGameTests::sliceAdvancements);
+        FUNCTIONS.register("hold_your_breath_advancement", () -> AdvancementGameTests::holdYourBreathAdvancement);
         FUNCTIONS.register("long_shot_advancement", () -> AdvancementGameTests::longShotAdvancement);
         FUNCTIONS.register("long_shot_through_a_gateway", () -> AdvancementGameTests::longShotThroughAGateway);
         FUNCTIONS.register("duel_at_dusk_advancement", () -> AdvancementGameTests::duelAtDuskAdvancement);
@@ -122,6 +123,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("marksman_cover_only_precision", () -> MarksmanGameTests::marksmanCoverOnlyPrecision);
         FUNCTIONS.register("marksman_draws_perfect_shots", () -> MarksmanGameTests::marksmanDrawsPerfectShots);
         FUNCTIONS.register("marksman_loses_the_shot_to_a_blunt", () -> MarksmanGameTests::marksmanLosesTheShotToABlunt);
+        FUNCTIONS.register("marksman_drops_a_foe_it_gives_up_on", () -> MarksmanGameTests::marksmanDropsAFoeItGivesUpOn);
         FUNCTIONS.register("marksman_phase_two", () -> MarksmanGameTests::marksmanPhaseTwo);
         FUNCTIONS.register("marksman_boss_bar_leaves", () -> MarksmanGameTests::marksmanBossBarLeaves);
         FUNCTIONS.register("marksman_on_the_watchtower", () -> MarksmanGameTests::marksmanOnTheWatchtower);

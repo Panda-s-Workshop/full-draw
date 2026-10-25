@@ -37,6 +37,15 @@ public final class Weapons {
         return !weapon.is(NO_SHOT_PIPELINE) && firesAsVanilla(weapon.getItem());
     }
 
+    /** Full Draw's enchantments that only the shot rules read, known by their names (the record holds no key of its own). */
+    private static final java.util.Set<String> SHOT_RULE_ENCHANTMENTS = java.util.Set.of("enchantment.fulldraw.deadeye", "enchantment.fulldraw.quickdraw", "enchantment.fulldraw.steady");
+
+    /** Whether the enchantment does anything only through the shot rules, so a weapon outside them can't take it. */
+    public static boolean worksThroughShotRules(net.minecraft.world.item.enchantment.Enchantment enchantment) {
+        return enchantment.description().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents name
+                && SHOT_RULE_ENCHANTMENTS.contains(name.getKey());
+    }
+
     private static final java.util.Map<Class<?>, Boolean> FIRES_AS_VANILLA = new java.util.concurrent.ConcurrentHashMap<>();
     /** The methods a bow or crossbow fires through: a class that overrides one may spend, aim or shoot as it likes. */
     private static final java.util.Set<String> FIRING = java.util.Set.of("releaseUsing", "shootProjectile", "performShooting");
@@ -53,10 +62,16 @@ public final class Weapons {
     public static boolean firesAsVanilla(Class<? extends Item> item) {
         if (Ranged.class.isAssignableFrom(item) || !ProjectileWeaponItem.class.isAssignableFrom(item)) return true;
         return FIRES_AS_VANILLA.computeIfAbsent(item, type -> {
-            for (Class<?> c = type; c != null && c != BowItem.class && c != CrossbowItem.class && c != ProjectileWeaponItem.class; c = c.getSuperclass())
-                for (java.lang.reflect.Method m : c.getDeclaredMethods())
-                    if (FIRING.contains(m.getName())) return false;
-            return true;
+            try {
+                for (Class<?> c = type; c != null && c != BowItem.class && c != CrossbowItem.class && c != ProjectileWeaponItem.class; c = c.getSuperclass())
+                    for (java.lang.reflect.Method m : c.getDeclaredMethods())
+                        if (FIRING.contains(m.getName())) return false;
+                return true;
+            } catch (LinkageError | SecurityException e) {
+                // a method naming a class this side lacks (a client type on a dedicated server): left alone, as unknown
+                com.panda.fulldraw.FullDrawMod.LOGGER.warn("Can't read how {} fires, so the shot rules leave it alone: {}", type.getName(), e.toString());
+                return false;
+            }
         });
     }
 

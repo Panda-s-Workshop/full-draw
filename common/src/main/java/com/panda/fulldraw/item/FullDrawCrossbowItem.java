@@ -102,16 +102,32 @@ public class FullDrawCrossbowItem extends CrossbowItem implements Weapons.Ranged
         return projectile;
     }
 
-    /** What its bolts do, which vanilla's crossbow tooltip can't say. */
+    /**
+     * How it differs from vanilla's crossbow, which vanilla's tooltip can't say: its load, its bolts' weight and what
+     * they do, that a bolt takes no head or range bonus, and the Bow Bash.
+     */
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag) {
         super.appendHoverText(stack, context, display, lines, flag);
         if (!Weapons.inPipeline(stack)) return;
+        WeaponStats stats = Weapons.stats(stack);
+        lines.accept(Component.translatable("tooltip.fulldraw.crossbow.load", FullDrawBowItem.number(stats.drawTicks() / 20.0)).withStyle(ChatFormatting.GRAY));
+        if (stats.damageMult() != 1.0)
+            lines.accept(Component.translatable("tooltip.fulldraw.crossbow.damage", FullDrawBowItem.number(stats.damageMult())).withStyle(ChatFormatting.GRAY));
+        var use = stack.get(net.minecraft.core.component.DataComponents.USE_EFFECTS);
+        if (use != null && use.speedMultiplier() <= 0.0F) lines.accept(Component.translatable("tooltip.fulldraw.crossbow.rooted").withStyle(ChatFormatting.GRAY));
+        else if (use != null && use.speedMultiplier() >= 1.0F) lines.accept(Component.translatable("tooltip.fulldraw.crossbow.walk").withStyle(ChatFormatting.GRAY));
         if (bolts.pierce() > 0) lines.accept(Component.translatable("tooltip.fulldraw.bolts.pierce", bolts.pierce() + 1).withStyle(ChatFormatting.GRAY));
         if (bolts.armourKept() < 1.0)
             lines.accept(Component.translatable("tooltip.fulldraw.bolts.armour", Math.round((1.0 - bolts.armourKept()) * 100)).withStyle(ChatFormatting.GRAY));
         if (stack.is(Weapons.SHIELD_PIERCING))
             lines.accept(Component.translatable("tooltip.fulldraw.bolts.shield", Math.round(BoltTraits.SHIELD_CRACK_SECONDS)).withStyle(ChatFormatting.GRAY));
         if (bolts.knockback() > 0) lines.accept(Component.translatable("tooltip.fulldraw.bolts.knockback").withStyle(ChatFormatting.GRAY));
+        lines.accept(Component.translatable("tooltip.fulldraw.crossbow.no_bonus").withStyle(ChatFormatting.GRAY));
+        moreLines(stack, lines);
+        lines.accept(FullDrawBowItem.bashLine());
     }
+
+    /** A kind's own lines, between the bolts' and the Bow Bash's. */
+    protected void moreLines(ItemStack stack, Consumer<Component> lines) {}
 }

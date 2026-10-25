@@ -8,13 +8,13 @@ import com.panda.fulldraw.entity.BlastArrow;
 import com.panda.fulldraw.entity.FlareArrow;
 import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.logic.Magazine;
+import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.registry.ModComponents;
 import com.panda.fulldraw.registry.ModEnchantments;
 import com.panda.fulldraw.shot.RicochetBolt;
 import com.panda.fulldraw.shot.Weapons;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
@@ -87,6 +87,6 @@ public abstract class CrossbowItemMixin {
     @Inject(method = "getChargeDuration", at = @At("HEAD"), cancellable = true)
     private static void fulldraw$chargeDuration(ItemStack stack, LivingEntity entity, CallbackInfoReturnable<Integer> cir) {
         if (stack.getItem() instanceof FullDrawCrossbowItem crossbow && Weapons.inPipeline(stack))
-            cir.setReturnValue(Mth.floor(EnchantmentHelper.modifyCrossbowChargingTime(stack, entity, crossbow.stats().drawTicks() / 20.0F) * 20.0F));
+            cir.setReturnValue(crossbow.stats().chargeTicks(EnchantmentHelper.modifyCrossbowChargingTime(stack, entity, WeaponStats.VANILLA_CHARGE_SECONDS)));
     }
 }

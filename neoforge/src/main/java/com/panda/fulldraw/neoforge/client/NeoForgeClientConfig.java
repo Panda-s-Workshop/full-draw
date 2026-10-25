@@ -12,7 +12,7 @@ public final class NeoForgeClientConfig implements FullDrawClientConfig.Source {
             .define("showRing", D.showRing());
     private static final ModConfigSpec.BooleanValue READOUT = B.comment("\"Long shot: N m\" on the action bar.")
             .define("distanceReadout", D.distanceReadout());
-    private static final ModConfigSpec.BooleanValue FOV = B.comment("Bow zoom on every bow, Steady Aim's narrower view and the release kick.")
+    private static final ModConfigSpec.BooleanValue FOV = B.comment("Bow zoom on the bows the shot rules cover, Steady Aim's narrower view and the release kick.")
             .define("fovEffects", D.fovEffects());
     private static final ModConfigSpec.BooleanValue TRAIL = B.comment("The particle trail behind Perfect arrows.")
             .define("perfectTrail", D.perfectTrail());

@@ -105,10 +105,9 @@ public class RepeatingCrossbowItem extends FullDrawCrossbowItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag) {
-        super.appendHoverText(stack, context, display, lines, flag);
-        if (!Weapons.inPipeline(stack)) return;
+    protected void moreLines(ItemStack stack, Consumer<Component> lines) {
         lines.accept(Component.translatable("tooltip.fulldraw.magazine", magazine.shots()).withStyle(ChatFormatting.GRAY));
+        lines.accept(Component.translatable("tooltip.fulldraw.magazine.alone").withStyle(ChatFormatting.GRAY));
         int loaded = shotsLoaded(stack);
         if (loaded > 0) lines.accept(Component.translatable("tooltip.fulldraw.magazine.loaded", loaded, magazine.shots()).withStyle(ChatFormatting.GRAY));
     }

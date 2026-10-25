@@ -33,8 +33,8 @@ final class CrossbowGameTests {
     /**
      * Loaded after 60 ticks of cranking (not 59; vanilla's crossbow needs 25), no walking or sprinting while cranking,
      * 600 uses; its bolt leaves at 3.6 with ×1.6 of the arrow's damage (3.2 from a plain arrow's 2), pierces 2 mobs and
-     * has no random crit (a vanilla crossbow's bolt from a player always does). Quick Charge III takes 15 ticks off the
-     * load, and Piercing I adds its 1 to the bolt's 2.
+     * has no random crit (a vanilla crossbow's bolt from a player always does). Quick Charge III cuts the load by the
+     * share it cuts vanilla's (1.25 s to 0.5 s), to 24 ticks, and Piercing I adds its 1 to the bolt's 2.
      */
     static void weaponStatsArbalest(GameTestHelper helper) {
         Player player = shooter(helper, new Vec3(5.5, 1, 5.5), 0, -30);
@@ -67,8 +67,8 @@ final class CrossbowGameTests {
                 ItemStack quick = enchanted(helper, ModItems.ARBALEST.get(), Enchantments.QUICK_CHARGE, 3);
                 AbstractArrow pierced = loadAndFire(helper, shooter(helper, new Vec3(5.5, 1, 8.5), 0, -30),
                         enchanted(helper, ModItems.ARBALEST.get(), Enchantments.PIERCING, 1));
-                if (CrossbowItem.getChargeDuration(quick, player) != 45)
-                    helper.fail("Quick Charge III should load the Arbalest in 45 ticks, not " + CrossbowItem.getChargeDuration(quick, player));
+                if (CrossbowItem.getChargeDuration(quick, player) != 24)
+                    helper.fail("Quick Charge III should load the Arbalest in 24 ticks, not " + CrossbowItem.getChargeDuration(quick, player));
                 else if (pierced.getPierceLevel() != 3) helper.fail("Piercing I on the Arbalest should give pierce 3, not " + pierced.getPierceLevel());
                 else helper.succeed();
             }
@@ -206,8 +206,8 @@ final class CrossbowGameTests {
 
     /**
      * Loaded after 40 ticks of cranking (not 39); each bolt leaves at 3.0 with ×0.6 of the arrow's damage (1.2 from a
-     * plain arrow's 2), strays at most 0.0172 × 2.0 per axis and further than a vanilla bolt can; 520 uses; walking
-     * while cranking as with vanilla's crossbow.
+     * plain arrow's 2), strays at most 0.0172 × 2.0 per axis and further than a vanilla bolt can; 520 uses; cranked at
+     * a full walk, though not at a sprint.
      */
     static void weaponStatsRepeatingCrossbow(GameTestHelper helper) {
         Player player = shooter(helper, new Vec3(2.5, 1, 2.5), -90, -10);
@@ -223,8 +223,8 @@ final class CrossbowGameTests {
         if (CrossbowItem.getChargeDuration(repeater, player) != 40) helper.fail("the Repeating Crossbow should load in 40 ticks, not " + CrossbowItem.getChargeDuration(repeater, player));
         else if (earlyLoaded || !CrossbowItem.isCharged(repeater)) helper.fail("the Repeating Crossbow should load at 40 ticks of cranking, not 39: early " + earlyLoaded);
         else if (repeater.getMaxDamage() != 520) helper.fail("the Repeating Crossbow should last 520 uses, not " + repeater.getMaxDamage());
-        else if (use != null && !use.equals(new ItemStack(Items.CROSSBOW).get(DataComponents.USE_EFFECTS)))
-            helper.fail("cranking the Repeating Crossbow should slow you as vanilla's crossbow does: " + use);
+        else if (use == null || use.canSprint() || use.speedMultiplier() != 1.0F)
+            helper.fail("the Repeating Crossbow should crank at a full walk, with no sprint: " + use);
         else {
             // vanilla adds the spread to the aim without rescaling, so one bolt's speed is off by up to a tenth: average them
             double worst = 0, speeds = 0;

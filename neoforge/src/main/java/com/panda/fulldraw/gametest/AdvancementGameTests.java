@@ -51,6 +51,28 @@ final class AdvancementGameTests {
     }
 
     /**
+     * Sneaking at full draw holds the breath, and the first breath held earns Hold Your Breath, the advancement that names
+     * Steady Aim. A mock player has no client to tick it, so the test ticks it as the server would for a real one (the
+     * loader's player tick runs the breath).
+     */
+    static void holdYourBreathAdvancement(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        Vec3 at = helper.absoluteVec(new Vec3(5.5, 1, 5.5));
+        player.snapTo(at.x, at.y, at.z, 0, -60);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+        player.getInventory().add(new ItemStack(Items.ARROW, 4));
+        if (done(helper, player, "hold_your_breath")) helper.fail("Hold Your Breath awarded before any breath was held");
+        player.setShiftKeyDown(true);
+        player.startUsingItem(InteractionHand.MAIN_HAND);
+        helper.onEachTick(player::doTick);
+        helper.succeedWhen(() -> {
+            if (!done(helper, player, "hold_your_breath"))
+                throw helper.assertionException("not yet: drawn " + player.getTicksUsingItem() + " ticks, breath " + com.panda.fulldraw.shot.Focus.of(player));
+        });
+    }
+
+    /**
      * A hit that deals no damage (here an invulnerable zombie) plays no hit feedback and earns
      * nothing. The arrow is a player's headshot that would otherwise award Right Between the Eyes.
      */

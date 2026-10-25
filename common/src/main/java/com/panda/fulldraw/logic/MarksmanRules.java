@@ -31,6 +31,8 @@ public final class MarksmanRules {
     public static final double SIGHT = 48.0;
     /** How long a target may be out of sight before, in its second phase, it shoots at where they hid. */
     public static final int HIDDEN_TICKS = 60;
+    /** How long it stays ducked at its post after a blow from beyond its arrow's reach: 30 s. */
+    public static final int OUT_OF_REACH_TICKS = 600;
     /**
      * It shoots a vanilla bow, always at a Perfect Release, at the full draw's speed, with an arrow lighter than a plain
      * one (base damage 1.3, not 2: vanilla's 4 at a full draw, not 6): on Hard a mob's arrow deals half again, and a

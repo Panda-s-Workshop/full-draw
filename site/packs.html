@@ -31,9 +31,10 @@
 <h2>Client config</h2>
 <p>Each player's own: what they see and hear. NeoForge <code>config/fulldraw-client.toml</code>, Fabric
 <code>config/fulldraw-client.properties</code>.</p>
-<div class="tw"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>showRing</code></td><td>true</td><td>The draw ring, the hit tick and early/late around the crosshair.</td></tr><tr><td><code>distanceReadout</code></td><td>true</td><td>&quot;Long shot: N m&quot; on the action bar.</td></tr><tr><td><code>fovEffects</code></td><td>true</td><td>Bow zoom on every bow, Steady Aim&#x27;s narrower view and the release kick.</td></tr><tr><td><code>perfectTrail</code></td><td>true</td><td>The particle trail behind Perfect arrows.</td></tr><tr><td><code>drawSounds</code></td><td>true</td><td>The draw creak, the strain of a held draw, the twang on release and your own breath.</td></tr><tr><td><code>perfectChime</code></td><td>true</td><td>The chime and the flash at the bow of your own Perfect Release.</td></tr><tr><td><code>hitSounds</code></td><td>true</td><td>The hit tick and the precision thock.</td></tr><tr><td><code>bowShake</code></td><td>true</td><td>The bow shaking in the hand when a draw is held too long.</td></tr><tr><td><code>quiverStrip</code></td><td>LEFT</td><td>Where the Quiver strip sits beside the hotbar: LEFT, RIGHT or HIDDEN.</td></tr></tbody></table></div></section>
+<div class="tw"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>showRing</code></td><td>true</td><td>The draw ring, the hit tick and early/late around the crosshair.</td></tr><tr><td><code>distanceReadout</code></td><td>true</td><td>&quot;Long shot: N m&quot; on the action bar.</td></tr><tr><td><code>fovEffects</code></td><td>true</td><td>Bow zoom on the bows the shot rules cover, Steady Aim&#x27;s narrower view and the release kick.</td></tr><tr><td><code>perfectTrail</code></td><td>true</td><td>The particle trail behind Perfect arrows.</td></tr><tr><td><code>drawSounds</code></td><td>true</td><td>The draw creak, the strain of a held draw, the twang on release and your own breath.</td></tr><tr><td><code>perfectChime</code></td><td>true</td><td>The chime and the flash at the bow of your own Perfect Release.</td></tr><tr><td><code>hitSounds</code></td><td>true</td><td>The hit tick and the precision thock.</td></tr><tr><td><code>bowShake</code></td><td>true</td><td>The bow shaking in the hand when a draw is held too long.</td></tr><tr><td><code>quiverStrip</code></td><td>LEFT</td><td>Where the Quiver strip sits beside the hotbar: LEFT, RIGHT or HIDDEN.</td></tr></tbody></table></div></section>
 <section id="data"><h2>Tags and data</h2>
-<div class="tw"><table><thead><tr><th>Item tag</th><th>Holds</th></tr></thead><tbody><tr><td><code>#fulldraw:no_shot_pipeline</code></td><td>Weapons Full Draw leaves alone: they shoot as their mod made them and don't draw from the Quiver. A bow or crossbow that overrides how it fires is left alone without the tag.</td></tr><tr><td><code>#fulldraw:quiver_ammo</code></td><td>What a Quiver takes (by default <code>#minecraft:arrows</code>).</td></tr><tr><td><code>#fulldraw:shield_piercing</code></td><td>Weapons whose bolts crack a Shieldbearer's shield (the Arbalest).</td></tr><tr><td><code>#fulldraw:cannot_bleed</code></td><td>Creatures a Broadhead can't make bleed (an entity tag: skeletons, golems, slimes, the wither and others).</td></tr><tr><td><code>#fulldraw:loads_alone</code></td><td>Ammunition a magazine crossbow loads one at a time (the Blast Arrow and firework rockets).</td></tr><tr><td><code>#fulldraw:fletching/heads</code></td><td>What the Fletching Table's head slot takes; also <code>shafts</code>, <code>fletchings</code>, <code>extras</code>.</td></tr></tbody></table></div>
+<div class="tw"><table><thead><tr><th>Item tag</th><th>Holds</th></tr></thead><tbody><tr><td><code>#fulldraw:no_shot_pipeline</code></td><td>Weapons Full Draw leaves alone: they shoot as their mod made them and don't draw from the Quiver. A bow or crossbow that overrides how it fires is left alone without the tag.</td></tr><tr><td><code>#fulldraw:quiver_ammo</code></td><td>What a Quiver takes (by default <code>#minecraft:arrows</code>).</td></tr><tr><td><code>#fulldraw:shield_piercing</code></td><td>Weapons whose bolts crack a Shieldbearer's shield (the Arbalest).</td></tr><tr><td><code>#fulldraw:loads_alone</code></td><td>Ammunition a magazine crossbow loads one at a time (the Blast Arrow and firework rockets).</td></tr><tr><td><code>#fulldraw:fletching/heads</code></td><td>What the Fletching Table's head slot takes; also <code>shafts</code>, <code>fletchings</code>, <code>extras</code>.</td></tr></tbody></table></div>
+<div class="tw"><table><thead><tr><th>Entity tag</th><th>Holds</th></tr></thead><tbody><tr><td><code>#fulldraw:cannot_bleed</code></td><td>Creatures a Broadhead can't make bleed: skeletons, golems, slimes, the wither and others.</td></tr></tbody></table></div>
 <p>Full Draw's bows join <code>#minecraft:enchantable/bow</code> and <code>#c:tools/bow</code>, its crossbows
 <code>#minecraft:enchantable/crossbow</code> and <code>#c:tools/crossbow</code>, and its arrows <code>#minecraft:arrows</code>.</p>
 <h3>Weak spots</h3>
@@ -61,7 +62,29 @@ optional <code>extra</code>, each an ingredient with a count:</p>
     &quot;id&quot;: &quot;fulldraw:broadhead_arrow&quot;,
     &quot;count&quot;: 8
   }
-}</code></pre></section>
+}</code></pre>
+<p>Each part must also be in its slot's tag (<code>#fulldraw:fletching/heads</code> and the others), or the slot won't
+take it; the server log names any recipe part a tag leaves out.</p>
+<h3>Switching things off</h3>
+<ul>
+<li><b>Where the creatures spawn:</b> the biome tags <code>#fulldraw:spawns/gale_harrier</code> and
+<code>#fulldraw:spawns/bog_lurker</code>; override one with <code>"replace": true</code> and an empty
+<code>values</code> list and that creature spawns nowhere (without <code>replace</code> the empty list merges and
+changes nothing). The server
+config also has a switch for each of the three. On NeoForge the weights and group sizes are data too
+(<code>fulldraw:neoforge/biome_modifier/spawns/*</code>); on Fabric they are fixed (a weight of 10
+for the Harrier, 20 for the Lurker).</li>
+<li><b>The Ranger's Watchtower:</b> empty <code>#fulldraw:has_structure/rangers_watchtower</code>, or override the
+structure set <code>fulldraw:rangers_watchtower</code>. As with the spawn tags, an emptied tag needs <code>"replace": true</code>.</li>
+<li><b>The fletcher's trades:</b> Full Draw puts its trades in vanilla's <code>#minecraft:fletcher/level_2</code> to
+<code>level_4</code> tags and raises those trade sets' <code>amount</code> from 2 to 3, so vanilla's trades stay.
+Removing Full Draw's entries from the tags and setting <code>amount</code> back to 2 restores vanilla's fletcher.</li>
+<li><b>The Fletching Table:</b> with no <code>fulldraw:fletching</code> recipe loaded it is vanilla's block again,
+with no menu.</li>
+<li><b>The zoom:</b> Full Draw zooms the view of every bow the shot rules cover, but vanilla's own, while it is drawn. A modded bow that zooms
+on its own then zooms twice: tag it <code>#fulldraw:no_shot_pipeline</code>, or a player can turn
+<code>fovEffects</code> off in their client config.</li>
+</ul></section>
 <section id="compat"><h2>Other mods</h2>
 <ul>
 <li>Other mods' bows that fire as vanilla's does get the shot rules (Perfect window, headshots, range) at a vanilla bow's numbers, unless tagged out. A bow or crossbow that overrides how it fires (its release or its shot) gets neither the rules nor the Quiver's arrows. Crossbows, ours and theirs, have no Perfect window and their bolts take no head or range multiplier.</li>

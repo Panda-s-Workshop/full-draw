@@ -12,7 +12,7 @@ final class FabricClientConfig implements FullDrawClientConfig.Source {
         FullDrawClientConfig.Source d = FullDrawClientConfig.DEFAULTS;
         ring = c.bool("showRing", d.showRing(), "The draw ring, the hit tick and early/late around the crosshair");
         readout = c.bool("distanceReadout", d.distanceReadout(), "\"Long shot: N m\" on the action bar");
-        fov = c.bool("fovEffects", d.fovEffects(), "Bow zoom on every bow, Steady Aim's narrower view and the release kick");
+        fov = c.bool("fovEffects", d.fovEffects(), "Bow zoom on the bows the shot rules cover, Steady Aim's narrower view and the release kick");
         trail = c.bool("perfectTrail", d.perfectTrail(), "The particle trail behind Perfect arrows");
         draw = c.bool("drawSounds", d.drawSounds(), "The draw creak, the strain of a held draw, the twang on release and your own breath");
         chime = c.bool("perfectChime", d.perfectChime(), "The chime and the flash at the bow of your own Perfect Release");

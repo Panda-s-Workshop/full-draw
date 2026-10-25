@@ -46,7 +46,10 @@ public class FullDrawBowItem extends BowItem implements Weapons.Ranged {
         return super.use(level, player, hand);
     }
 
-    /** How it differs from vanilla's bow: its draw, its hit, its spread and arc, its Perfect window, and the run. */
+    /**
+     * How it differs from vanilla's bow: its draw, its hit, its spread and arc, its Perfect window, and the run; then
+     * the Bow Bash, which every bow and crossbow has.
+     */
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag) {
         super.appendHoverText(stack, context, display, lines, flag);
@@ -57,12 +60,20 @@ public class FullDrawBowItem extends BowItem implements Weapons.Ranged {
         if (stats.spread() < vanilla.spread()) lines.accept(gray("tooltip.fulldraw.bow.tight"));
         else if (stats.spread() > vanilla.spread()) lines.accept(gray("tooltip.fulldraw.bow.wide"));
         if (stats.gravityMult() < vanilla.gravityMult()) lines.accept(gray("tooltip.fulldraw.bow.flat"));
-        if (stats.extraWindow() > 0) lines.accept(gray("tooltip.fulldraw.bow.window", stats.extraWindow()));
+        if (stats.extraWindow() > 0) lines.accept(gray("tooltip.fulldraw.bow.window", number(stats.extraWindow() / 20.0)));
         if (!startsWhileSprinting) lines.accept(gray("tooltip.fulldraw.bow.no_sprint"));
+        var use = stack.get(net.minecraft.core.component.DataComponents.USE_EFFECTS);
+        if (use != null && use.canSprint() && use.speedMultiplier() >= 1.0F) lines.accept(gray("tooltip.fulldraw.bow.sprint"));
+        lines.accept(bashLine());
+    }
+
+    /** The Bow Bash's line, under every Full Draw bow and crossbow. */
+    public static Component bashLine() {
+        return Component.translatable("tooltip.fulldraw.bash", number(com.panda.fulldraw.shot.BowBash.COOLDOWN_TICKS / 20.0)).withStyle(ChatFormatting.DARK_GRAY);
     }
 
     /** Up to two decimals, with no trailing zeros: 0.6, 1.15, 1. */
-    private static String number(double value) {
+    static String number(double value) {
         return String.format(java.util.Locale.ROOT, "%.2f", value).replaceAll("\\.?0+$", "");
     }
 

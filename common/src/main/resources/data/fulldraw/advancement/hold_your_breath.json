@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "fulldraw:event",
+      "conditions": {
+        "event": "hold_your_breath"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:spyglass"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.hold_your_breath.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.hold_your_breath.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "fulldraw:perfect_release"
+}

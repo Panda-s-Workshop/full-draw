@@ -4,6 +4,7 @@ import com.panda.fulldraw.logic.Breath;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.network.FullDrawNetwork;
 import com.panda.fulldraw.registry.ModSounds;
+import com.panda.fulldraw.registry.ModTriggers;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,6 +55,7 @@ public final class Focus {
         if (before.focusing() != after.focusing() || before.exhausted() != after.exhausted())
             if (player instanceof ServerPlayer sp)
                 FullDrawNetwork.send(sp, new FullDrawNetwork.BreathState((float) after.fill(), after.focusing(), after.exhaustedTicks()));
+        if (!before.focusing() && after.focusing() && player instanceof ServerPlayer sp) ModTriggers.EVENT.get().trigger(sp, "hold_your_breath");
         Breath.Event event = Breath.event(before, after);
         if (event == Breath.Event.NONE) return;
         if (event == Breath.Event.INHALE) {

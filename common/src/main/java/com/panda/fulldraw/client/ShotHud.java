@@ -166,7 +166,8 @@ public final class ShotHud {
         FullDrawClientConfig.QuiverStrip place = FullDrawClientConfig.get().quiverStrip();
         if (p == null || p.isSpectator() || mc.gui.hud.isHidden() || mc.gui.screen() != null || place == FullDrawClientConfig.QuiverStrip.HIDDEN) return;
         ItemStack weapon = p.getMainHandItem().getItem() instanceof ProjectileWeaponItem ? p.getMainHandItem() : p.getOffhandItem();
-        if (!(weapon.getItem() instanceof ProjectileWeaponItem item)) return;
+        // a weapon the Quiver doesn't feed (one firing its own way, or tagged out) shows none of it as ready
+        if (!(weapon.getItem() instanceof ProjectileWeaponItem item) || !com.panda.fulldraw.shot.Weapons.inPipeline(weapon)) return;
         ItemStack quiver = Quivers.find(p);
         if (quiver.isEmpty()) return;
         QuiverContents contents = Quivers.contents(quiver);

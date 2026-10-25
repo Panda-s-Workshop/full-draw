@@ -50,7 +50,9 @@ public final class ModItems {
     /** The burst crossbow: one long crank loads five bolts, fired one a click. */
     public static final DeferredItem<RepeatingCrossbowItem> REPEATING_CROSSBOW = ITEMS.registerItem("repeating_crossbow",
             p -> new RepeatingCrossbowItem(p, WeaponStats.REPEATING_CROSSBOW, Magazine.REPEATING_CROSSBOW),
-            p -> p.stacksTo(1).durability(520).component(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).enchantable(1));
+            // cranked on the move at a full walk (no sprint): the light crossbow's place is fighting while moving
+            p -> p.stacksTo(1).durability(520).component(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).enchantable(1)
+                    .component(DataComponents.USE_EFFECTS, new UseEffects(false, true, 1.0F)));
 
     /** A wide cutting head: ×1.25 on bare flesh down to ×0.75 on plate, and the wound bleeds. */
     public static final DeferredItem<FullDrawArrowItem> BROADHEAD_ARROW = ITEMS.registerItem("broadhead_arrow",

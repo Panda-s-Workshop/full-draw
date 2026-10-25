@@ -43,19 +43,21 @@ public abstract class CrossbowItemMixin {
     /**
      * A magazine crossbow loads all its shots in one crank: vanilla draws one load of ammo (one arrow, Multishot's
      * three) when the crank completes, so the rest are drawn here, each from whatever ammo is next, until the magazine
-     * is full or the ammo runs out.
+     * is full, the ammo runs out or the next ammo loads alone (a Blast Arrow, which also fills a magazine by itself).
      */
     @WrapOperation(method = "tryLoadProjectiles", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/item/CrossbowItem;draw(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)Ljava/util/List;"))
     private static List<ItemStack> fulldraw$magazine(ItemStack weapon, ItemStack ammo, LivingEntity shooter, Operation<List<ItemStack>> original) {
+        boolean alone = RepeatingCrossbowItem.loadsAlone(ammo);
         List<ItemStack> first = original.call(weapon, ammo, shooter);
         Magazine magazine = RepeatingCrossbowItem.magazineOf(weapon);
         if (magazine == null || first.isEmpty()) return first;
         weapon.set(ModComponents.SHOT_SIZE.get(), first.size());
+        if (alone) return first;
         List<ItemStack> all = new ArrayList<>(first);
         for (int shot = 1; shot < magazine.shots(); shot++) {
             ItemStack next = shooter.getProjectile(weapon);
-            List<ItemStack> more = next.isEmpty() ? List.of() : original.call(weapon, next, shooter);
+            List<ItemStack> more = next.isEmpty() || RepeatingCrossbowItem.loadsAlone(next) ? List.of() : original.call(weapon, next, shooter);
             if (more.isEmpty()) break;
             all.addAll(more);
         }

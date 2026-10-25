@@ -3,7 +3,9 @@ package com.panda.fulldraw.registry;
 import com.panda.fulldraw.FullDrawMod;
 import com.panda.fulldraw.item.FullDrawBowItem;
 import com.panda.fulldraw.entity.BluntArrow;
+import com.panda.fulldraw.entity.BlastArrow;
 import com.panda.fulldraw.entity.BodkinArrow;
+import com.panda.fulldraw.entity.FlareArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
 import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.item.FullDrawArrowItem;
@@ -63,7 +65,15 @@ public final class ModItems {
 
     /** A coil of rope behind a hook: hangs a rope where it strikes a wall or a ceiling. */
     public static final DeferredItem<FullDrawArrowItem> ROPE_ARROW = ITEMS.registerItem("rope_arrow",
-            p -> new FullDrawArrowItem(p, RopeArrow::new, RopeArrow::new, 2));
+            p -> new FullDrawArrowItem(p, RopeArrow::new, RopeArrow::new, 2, () -> new Object[] {com.panda.fulldraw.FullDrawConfig.clientRopeArrowLength()}));
+
+    /** A burning head: lights where it lands for 30 s, and the mobs around it glow. */
+    public static final DeferredItem<FullDrawArrowItem> FLARE_ARROW = ITEMS.registerItem("flare_arrow",
+            p -> new FullDrawArrowItem(p, FlareArrow::new, FlareArrow::new, 2));
+
+    /** A charge behind the head: it explodes where it strikes, blocks spared unless the server says otherwise. */
+    public static final DeferredItem<FullDrawArrowItem> BLAST_ARROW = ITEMS.registerItem("blast_arrow",
+            p -> new FullDrawArrowItem(p, BlastArrow::new, BlastArrow::new, 2, () -> new Object[0]));
 
     /** Rope taken down from a Rope Arrow's column, to hang by hand: under a ledge, on a wall, or below more rope. */
     public static final DeferredItem<BlockItem> ROPE = ITEMS.registerSimpleBlockItem(ModBlocks.ROPE);

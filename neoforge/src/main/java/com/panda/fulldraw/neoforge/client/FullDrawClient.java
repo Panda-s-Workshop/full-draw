@@ -28,7 +28,7 @@ public final class FullDrawClient {
         container.registerConfig(net.neoforged.fml.config.ModConfig.Type.CLIENT, NeoForgeClientConfig.SPEC);
         com.panda.fulldraw.FullDrawClientConfig.use(new NeoForgeClientConfig());
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut e) ->
-                com.panda.fulldraw.FullDrawConfig.useRemote(null));
+                com.panda.fulldraw.FullDrawConfig.useRemote(null, 0));
         FullDrawNetwork.toServer = payload -> {
             var connection = net.minecraft.client.Minecraft.getInstance().getConnection();
             if (connection != null && connection.hasChannel(payload.type())) ClientPacketDistributor.sendToServer(payload);
@@ -37,7 +37,7 @@ public final class FullDrawClient {
             e.register(FullDrawNetwork.ShotResult.TYPE, (payload, ctx) -> ShotFeedback.onShotResult(payload));
             e.register(FullDrawNetwork.ReleaseResult.TYPE, (payload, ctx) -> ShotHud.onReleaseResult(payload));
             e.register(FullDrawNetwork.BreathState.TYPE, (payload, ctx) -> com.panda.fulldraw.client.FocusClient.onBreathState(payload));
-            e.register(FullDrawNetwork.ServerTuning.TYPE, (payload, ctx) -> com.panda.fulldraw.FullDrawConfig.useRemote(payload.tuning()));
+            e.register(FullDrawNetwork.ServerTuning.TYPE, (payload, ctx) -> com.panda.fulldraw.FullDrawConfig.useRemote(payload.tuning(), payload.ropeLength()));
             e.register(FullDrawNetwork.ArrowGravity.TYPE, (payload, ctx) -> ShotFeedback.onArrowGravity(payload));
             e.register(FullDrawNetwork.FuseOut.TYPE, (payload, ctx) -> ShotFeedback.onFuseOut(payload));
         });

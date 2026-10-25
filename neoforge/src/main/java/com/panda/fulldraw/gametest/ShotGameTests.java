@@ -293,7 +293,7 @@ final class ShotGameTests {
     /** The server's numbers survive the trip to a client: every field, with values that differ from the defaults. */
     static void serverTuningCodecRoundTrips(GameTestHelper helper) {
         var sent = new com.panda.fulldraw.network.FullDrawNetwork.ServerTuning(new com.panda.fulldraw.logic.ShotMath.Tuning(
-                7, 3, 2.25, 1.75, 1.25, 4.5, 12.0, 0.03, 1.8, 3.5, 0.45, 2.5, 7.5, 4.0));
+                7, 3, 2.25, 1.75, 1.25, 4.5, 12.0, 0.03, 1.8, 3.5, 0.45, 2.5, 7.5, 4.0), 9);
         var buf = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), helper.getLevel().registryAccess());
         com.panda.fulldraw.network.FullDrawNetwork.ServerTuning.STREAM_CODEC.encode(buf, sent);
         var received = com.panda.fulldraw.network.FullDrawNetwork.ServerTuning.STREAM_CODEC.decode(buf);

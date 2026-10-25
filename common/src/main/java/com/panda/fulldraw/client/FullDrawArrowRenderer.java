@@ -32,6 +32,14 @@ public class FullDrawArrowRenderer<T extends AbstractArrow> extends ArrowRendere
         sink.register(ModEntities.BODKIN_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("bodkin_arrow")));
         sink.register(ModEntities.BLUNT_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("blunt_arrow")));
         sink.register(ModEntities.ROPE_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("rope_arrow")));
+        sink.register(ModEntities.FLARE_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("flare_arrow")) {
+            // it burns: lit by its own flame, not by the world around it
+            @Override
+            protected int getBlockLightLevel(com.panda.fulldraw.entity.FlareArrow arrow, net.minecraft.core.BlockPos pos) {
+                return 15;
+            }
+        });
+        sink.register(ModEntities.BLAST_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("blast_arrow")));
     }
 
     private static Identifier texture(String id) {

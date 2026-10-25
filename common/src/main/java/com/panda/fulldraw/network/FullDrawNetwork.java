@@ -104,8 +104,11 @@ public final class FullDrawNetwork {
             if (player.distanceToSqr(creeper) < 96 * 96) send(player, payload);
     }
 
-    /** The server's shot numbers, sent to each player on joining and again when the server's config reloads. */
-    public record ServerTuning(ShotMath.Tuning tuning) implements CustomPacketPayload {
+    /**
+     * The server's shot numbers and its rope length (for the Rope Arrow's tooltip), sent to each player on joining and
+     * again when the server's config reloads.
+     */
+    public record ServerTuning(ShotMath.Tuning tuning, int ropeLength) implements CustomPacketPayload {
         public static final Type<ServerTuning> TYPE = new Type<>(FullDrawMod.id("server_tuning"));
         public static final StreamCodec<RegistryFriendlyByteBuf, ServerTuning> STREAM_CODEC = StreamCodec.of((buf, p) -> {
             ShotMath.Tuning t = p.tuning();
@@ -114,9 +117,10 @@ public final class FullDrawNetwork {
             for (double d : new double[] {t.perfectMult(), t.precisionMobs(), t.precisionPlayers(), t.skillCap(), t.rangeStart(), t.rangePerBlock(),
                     t.rangeCap(), t.pointBlankDistance(), t.pointBlankMult(), t.trembleStartSeconds(), t.trembleFullSeconds(), t.trembleMaxSpread()})
                 buf.writeDouble(d);
+            buf.writeVarInt(p.ropeLength());
         }, buf -> new ServerTuning(new ShotMath.Tuning(buf.readVarInt(), buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
                 buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                buf.readDouble(), buf.readDouble())));
+                buf.readDouble(), buf.readDouble()), buf.readVarInt()));
 
         @Override
         public Type<ServerTuning> type() {
@@ -126,7 +130,7 @@ public final class FullDrawNetwork {
 
     /** When a player joins: the server's numbers for their ring and HUD. */
     public static void onJoin(ServerPlayer player) {
-        send(player, new ServerTuning(com.panda.fulldraw.FullDrawConfig.tuning()));
+        send(player, new ServerTuning(com.panda.fulldraw.FullDrawConfig.tuning(), com.panda.fulldraw.FullDrawConfig.ropeArrowLength()));
     }
 
     /** When the server's config changes while it runs: everyone online gets the new numbers. */

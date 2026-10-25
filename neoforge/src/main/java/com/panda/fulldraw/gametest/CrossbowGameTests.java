@@ -320,6 +320,23 @@ final class CrossbowGameTests {
             helper.runAfterDelay(1 + i * gap, () -> ((CrossbowItem) repeater.getItem()).use(helper.getLevel(), player, InteractionHand.MAIN_HAND));
     }
 
+    /**
+     * A Blast Arrow loads alone: a crank on Blast Arrows loads one shot, and a crank on two arrows with Blast Arrows
+     * behind them loads the two arrows and stops.
+     */
+    static void repeaterLoadsBlastAlone(GameTestHelper helper) {
+        Player player = shooter(helper, new Vec3(2.5, 1, 2.5), -90, 0);
+        player.getInventory().setItem(9, new ItemStack(ModItems.BLAST_ARROW.get(), 8));
+        int alone = RepeatingCrossbowItem.shotsLoaded(load(helper, player, new ItemStack(ModItems.REPEATING_CROSSBOW.get())));
+        int blastLeft = player.getInventory().getItem(9).getCount();
+        player.getInventory().setItem(9, new ItemStack(Items.ARROW, 2));
+        player.getInventory().setItem(10, new ItemStack(ModItems.BLAST_ARROW.get(), 8));
+        int behind = RepeatingCrossbowItem.shotsLoaded(load(helper, player, new ItemStack(ModItems.REPEATING_CROSSBOW.get())));
+        if (alone != 1 || blastLeft != 7) helper.fail("a crank on Blast Arrows should load one: " + alone + " shots, " + blastLeft + " left of 8");
+        else if (behind != 2 || player.getInventory().getItem(10).getCount() != 8) helper.fail("the drawing should stop before a Blast Arrow: " + behind + " shots");
+        else helper.succeed();
+    }
+
     /** A shot that breaks the Repeating Crossbow drops the four arrows still loaded instead of losing them. */
     static void repeaterBreakDropsAmmo(GameTestHelper helper) {
         Player player = shooter(helper, new Vec3(2.5, 1, 2.5), -90, 0);

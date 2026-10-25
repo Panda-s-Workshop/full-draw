@@ -67,6 +67,25 @@ class BalanceTest {
         assertTrue(magazine >= arbalest, "a magazine deals " + magazine + ", less than one Arbalest bolt's " + arbalest);
     }
 
+    /**
+     * A Blast Arrow rewards the hit: a creature it strikes takes the arrow's hit and then the explosion in full, so a body
+     * hit beats a shot into the ground at the feet and a head hit beats the body, from every bow. And it is no single-target
+     * upgrade: its best hit from any bow stays at or under the best plain arrow in the mod, a Perfect Longbow head hit.
+     */
+    @Test
+    void blastRewardsTheHit() {
+        double feet = ArrowTraits.blastDamage(0.0, 1.0);
+        WeaponStats l = WeaponStats.LONGBOW;
+        double bestPlain = ShotMath.damage(ShotMathTest.launchBase(l), l.damageMult(), 1, true, T.precisionMobs(), 200, T);
+        double blastMult = ArrowTraits.BLAST.multFor(6.0, 0);
+        for (WeaponStats w : List.of(WeaponStats.VANILLA_BOW, WeaponStats.SHORTBOW, WeaponStats.LONGBOW, WeaponStats.RECURVE_BOW)) {
+            double body = ShotMath.damage(ShotMathTest.launchBase(w), w.damageMult(), blastMult, true, 1.0, 30, T) + feet;
+            double head = ShotMath.damage(ShotMathTest.launchBase(w), w.damageMult(), blastMult, true, T.precisionMobs(), 200, T) + feet;
+            assertTrue(head > body && body > feet, w + ": head " + head + ", body " + body + ", at the feet " + feet);
+            assertTrue(head <= bestPlain, w + ": a Blast Arrow's best hit " + head + " beats the best plain arrow's " + bestPlain);
+        }
+    }
+
     private static void assertRatio(double armour, double toughness, double ceiling) {
         double vanilla = perMinute(WeaponStats.VANILLA_CROSSBOW, true, armour, toughness, 1.0);
         double arbalest = perMinute(WeaponStats.ARBALEST, false, armour, toughness, BoltTraits.ARBALEST.armourKept());

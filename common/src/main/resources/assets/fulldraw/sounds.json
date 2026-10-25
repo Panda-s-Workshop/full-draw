@@ -313,5 +313,15 @@
         "pitch": 0.85
       }
     ]
+  },
+  "flare": {
+    "subtitle": "subtitles.fulldraw.flare",
+    "sounds": [
+      {
+        "name": "minecraft:fire/ignite",
+        "volume": 1.0,
+        "pitch": 1.3
+      }
+    ]
   }
 }

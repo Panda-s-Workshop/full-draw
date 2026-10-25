@@ -42,7 +42,8 @@ public final class FullDrawMod {
      */
     public static void setup() {
         ((net.minecraft.world.level.block.FireBlock) net.minecraft.world.level.block.Blocks.FIRE).setFlammable(ModBlocks.ROPE.get(), 30, 60);
-        for (var arrow : List.of(ModItems.BROADHEAD_ARROW, ModItems.BODKIN_ARROW, ModItems.BLUNT_ARROW, ModItems.ROPE_ARROW))
+        for (var arrow : List.of(ModItems.BROADHEAD_ARROW, ModItems.BODKIN_ARROW, ModItems.BLUNT_ARROW, ModItems.ROPE_ARROW,
+                ModItems.FLARE_ARROW, ModItems.BLAST_ARROW))
             net.minecraft.world.level.block.DispenserBlock.registerProjectileBehavior(arrow.get());
     }
 

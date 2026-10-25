@@ -1,5 +1,6 @@
 package com.panda.fulldraw.block;
 
+import com.panda.fulldraw.FullDrawConfig;
 import com.panda.fulldraw.logic.ArrowTraits;
 import com.panda.fulldraw.registry.ModSounds;
 import java.util.Map;
@@ -143,13 +144,14 @@ public class RopeBlock extends Block {
 
     /**
      * Ties a rope at {@code top} to what's on its {@code tied} side ({@code up} for the block above) and lets it fall
-     * through open air, down to {@link ArrowTraits#ROPE_LENGTH} blocks. Returns how many ropes hang, 0 when {@code top}
+     * through open air, down to the server's {@code ropeArrowLength} (24 unless set). Returns how many ropes hang, 0 when {@code top}
      * isn't open or nothing there would hold a rope.
      */
     public int hang(Level level, BlockPos top, Direction tied) {
         if (!level.getBlockState(top).isAir() || !holds(level, top, tied)) return 0;
         BlockState rope = defaultBlockState().setValue(TIED, tied);
-        int length = ArrowTraits.ropeLength(i -> !level.isOutsideBuildHeight(top.below(i)) && level.getBlockState(top.below(i)).isAir());
+        int length = ArrowTraits.ropeLength(i -> !level.isOutsideBuildHeight(top.below(i)) && level.getBlockState(top.below(i)).isAir(),
+                FullDrawConfig.ropeArrowLength());
         for (int i = 0; i < length; i++) level.setBlock(top.below(i), rope.setValue(KNOT, i == 0), Block.UPDATE_ALL);
         return length;
     }

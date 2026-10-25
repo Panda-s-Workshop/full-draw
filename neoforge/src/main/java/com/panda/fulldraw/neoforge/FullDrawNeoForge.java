@@ -31,7 +31,7 @@ public final class FullDrawNeoForge {
             if (e.getConfig().getSpec() == NeoForgeConfig.SPEC && server != null) server.execute(() -> FullDrawNetwork.onTuningChanged(server));
         });
         modBus.addListener((RegisterPayloadHandlersEvent e) -> {
-            PayloadRegistrar r = e.registrar("1").executesOn(HandlerThread.MAIN).optional();
+            PayloadRegistrar r = e.registrar("2").executesOn(HandlerThread.MAIN).optional();
             r.playToServer(FullDrawNetwork.CycleQuiver.TYPE, FullDrawNetwork.CycleQuiver.STREAM_CODEC, (payload, ctx) -> {
                 if (ctx.player() instanceof ServerPlayer player) FullDrawNetwork.handleCycleQuiver(payload, player);
             });

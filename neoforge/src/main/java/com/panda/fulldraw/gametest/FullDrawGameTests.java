@@ -46,6 +46,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("repeater_magazine_five", () -> CrossbowGameTests::repeaterMagazineFive);
         FUNCTIONS.register("repeater_burst_lands", () -> CrossbowGameTests::repeaterBurstLands);
         FUNCTIONS.register("repeater_break_drops_ammo", () -> CrossbowGameTests::repeaterBreakDropsAmmo);
+        FUNCTIONS.register("repeater_loads_blast_alone", () -> CrossbowGameTests::repeaterLoadsBlastAlone);
         FUNCTIONS.register("crank_sounds", () -> CrossbowGameTests::crankSounds);
         FUNCTIONS.register("steady_aim_halves_spread", () -> ShotGameTests::steadyAimHalvesSpread);
         FUNCTIONS.register("bow_bash_shoves", () -> ShotGameTests::bowBashShoves);
@@ -69,6 +70,11 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("rope_arrow_places_rope", () -> ArrowGameTests::ropeArrowPlacesRope);
         FUNCTIONS.register("rope_comes_down_together", () -> ArrowGameTests::ropeComesDownTogether);
         FUNCTIONS.register("rope_arrow_refusals", () -> ArrowGameTests::ropeArrowRefusals);
+        FUNCTIONS.register("flare_lights_and_glows", () -> ArrowGameTests::flareLightsAndGlows);
+        FUNCTIONS.register("blast_arrow_explodes", () -> ArrowGameTests::blastArrowExplodes);
+        FUNCTIONS.register("blast_hit_adds_copies_plain", () -> ArrowGameTests::blastHitAddsAndCopiesArePlain);
+        FUNCTIONS.register("flare_burns_above_cover", () -> ArrowGameTests::flareBurnsAboveCover);
+        FUNCTIONS.register("flare_adventure_and_mob_flares", () -> ArrowGameTests::flareAdventureAndMobFlares);
     }
 
     private FullDrawGameTests() {}

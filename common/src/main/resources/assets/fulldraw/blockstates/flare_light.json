@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "burn=1": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=2": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=3": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=4": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=5": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=6": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=7": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=8": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=9": {
+      "model": "fulldraw:block/flare_light"
+    },
+    "burn=10": {
+      "model": "fulldraw:block/flare_light"
+    }
+  }
+}

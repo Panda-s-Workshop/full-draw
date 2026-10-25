@@ -45,11 +45,26 @@ class ArrowTraitsTest {
 
     @Test
     void ropeHangsToTheFirstBlockOrItsLength() {
-        assertEquals(ArrowTraits.ROPE_LENGTH, ArrowTraits.ropeLength(i -> true), "open all the way down");
-        assertEquals(24, ArrowTraits.ROPE_LENGTH);
-        assertEquals(5, ArrowTraits.ropeLength(i -> i < 5), "stops on the floor");
-        assertEquals(0, ArrowTraits.ropeLength(i -> false), "no room for the knot");
+        assertEquals(24, ArrowTraits.ROPE_LENGTH, "the default length");
+        assertEquals(24, ArrowTraits.ropeLength(i -> true, 24), "open all the way down");
+        assertEquals(8, ArrowTraits.ropeLength(i -> true, 8), "a server's shorter rope");
+        assertEquals(5, ArrowTraits.ropeLength(i -> i < 5, 24), "stops on the floor");
+        assertEquals(0, ArrowTraits.ropeLength(i -> false, 24), "no room for the knot");
         assertEquals(0.5, ArrowTraits.ROPE.multFor(6.0, 15), EPS, "a weak hit, armour or not");
+    }
+
+    @Test
+    void flareAndBlastNumbers() {
+        assertEquals(30, ArrowTraits.FLARE_LIGHT_TICKS / 20, "the flare burns 30 s");
+        assertEquals(10, ArrowTraits.FLARE_GLOW_TICKS / 20, "mobs glow 10 s");
+        assertEquals(8.0, ArrowTraits.FLARE_GLOW_RADIUS, EPS);
+        assertEquals(1.5F, ArrowTraits.BLAST_POWER, "half a creeper's");
+        assertEquals(11.0, ArrowTraits.blastDamage(0.0, 1.0), EPS, "half of vanilla's 22 at the centre");
+        assertEquals(0.0, ArrowTraits.blastDamage(3.0, 1.0), EPS, "nothing past its diameter");
+        assertTrue(ArrowTraits.blastDamage(1.0, 1.0) < ArrowTraits.blastDamage(0.5, 1.0), "less further off");
+        assertTrue(ArrowTraits.blastDamage(1.0, 0.5) < ArrowTraits.blastDamage(1.0, 1.0), "less when half hidden");
+        assertEquals(0.5, ArrowTraits.FLARE.multFor(6.0, 10), EPS);
+        assertEquals(0.5, ArrowTraits.BLAST.multFor(6.0, 10), EPS);
     }
 
     @Test
@@ -80,7 +95,10 @@ class ArrowTraitsTest {
         assertTrue(lang.contains("×0.8 damage, but 60% of armour"), "bodkin tooltip");
         assertTrue(lang.contains("1 damage, whatever the bow or the shot"), "blunt tooltip");
         assertTrue(lang.contains("×0.5 damage"), "rope arrow tooltip");
-        assertTrue(lang.contains("hangs a rope down to " + ArrowTraits.ROPE_LENGTH + " blocks"), "rope length tooltip");
+        assertTrue(lang.contains("hangs a rope down to %s blocks"), "rope length tooltip, filled with the server's length");
+        assertTrue(lang.contains("Lights where it lands for 30 s; mobs within 8 blocks glow for 10 s"), "flare tooltip");
+        assertTrue(lang.contains("×0.5 damage, then an explosion where it strikes"), "blast tooltip");
+        assertTrue(lang.contains("Hurts and throws back all around it, you too"), "the blast hurts its shooter too");
     }
 
     /** Vanilla's {@code CombatRules.getDamageAfterAbsorb} with no toughness. */

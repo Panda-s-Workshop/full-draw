@@ -3,6 +3,8 @@
     "fulldraw:broadhead_arrow",
     "fulldraw:bodkin_arrow",
     "fulldraw:blunt_arrow",
-    "fulldraw:rope_arrow"
+    "fulldraw:rope_arrow",
+    "fulldraw:flare_arrow",
+    "fulldraw:blast_arrow"
   ]
 }

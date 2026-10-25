@@ -4,6 +4,7 @@ import com.panda.fulldraw.logic.BoltTraits;
 import com.panda.fulldraw.logic.Magazine;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.registry.ModComponents;
+import com.panda.fulldraw.registry.ModItems;
 import com.panda.fulldraw.registry.ModSounds;
 import com.panda.fulldraw.shot.Weapons;
 import java.util.List;
@@ -42,6 +43,14 @@ public class RepeatingCrossbowItem extends FullDrawCrossbowItem {
     @Nullable
     public static Magazine magazineOf(ItemStack weapon) {
         return weapon.getItem() instanceof RepeatingCrossbowItem repeater && Weapons.inPipeline(weapon) ? repeater.magazine : null;
+    }
+
+    /**
+     * Ammo that loads alone, a crank for one shot: a magazine of Blast Arrows would stack five explosions past any
+     * Arbalest bolt, so one comes first in a magazine by itself and the drawing stops before one.
+     */
+    public static boolean loadsAlone(ItemStack ammo) {
+        return ammo.is(ModItems.BLAST_ARROW.get());
     }
 
     /** Shots still in the magazine (the sprite's pips, the tooltip). */

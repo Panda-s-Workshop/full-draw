@@ -57,6 +57,15 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
             .defineInRange("trembleMaxSpread", D.trembleMaxSpread(), 0.0, 20.0);
 
     static {
+        B.pop().comment("Arrows").push("arrows");
+    }
+
+    private static final ModConfigSpec.BooleanValue BLAST_BREAKS = B.comment("Blast Arrows break blocks, as TNT does, where the tnt_explodes game rule allows (a mob's under mobGriefing). false: they only hurt and knock back.")
+            .define("blastArrowBreaksBlocks", false);
+    private static final ModConfigSpec.IntValue ROPE_LENGTH = B.comment("The most rope one Rope Arrow hangs, counting its knot.")
+            .defineInRange("ropeArrowLength", com.panda.fulldraw.logic.ArrowTraits.ROPE_LENGTH, 1, 64);
+
+    static {
         B.pop();
     }
 
@@ -65,6 +74,16 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
     @Override
     public boolean vanillaCritOnFullDraw() {
         return SPEC.isLoaded() ? VANILLA_CRIT.get() : FullDrawConfig.DEFAULTS.vanillaCritOnFullDraw();
+    }
+
+    @Override
+    public boolean blastArrowBreaksBlocks() {
+        return SPEC.isLoaded() ? BLAST_BREAKS.get() : FullDrawConfig.DEFAULTS.blastArrowBreaksBlocks();
+    }
+
+    @Override
+    public int ropeArrowLength() {
+        return SPEC.isLoaded() ? ROPE_LENGTH.get() : FullDrawConfig.DEFAULTS.ropeArrowLength();
     }
 
     @Override

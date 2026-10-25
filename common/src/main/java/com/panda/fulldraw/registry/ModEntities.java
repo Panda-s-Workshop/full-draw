@@ -2,7 +2,9 @@ package com.panda.fulldraw.registry;
 
 import com.panda.fulldraw.FullDrawMod;
 import com.panda.fulldraw.entity.BluntArrow;
+import com.panda.fulldraw.entity.BlastArrow;
 import com.panda.fulldraw.entity.BodkinArrow;
+import com.panda.fulldraw.entity.FlareArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
 import com.panda.fulldraw.entity.FullDrawArrow;
 import com.panda.fulldraw.entity.RopeArrow;
@@ -18,6 +20,8 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<BodkinArrow>> BODKIN_ARROW = arrow("bodkin_arrow", BodkinArrow::new);
     public static final DeferredHolder<EntityType<?>, EntityType<BluntArrow>> BLUNT_ARROW = arrow("blunt_arrow", BluntArrow::new);
     public static final DeferredHolder<EntityType<?>, EntityType<RopeArrow>> ROPE_ARROW = arrow("rope_arrow", RopeArrow::new);
+    public static final DeferredHolder<EntityType<?>, EntityType<FlareArrow>> FLARE_ARROW = arrow("flare_arrow", FlareArrow::new);
+    public static final DeferredHolder<EntityType<?>, EntityType<BlastArrow>> BLAST_ARROW = arrow("blast_arrow", BlastArrow::new);
 
     private ModEntities() {}
 

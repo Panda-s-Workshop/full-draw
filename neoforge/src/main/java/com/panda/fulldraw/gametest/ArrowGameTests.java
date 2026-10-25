@@ -1,11 +1,16 @@
 package com.panda.fulldraw.gametest;
 
 import com.panda.fulldraw.entity.BodkinArrow;
+import com.panda.fulldraw.FullDrawConfig;
+import com.panda.fulldraw.block.FlareLightBlock;
 import com.panda.fulldraw.block.RopeBlock;
+import com.panda.fulldraw.entity.BlastArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
+import com.panda.fulldraw.entity.FlareArrow;
 import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.registry.ModBlocks;
 import com.panda.fulldraw.registry.ModEffects;
+import com.panda.fulldraw.logic.ArrowTraits;
 import com.panda.fulldraw.registry.ModItems;
 import com.panda.fulldraw.shot.ShotHolder;
 import java.util.HashSet;
@@ -31,6 +36,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
@@ -351,6 +357,202 @@ final class ArrowGameTests {
             }
             helper.succeed();
         });
+    }
+
+    /**
+     * A Flare Arrow shot down into the floor near a corner lights the block it lands in (15, ten steps of 3 s, so 30 s;
+     * another flare there tops it back up) and spends the arrow; a husk 3 blocks off and one 7 off glow, one 9 off doesn't.
+     * A second flare into a husk lights the spot where it struck.
+     */
+    static void flareLightsAndGlows(GameTestHelper helper) {
+        LivingEntity near = husk(helper, 4.5, 1.5), mid = husk(helper, 1.5, 8.5), far = husk(helper, 10.5, 10.5), distant = husk(helper, 10.5, 0.5);
+        Player player = shooter(helper);
+        FlareArrow flare = (FlareArrow) shot(helper, player, ModItems.FLARE_ARROW.get(), new Vec3(1.5, 4.0, 1.5), new Vec3(0, -3.0, 0));
+        // and one into the far husk: a flare that hits a creature lights the spot too
+        shot(helper, player, ModItems.FLARE_ARROW.get(), new Vec3(10.5, 1.5, 6.5), new Vec3(0, 0, 3.0));
+        BlockPos lit = new BlockPos(1, 1, 1);
+        helper.runAfterDelay(5, () -> {
+            int byHusk = 0;
+            for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(9, 1, 8), new BlockPos(11, 3, 11)))
+                if (helper.getBlockState(pos).is(ModBlocks.FLARE_LIGHT.get())) byHusk++;
+            if (byHusk != 1) throw helper.assertionException("a flare into a husk should light the spot it struck: " + byHusk + " lights; " + drops(helper));
+            var state = helper.getBlockState(lit);
+            if (!state.is(ModBlocks.FLARE_LIGHT.get())) throw helper.assertionException("no flare light where the flare landed: " + state);
+            if (state.getLightEmission() != 15 || state.getValue(FlareLightBlock.BURN) != FlareLightBlock.STEPS)
+                throw helper.assertionException("a fresh flare should light 15 with its whole time to burn: " + state);
+            BlockPos abs = helper.absolutePos(lit);
+            if (!helper.getLevel().getBlockTicks().hasScheduledTick(abs, ModBlocks.FLARE_LIGHT.get())) throw helper.assertionException("the flare isn't counting down");
+            if (!flare.isRemoved()) throw helper.assertionException("the flare arrow should be spent on landing");
+            if (!near.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING) || !mid.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING))
+                throw helper.assertionException("husks within 8 blocks should glow");
+            if (lost(far) <= 0) throw helper.assertionException("the second flare should have struck the far husk");
+            if (distant.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING)) throw helper.assertionException("a husk 9 blocks from either flare should not glow");
+            int glow = near.getEffect(net.minecraft.world.effect.MobEffects.GLOWING).getDuration();
+            if (glow > 200 || glow < 190) throw helper.assertionException("the glow should last 10 s: " + glow);
+            // three steps burn down, then another flare lands there: back to the full 30 s
+            for (int i = 0; i < 3; i++) helper.getLevel().getBlockState(abs).tick(helper.getLevel(), abs, helper.getLevel().getRandom());
+            if (helper.getBlockState(lit).getValue(FlareLightBlock.BURN) != FlareLightBlock.STEPS - 3) throw helper.assertionException("the flare should burn down a step a tick call");
+            ModBlocks.FLARE_LIGHT.get().light(helper.getLevel(), abs);
+            if (helper.getBlockState(lit).getValue(FlareLightBlock.BURN) != FlareLightBlock.STEPS) throw helper.assertionException("another flare should top the light up");
+            for (int i = 0; i < FlareLightBlock.STEPS; i++) helper.getLevel().getBlockState(abs).tick(helper.getLevel(), abs, helper.getLevel().getRandom());
+            if (!helper.getBlockState(lit).isAir()) throw helper.assertionException("the flare should be out after its ten steps: " + helper.getBlockState(lit));
+            helper.succeed();
+        });
+    }
+
+    /**
+     * A Blast Arrow into a glass wall beside a husk explodes there: the husk is hurt and the arrow spent, and with the
+     * server's default no glass breaks. Then, with {@code blastArrowBreaksBlocks} on, a second one breaks the glass; a
+     * third, with {@code tnt_explodes} off, doesn't, nor does a husk's with {@code mobGriefing} off.
+     */
+    static void blastArrowExplodes(GameTestHelper helper) {
+        for (int x = 1; x <= 10; x++)
+            for (int y = 1; y <= 4; y++) helper.setBlock(new BlockPos(x, y, 9), Blocks.GLASS);
+        LivingEntity husk = husk(helper, 3.5, 7.5);
+        Player player = shooter(helper);
+        BlastArrow first = (BlastArrow) shot(helper, player, ModItems.BLAST_ARROW.get(), new Vec3(2.5, 2.5, 4.5), new Vec3(0, 0, 3.0));
+        helper.runAfterDelay(5, () -> {
+            if (!first.isRemoved()) throw helper.assertionException("the blast arrow should be spent");
+            // the arrow flies past the husk into the glass: anything it lost, the explosion did
+            if (lost(husk) <= 0) throw helper.assertionException("the explosion should hurt the husk beside it");
+            for (int x = 1; x <= 10; x++)
+                for (int y = 1; y <= 4; y++)
+                    if (!helper.getBlockState(new BlockPos(x, y, 9)).is(Blocks.GLASS)) throw helper.assertionException("a blast arrow broke glass by default at " + x + "," + y);
+            FullDrawConfig.Source before = FullDrawConfig.source();
+            FullDrawConfig.use(new FullDrawConfig.Source() {
+                @Override public boolean vanillaCritOnFullDraw() { return before.vanillaCritOnFullDraw(); }
+                @Override public com.panda.fulldraw.logic.ShotMath.Tuning tuning() { return before.tuning(); }
+                @Override public boolean blastArrowBreaksBlocks() { return true; }
+                @Override public int ropeArrowLength() { return before.ropeArrowLength(); }
+            });
+            shot(helper, player, ModItems.BLAST_ARROW.get(), new Vec3(8.5, 2.5, 4.5), new Vec3(0, 0, 3.0));
+            var rules = helper.getLevel().getGameRules();
+            var server = helper.getLevel().getServer();
+            helper.runAfterDelay(5, () -> {
+                if (helper.getBlockState(new BlockPos(8, 2, 9)).is(Blocks.GLASS)) {
+                    FullDrawConfig.use(before);
+                    throw helper.assertionException("with blastArrowBreaksBlocks on, the glass it struck should break");
+                }
+                rules.set(GameRules.TNT_EXPLODES, false, server);
+                rules.set(GameRules.MOB_GRIEFING, false, server);
+                shot(helper, player, ModItems.BLAST_ARROW.get(), new Vec3(2.5, 3.5, 4.5), new Vec3(0, 0, 3.0));
+                LivingEntity archer = husk(helper, 4.5, 1.5);
+                shot(helper, archer, new ItemStack(ModItems.BLAST_ARROW.get()), new Vec3(4.5, 3.5, 4.5), new Vec3(0, 0, 3.0));
+                helper.runAfterDelay(5, () -> {
+                    FullDrawConfig.use(before);
+                    rules.set(GameRules.TNT_EXPLODES, true, server);
+                    rules.set(GameRules.MOB_GRIEFING, true, server);
+                    if (!helper.getBlockState(new BlockPos(2, 3, 9)).is(Blocks.GLASS)) helper.fail("with tnt_explodes off, a player's blast arrow broke glass");
+                    else if (!helper.getBlockState(new BlockPos(4, 3, 9)).is(Blocks.GLASS)) helper.fail("with mobGriefing off, a husk's blast arrow broke glass");
+                    else helper.succeed();
+                });
+            });
+        });
+    }
+
+    /**
+     * A Blast Arrow that strikes a husk lands its own hit and then the explosion in full on top: the husk loses more than
+     * the explosion alone does at its centre. A Multishot copy flies as a plain arrow: it sticks in the glass beside
+     * another husk and doesn't go off.
+     */
+    static void blastHitAddsAndCopiesArePlain(GameTestHelper helper) {
+        for (int x = 6; x <= 10; x++)
+            for (int y = 1; y <= 4; y++) helper.setBlock(new BlockPos(x, y, 9), Blocks.GLASS);
+        LivingEntity struck = husk(helper, 2.5, 6.5), beside = husk(helper, 8.5, 7.5);
+        Player player = shooter(helper);
+        shot(helper, player, ModItems.BLAST_ARROW.get(), new Vec3(2.5, 1.9, 2.5), new Vec3(0, 0, 3.0));
+        ItemStack copy = new ItemStack(ModItems.BLAST_ARROW.get());
+        copy.set(net.minecraft.core.component.DataComponents.INTANGIBLE_PROJECTILE, net.minecraft.util.Unit.INSTANCE);
+        AbstractArrow plain = shot(helper, player, copy, new Vec3(7.5, 2.5, 4.5), new Vec3(0, 0, 3.0));
+        helper.runAfterDelay(5, () -> {
+            double explosion = ArrowTraits.blastDamage(0.0, 1.0);
+            if (lost(struck) <= explosion + 0.5) helper.fail("a struck husk should take the arrow's hit and the explosion: lost " + lost(struck) + ", the explosion alone " + explosion);
+            else if (plain.isRemoved() || lost(beside) > 0) helper.fail("a Multishot copy should fly as a plain arrow, not go off");
+            else helper.succeed();
+        });
+    }
+
+    /**
+     * A flare falls through short grass and a thin layer of snow to the ground beneath and burns on top of them; in water
+     * it lights nothing. A player standing by doesn't glow: a player's flare shows the mobs.
+     */
+    static void flareBurnsAboveCover(GameTestHelper helper) {
+        helper.setBlock(new BlockPos(1, 0, 3), Blocks.GRASS_BLOCK);
+        helper.setBlock(new BlockPos(1, 1, 3), Blocks.SHORT_GRASS);
+        helper.setBlock(new BlockPos(5, 1, 3), Blocks.SNOW);
+        for (int x = 8; x <= 10; x++)
+            for (int z = 2; z <= 4; z++) helper.setBlock(new BlockPos(x, 1, z), x == 9 && z == 3 ? Blocks.WATER : Blocks.GLASS);
+        ServerPlayer bystander = helper.makeMockServerPlayerInLevel();
+        Vec3 by = helper.absoluteVec(new Vec3(3.5, 1, 4.5));
+        bystander.snapTo(by.x, by.y, by.z, 0, 0);
+        Player player = shooter(helper);
+        for (int x : new int[] {1, 5, 9})
+            shot(helper, player, ModItems.FLARE_ARROW.get(), new Vec3(x + 0.5, 4.0, 3.5), new Vec3(0, -3.0, 0));
+        helper.runAfterDelay(10, () -> {
+            if (!helper.getBlockState(new BlockPos(1, 2, 3)).is(ModBlocks.FLARE_LIGHT.get()) || !helper.getBlockState(new BlockPos(1, 1, 3)).is(Blocks.SHORT_GRASS))
+                helper.fail("a flare into short grass should burn above it, the grass left: " + helper.getBlockState(new BlockPos(1, 1, 3)) + " / " + helper.getBlockState(new BlockPos(1, 2, 3)));
+            else if (!helper.getBlockState(new BlockPos(5, 2, 3)).is(ModBlocks.FLARE_LIGHT.get()))
+                helper.fail("a flare into thin snow should burn above it: " + helper.getBlockState(new BlockPos(5, 1, 3)) + " / " + helper.getBlockState(new BlockPos(5, 2, 3)));
+            else if (lights(helper, new BlockPos(8, 1, 2), new BlockPos(10, 5, 4)) != 0) helper.fail("a flare in water should light nothing");
+            else if (bystander.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING)) helper.fail("a player's flare should not set a player glowing");
+            else helper.succeed();
+        });
+    }
+
+    /**
+     * An Adventure player's flare lights nothing but still shows the mobs around. A husk's flare shows the player beside
+     * it, not the husks.
+     */
+    static void flareAdventureAndMobFlares(GameTestHelper helper) {
+        LivingEntity watcher = husk(helper, 4.5, 2.5);
+        ServerPlayer adventurer = helper.makeMockServerPlayerInLevel();
+        adventurer.gameMode.changeGameModeForPlayer(GameType.ADVENTURE);
+        shot(helper, adventurer, new ItemStack(ModItems.FLARE_ARROW.get()), new Vec3(3.5, 4.0, 2.5), new Vec3(0, -3.0, 0));
+        helper.runAfterDelay(5, () -> {
+            if (lights(helper, new BlockPos(2, 1, 1), new BlockPos(4, 3, 3)) != 0) throw helper.assertionException("an Adventure player's flare should light nothing");
+            if (!watcher.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING)) throw helper.assertionException("an Adventure player's flare should still show the mobs");
+            watcher.removeAllEffects();
+            LivingEntity archer = husk(helper, 8.5, 8.5);
+            ServerPlayer target = helper.makeMockServerPlayerInLevel();
+            Vec3 at = helper.absoluteVec(new Vec3(8.5, 1, 6.5));
+            target.snapTo(at.x, at.y, at.z, 0, 0);
+            shot(helper, archer, new ItemStack(ModItems.FLARE_ARROW.get()), new Vec3(7.5, 4.0, 7.5), new Vec3(0, -3.0, 0));
+            helper.runAfterDelay(5, () -> {
+                if (!target.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING)) helper.fail("a husk's flare should set the player near it glowing");
+                else if (archer.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING) || watcher.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING))
+                    helper.fail("a husk's flare should not set the husks glowing");
+                else helper.succeed();
+            });
+        });
+    }
+
+    private static int lights(GameTestHelper helper, BlockPos from, BlockPos to) {
+        int n = 0;
+        for (BlockPos pos : BlockPos.betweenClosed(from, to))
+            if (helper.getBlockState(pos).is(ModBlocks.FLARE_LIGHT.get())) n++;
+        return n;
+    }
+
+    private static LivingEntity husk(GameTestHelper helper, double x, double z) {
+        Mob husk = helper.spawnWithNoFreeWill(EntityTypes.HUSK, new Vec3(x, 1, z));
+        for (EquipmentSlot slot : EquipmentSlot.values()) husk.setItemSlot(slot, ItemStack.EMPTY);
+        return husk;
+    }
+
+    /** An arrow of this item from the player, at a relative point, moving without gravity. */
+    private static AbstractArrow shot(GameTestHelper helper, Player player, net.minecraft.world.item.Item ammo, Vec3 at, Vec3 motion) {
+        return shot(helper, player, new ItemStack(ammo), at, motion);
+    }
+
+    /** An arrow of this stack from this shooter, at a relative point, moving without gravity. */
+    private static AbstractArrow shot(GameTestHelper helper, LivingEntity shooter, ItemStack ammo, Vec3 at, Vec3 motion) {
+        AbstractArrow arrow = ((ArrowItem) ammo.getItem()).createArrow(helper.getLevel(), ammo, shooter, null);
+        Vec3 from = helper.absoluteVec(at);
+        arrow.setPos(from.x, from.y, from.z);
+        arrow.setNoGravity(true);
+        arrow.setDeltaMovement(motion);
+        helper.getLevel().addFreshEntity(arrow);
+        return arrow;
     }
 
     private static RopeArrow rope(GameTestHelper helper, Player player, Vec3 at, Vec3 motion) {

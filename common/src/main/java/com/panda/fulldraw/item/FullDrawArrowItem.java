@@ -33,12 +33,19 @@ public class FullDrawArrowItem extends ArrowItem {
     private final Fired fired;
     private final Dispensed dispensed;
     private final int tooltipLines;
+    private final java.util.function.Supplier<Object[]> tooltipArgs;
 
     public FullDrawArrowItem(Properties properties, Fired fired, Dispensed dispensed, int tooltipLines) {
+        this(properties, fired, dispensed, tooltipLines, () -> new Object[0]);
+    }
+
+    /** With numbers for the tooltip's {@code %s}: what the server has set, read when the tooltip is drawn. */
+    public FullDrawArrowItem(Properties properties, Fired fired, Dispensed dispensed, int tooltipLines, java.util.function.Supplier<Object[]> tooltipArgs) {
         super(properties);
         this.fired = fired;
         this.dispensed = dispensed;
         this.tooltipLines = tooltipLines;
+        this.tooltipArgs = tooltipArgs;
     }
 
     @Override
@@ -57,6 +64,6 @@ public class FullDrawArrowItem extends ArrowItem {
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag) {
         super.appendHoverText(stack, context, display, lines, flag);
         for (int i = 0; i < tooltipLines; i++)
-            lines.accept(Component.translatable(getDescriptionId() + ".tooltip." + i).withStyle(ChatFormatting.GRAY));
+            lines.accept(Component.translatable(getDescriptionId() + ".tooltip." + i, tooltipArgs.get()).withStyle(ChatFormatting.GRAY));
     }
 }

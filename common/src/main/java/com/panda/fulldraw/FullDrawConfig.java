@@ -1,5 +1,6 @@
 package com.panda.fulldraw;
 
+import com.panda.fulldraw.logic.ArrowTraits;
 import com.panda.fulldraw.logic.ShotMath;
 
 /**
@@ -15,16 +16,26 @@ public final class FullDrawConfig {
 
         /** The shot pipeline's numbers. */
         ShotMath.Tuning tuning();
+
+        /** Blast Arrows break blocks (as TNT, where tnt_explodes allows; a mob's under mobGriefing); false: they only hurt and knock back. */
+        boolean blastArrowBreaksBlocks();
+
+        /** The most rope one Rope Arrow hangs, counting its knot. */
+        int ropeArrowLength();
     }
 
     public static final Source DEFAULTS = new Source() {
         @Override public boolean vanillaCritOnFullDraw() { return false; }
         @Override public ShotMath.Tuning tuning() { return ShotMath.DEFAULTS; }
+        @Override public boolean blastArrowBreaksBlocks() { return false; }
+        @Override public int ropeArrowLength() { return ArrowTraits.ROPE_LENGTH; }
     };
 
     private static Source source = DEFAULTS;
     /** The connected server's numbers, on a client; null when not connected. */
     private static ShotMath.Tuning remote;
+    /** The connected server's rope length, on a client; 0 when not connected. */
+    private static int remoteRopeLength;
 
     private FullDrawConfig() {}
 
@@ -32,9 +43,15 @@ public final class FullDrawConfig {
         source = loaderConfig;
     }
 
-    /** On the client: the server's numbers, or null on disconnect. */
-    public static void useRemote(ShotMath.Tuning serverTuning) {
+    /** On the client: the server's numbers, or null (and 0) on disconnect. */
+    public static void useRemote(ShotMath.Tuning serverTuning, int ropeLength) {
         remote = serverTuning;
+        remoteRopeLength = ropeLength;
+    }
+
+    /** The source the loader plugged in, so a test can wrap it and put it back. */
+    public static Source source() {
+        return source;
     }
 
     /** Whether this client has the server's numbers (for tests of the join sync). */
@@ -60,6 +77,20 @@ public final class FullDrawConfig {
 
     public static boolean vanillaCritOnFullDraw() {
         return source.vanillaCritOnFullDraw();
+    }
+
+    public static boolean blastArrowBreaksBlocks() {
+        return source.blastArrowBreaksBlocks();
+    }
+
+    /** The rope length the server hangs. */
+    public static int ropeArrowLength() {
+        return source.ropeArrowLength();
+    }
+
+    /** The rope length the client's tooltip states: the connected server's, or this side's own. */
+    public static int clientRopeArrowLength() {
+        return remoteRopeLength > 0 ? remoteRopeLength : source.ropeArrowLength();
     }
 
     /** The shot pipeline's numbers as this side's config has them now: what the server decides shots with. */

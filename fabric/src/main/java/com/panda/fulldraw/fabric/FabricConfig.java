@@ -8,12 +8,15 @@ import com.panda.fulldraw.logic.ShotMath;
  * rewritten with every key and comment. Clients on a server use the server's numbers.
  */
 final class FabricConfig implements FullDrawConfig.Source {
-    private final boolean vanillaCritOnFullDraw;
+    private final boolean vanillaCritOnFullDraw, blastArrowBreaksBlocks;
     private final ShotMath.Tuning tuning;
+    private final int ropeArrowLength;
 
-    private FabricConfig(boolean vanillaCritOnFullDraw, ShotMath.Tuning tuning) {
+    private FabricConfig(boolean vanillaCritOnFullDraw, ShotMath.Tuning tuning, boolean blastArrowBreaksBlocks, int ropeArrowLength) {
         this.vanillaCritOnFullDraw = vanillaCritOnFullDraw;
         this.tuning = tuning;
+        this.blastArrowBreaksBlocks = blastArrowBreaksBlocks;
+        this.ropeArrowLength = ropeArrowLength;
     }
 
     static FabricConfig load() {
@@ -34,9 +37,21 @@ final class FabricConfig implements FullDrawConfig.Source {
         double start = c.decimal("trembleStartSeconds", d.trembleStartSeconds(), 0.0, 60.0, "Seconds past full draw the tremble starts");
         double full = c.decimal("trembleFullSeconds", d.trembleFullSeconds(), 0.1, 120.0, "Seconds past full draw the tremble is at its worst");
         double max = c.decimal("trembleMaxSpread", d.trembleMaxSpread(), 0.0, 20.0, "Spread at the worst of the tremble (vanilla's bow is 1.0)");
+        boolean blast = c.bool("blastArrowBreaksBlocks", false, "Blast Arrows break blocks, as TNT does, where the tnt_explodes game rule allows (a mob's under mobGriefing); false means they only hurt and knock back");
+        int rope = c.integer("ropeArrowLength", com.panda.fulldraw.logic.ArrowTraits.ROPE_LENGTH, 1, 64, "The most rope one Rope Arrow hangs, counting its knot");
         c.save("Full Draw: server settings. Clients on this server use these numbers.");
         return new FabricConfig(crit, new ShotMath.Tuning(window, delay, perfect, mobs, players, cap, rangeStart, perBlock, rangeCap, pointBlank,
-                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max));
+                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope);
+    }
+
+    @Override
+    public boolean blastArrowBreaksBlocks() {
+        return blastArrowBreaksBlocks;
+    }
+
+    @Override
+    public int ropeArrowLength() {
+        return ropeArrowLength;
     }
 
     @Override

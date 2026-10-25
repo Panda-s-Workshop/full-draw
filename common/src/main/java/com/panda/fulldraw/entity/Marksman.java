@@ -1,5 +1,6 @@
 package com.panda.fulldraw.entity;
 
+import com.panda.fulldraw.FullDrawConfig;
 import com.panda.fulldraw.logic.MarksmanRules;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.registry.ModEnchantments;
@@ -105,6 +106,8 @@ public class Marksman extends AbstractSkeleton {
     private int stranded;
     /** Its last shots, in order, with the game time of each (for tests). */
     public final List<Loosed> loosed = new ArrayList<>();
+    /** How many projectiles its cover has turned away, each with the parapet's knock and chips (for tests). */
+    public int turnedAway;
 
     public record Loosed(MarksmanRules.Shot shot, long gameTime, int drawTicks) {}
 
@@ -127,7 +130,7 @@ public class Marksman extends AbstractSkeleton {
                 // an explosion its cover screens mustn't still push it out of the crenel's gap and off the tower
                 .add(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE, 1.0)
                 // the bow's end, for a foe on the battlements with it
-                .add(Attributes.ATTACK_DAMAGE, 3.0)
+                .add(Attributes.ATTACK_DAMAGE, MarksmanRules.BASH_DAMAGE)
                 .add(Attributes.ATTACK_KNOCKBACK, 1.2);
     }
 
@@ -166,6 +169,7 @@ public class Marksman extends AbstractSkeleton {
         setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
         populateDefaultEquipmentSlots(random, difficulty);
         setHome(blockPosition());
+        applyTuning();
         return result;
     }
 
@@ -284,6 +288,7 @@ public class Marksman extends AbstractSkeleton {
         projectile.setDeltaMovement(-motion.x * 0.05, 0.1, -motion.z * 0.05);
         projectile.needsSync = true;
         if (!(level() instanceof ServerLevel level)) return;
+        turnedAway++;
         level.playSound(null, projectile.getX(), projectile.getY(), projectile.getZ(), ModSounds.MARKSMAN_PARAPET.get(), getSoundSource(), 1.0F,
                 0.9F + random.nextFloat() * 0.2F);
         Crenel cover = coverAt();
@@ -531,7 +536,7 @@ public class Marksman extends AbstractSkeleton {
                 Vec3 tip = getEyePosition().add(getLookAngle().scale(0.9)).subtract(0.0, 0.25, 0.0);
                 level.sendParticles(GLINT, true, false, tip.x, tip.y, tip.z, 3, 0.04, 0.04, 0.04, 0.0);
             }
-            if (ticks < MarksmanRules.drawTicks(phaseTwo())) return;
+            if (ticks < FullDrawConfig.marksman().drawTicks(phaseTwo())) return;
             loose(shot, shot == MarksmanRules.Shot.BLAST ? foe.position() : shot == MarksmanRules.Shot.FLARE ? lastSeen.subtract(0, 1.5, 0)
                     : seen ? lead(foe.getEyePosition().subtract(0, 0.5, 0)) : lastSeen.subtract(0, 0.5, 0));
             last = at;
@@ -618,7 +623,7 @@ public class Marksman extends AbstractSkeleton {
                     BuiltInRegistries.ITEM.getKey(bow.isEmpty() ? Items.BOW : bow.getItem())));
             // a plain arrow's damage, not a mob's (which grows with the difficulty: the difficulty already scales what a
             // player takes)
-            arrow.setBaseDamage(MarksmanRules.ARROW_BASE_DAMAGE);
+            arrow.setBaseDamage(FullDrawConfig.marksman().arrowBaseDamage());
             arrow.setCritArrow(true);
         }
         arrow.setPos(eye.x, eye.y - 0.1, eye.z);
@@ -639,6 +644,7 @@ public class Marksman extends AbstractSkeleton {
         if (home == null) {
             setHome(blockPosition());
             if (getMainHandItem().isEmpty()) populateDefaultEquipmentSlots(random, level.getCurrentDifficultyAt(blockPosition()));
+            applyTuning();
         }
         // the parapet can be broken: look again for its crenels now and then
         if (tickCount % 200 == 0) {
@@ -649,6 +655,18 @@ public class Marksman extends AbstractSkeleton {
         stranded = off ? stranded + 1 : 0;
         if (stranded >= MarksmanRules.STRANDED_TICKS) backToPost(level);
         super.customServerAiStep(level);
+    }
+
+    /**
+     * The server's numbers for a new one: its health and its blow. One already met keeps its own. A new one at full
+     * health stays full; one a command summoned hurt keeps what it was given.
+     */
+    private void applyTuning() {
+        MarksmanRules.Tuning tuning = FullDrawConfig.marksman();
+        boolean full = getHealth() >= getMaxHealth();
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(tuning.health());
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(tuning.bashDamage());
+        if (full) setHealth(getMaxHealth());
     }
 
     /** Off its tower with no way up: it is back at its post, with a puff where it was and where it is. */

@@ -42,6 +42,17 @@ public final class MarksmanRules {
     /** An arrow's gravity and drag, as vanilla's. */
     public static final double ARROW_GRAVITY = 0.05;
     public static final double ARROW_DRAG = 0.99;
+    /** The bow's end, for a foe on the battlements with it. */
+    public static final double BASH_DAMAGE = 3.0;
+
+    /** The numbers a server can change: its health, its draw (and below half health), its arrow's base damage, its blow. */
+    public record Tuning(float health, int drawTicks, int drawTicksPhaseTwo, double arrowBaseDamage, double bashDamage) {
+        public int drawTicks(boolean phaseTwo) {
+            return phaseTwo ? drawTicksPhaseTwo : drawTicks;
+        }
+    }
+
+    public static final Tuning DEFAULTS = new Tuning(MAX_HEALTH, DRAW_TICKS, DRAW_TICKS_PHASE_TWO, ARROW_BASE_DAMAGE, BASH_DAMAGE);
 
     /** What its arrow deals on striking a player this far off, before armour: a Perfect shot, to the head or not. */
     public static double arrowDamage(double distance, boolean head, ShotMath.Tuning t) {

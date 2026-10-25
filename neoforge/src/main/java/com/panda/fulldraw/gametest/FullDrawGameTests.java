@@ -127,6 +127,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("marksman_bashes_a_foe_beside_it", () -> MarksmanGameTests::marksmanBashesAFoeBesideIt);
         FUNCTIONS.register("marksman_drops", () -> MarksmanGameTests::marksmanDrops);
         FUNCTIONS.register("marksman_kept_on_peaceful", () -> MarksmanGameTests::marksmanKeptOnPeaceful);
+        FUNCTIONS.register("marksman_follows_the_config", () -> MarksmanGameTests::marksmanFollowsTheConfig);
         // the enchantments
         FUNCTIONS.register("enchantments_registered", () -> EnchantmentGameTests::enchantmentsRegistered);
         FUNCTIONS.register("quickdraw_shortens_draw", () -> EnchantmentGameTests::quickdrawShortensDraw);
@@ -145,14 +146,14 @@ public final class FullDrawGameTests {
      * test's mobs would count too).
      */
     private static final java.util.Set<String> ALONE = java.util.Set.of("blast_arrow_explodes", "arrows_recovered_on_kill", "arrow_pickup_lifetime",
-            "harrier_spawn_rules", "bog_lurker_spawn_rules", "marksman_kept_on_peaceful");
+            "harrier_spawn_rules", "bog_lurker_spawn_rules", "marksman_kept_on_peaceful", "marksman_follows_the_config");
     /** Tests that need the open sky over their arena (every other test gets a barrier roof). */
     private static final java.util.Set<String> SKY = java.util.Set.of("harrier_spawn_rules", "bog_lurker_spawn_rules", "harrier_steep_dive_headshot",
             "harrier_dive_strikes_and_climbs");
     /** Tests that watch a mob through more than one round of what it does, or wait on the light: 10 s instead of 5. */
     private static final java.util.Set<String> LONG = java.util.Set.of("bog_lurker_spits_in_range", "bog_lurker_flees_close", "bog_lurker_dives_when_struck_from_afar",
             "bog_lurker_spawn_rules", "harrier_spawn_rules", "marksman_draws_perfect_shots", "marksman_phase_two", "marksman_on_the_watchtower",
-            "marksman_shoots_from_the_gap", "marksman_back_to_post");
+            "marksman_shoots_from_the_gap", "marksman_back_to_post", "marksman_follows_the_config");
 
     private FullDrawGameTests() {}
 

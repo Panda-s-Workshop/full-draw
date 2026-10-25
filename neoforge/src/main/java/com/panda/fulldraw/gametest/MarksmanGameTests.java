@@ -72,6 +72,8 @@ final class MarksmanGameTests {
             List<String> wrong = new ArrayList<>();
             if (lost(body) > 0) wrong.add("a body arrow on it ducked should be turned away, it lost " + lost(body));
             if (!bodyArrow.isAlive()) wrong.add("the arrow turned away should fall, not vanish");
+            if (body.turnedAway != 1) wrong.add("the arrow turned away should knock on the parapet once, with its chips: " + body.turnedAway);
+            if (head.turnedAway + standing.turnedAway + behind.turnedAway != 0) wrong.add("only the turned-away arrow should knock on the parapet");
             if (lost(head) <= 0) wrong.add("a head arrow on it ducked should land");
             if (lost(standing) <= 0) wrong.add("a body arrow on it standing should land");
             if (lost(behind) > 0) wrong.add("an explosion beyond the parapet should do it no harm, it lost " + lost(behind));
@@ -276,6 +278,46 @@ final class MarksmanGameTests {
     }
 
     /** Every death: the Marksman's Eye and a Recurve Bow with Deadeye II, 1 to 3 bones and 2 to 6 arrows. */
+    /**
+     * The server's numbers for it: with health 60, a 12-tick draw and a blow of 5 in the config, a new Marksman has 60
+     * health and a blow of 5, and draws for 12 ticks. (Alone: the config is the server's.)
+     */
+    static void marksmanFollowsTheConfig(GameTestHelper helper) {
+        com.panda.fulldraw.FullDrawConfig.Source before = com.panda.fulldraw.FullDrawConfig.source();
+        MarksmanRules.Tuning tuned = new MarksmanRules.Tuning(60.0F, 12, 10, 2.0, 5.0);
+        com.panda.fulldraw.FullDrawConfig.use(new com.panda.fulldraw.FullDrawConfig.Source() {
+            @Override public boolean vanillaCritOnFullDraw() { return before.vanillaCritOnFullDraw(); }
+            @Override public com.panda.fulldraw.logic.ShotMath.Tuning tuning() { return before.tuning(); }
+            @Override public boolean blastArrowBreaksBlocks() { return before.blastArrowBreaksBlocks(); }
+            @Override public int ropeArrowLength() { return before.ropeArrowLength(); }
+            @Override public double arrowRecoveryChance() { return before.arrowRecoveryChance(); }
+            @Override public int arrowPickupLifetimeSeconds() { return before.arrowPickupLifetimeSeconds(); }
+            @Override public boolean shieldbearerSpawns() { return before.shieldbearerSpawns(); }
+            @Override public boolean galeHarrierSpawns() { return before.galeHarrierSpawns(); }
+            @Override public boolean bogLurkerSpawns() { return before.bogLurkerSpawns(); }
+            @Override public MarksmanRules.Tuning marksman() { return tuned; }
+        });
+        LivingEntity foe = golem(helper, 1.5, 6.5);
+        Marksman marksman = helper.spawn(ModEntities.MARKSMAN.get(), new Vec3(10.5, 1, 6.5));
+        marksman.setTarget(foe);
+        float[] max = new float[1], health = new float[1];
+        double[] blow = new double[1];
+        // after its first tick, where one placed without a spawn takes the numbers
+        helper.runAfterDelay(5, () -> {
+            max[0] = marksman.getMaxHealth();
+            health[0] = marksman.getHealth();
+            blow[0] = marksman.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+        });
+        helper.runAfterDelay(150, () -> {
+            com.panda.fulldraw.FullDrawConfig.use(before);
+            if (max[0] != 60.0F || health[0] != 60.0F) helper.fail("a new Marksman should have the config's 60 health: " + health[0] + " of " + max[0]);
+            else if (blow[0] != 5.0) helper.fail("its blow should be the config's 5: " + blow[0]);
+            else if (marksman.loosed.isEmpty()) helper.fail("it should have loosed by now");
+            else if (Math.abs(marksman.loosed.getFirst().drawTicks() - 12) > 2) helper.fail("it should draw for the config's 12 ticks: " + marksman.loosed.getFirst());
+            else helper.succeed();
+        });
+    }
+
     /** Whether the Recurve is the Marksman's own: Deadeye II, named The Marksman's Recurve. */
     private static boolean prize(ItemStack stack) {
         var name = stack.get(net.minecraft.core.component.DataComponents.ITEM_NAME);

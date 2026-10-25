@@ -1,6 +1,7 @@
 package com.panda.fulldraw.neoforge;
 
 import com.panda.fulldraw.FullDrawConfig;
+import com.panda.fulldraw.logic.MarksmanRules;
 import com.panda.fulldraw.logic.ShotMath;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -81,6 +82,22 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
             .define("bogLurkerSpawns", true);
 
     static {
+        B.pop().comment("The Marksman (a new one takes these; one already met keeps its own health and blow)").push("marksman");
+    }
+
+    private static final MarksmanRules.Tuning M = MarksmanRules.DEFAULTS;
+    private static final ModConfigSpec.DoubleValue MARKSMAN_HEALTH = B.comment("The Marksman's health.")
+            .defineInRange("marksmanHealth", (double) M.health(), 1.0, 1024.0);
+    private static final ModConfigSpec.IntValue MARKSMAN_DRAW = B.comment("Ticks the Marksman draws in a crenel's gap before it looses.")
+            .defineInRange("marksmanDrawTicks", M.drawTicks(), 5, 200);
+    private static final ModConfigSpec.IntValue MARKSMAN_DRAW_TWO = B.comment("Ticks it draws below half its health.")
+            .defineInRange("marksmanDrawTicksPhaseTwo", M.drawTicksPhaseTwo(), 5, 200);
+    private static final ModConfigSpec.DoubleValue MARKSMAN_ARROW = B.comment("Its arrow's base damage (a skeleton's is 2.0; each of its shots is a Perfect one).")
+            .defineInRange("marksmanArrowBaseDamage", M.arrowBaseDamage(), 0.0, 20.0);
+    private static final ModConfigSpec.DoubleValue MARKSMAN_BASH = B.comment("The blow of its bow's end, for a foe on the battlements with it.")
+            .defineInRange("marksmanBashDamage", M.bashDamage(), 0.0, 64.0);
+
+    static {
         B.pop();
     }
 
@@ -119,6 +136,12 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
     @Override
     public boolean bogLurkerSpawns() {
         return SPEC.isLoaded() ? LURKER_SPAWNS.get() : FullDrawConfig.DEFAULTS.bogLurkerSpawns();
+    }
+
+    @Override
+    public MarksmanRules.Tuning marksman() {
+        return SPEC.isLoaded() ? new MarksmanRules.Tuning(MARKSMAN_HEALTH.get().floatValue(), MARKSMAN_DRAW.get(), MARKSMAN_DRAW_TWO.get(), MARKSMAN_ARROW.get(),
+                MARKSMAN_BASH.get()) : MarksmanRules.DEFAULTS;
     }
 
     @Override

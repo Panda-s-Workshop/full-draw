@@ -1,6 +1,7 @@
 package com.panda.fulldraw.fabric;
 
 import com.panda.fulldraw.FullDrawConfig;
+import com.panda.fulldraw.logic.MarksmanRules;
 import com.panda.fulldraw.logic.ShotMath;
 
 /**
@@ -12,10 +13,11 @@ final class FabricConfig implements FullDrawConfig.Source {
     private final ShotMath.Tuning tuning;
     private final int ropeArrowLength, arrowPickupLifetimeSeconds;
     private final double arrowRecoveryChance;
+    private final MarksmanRules.Tuning marksman;
 
     private FabricConfig(boolean vanillaCritOnFullDraw, ShotMath.Tuning tuning, boolean blastArrowBreaksBlocks, int ropeArrowLength,
                          double arrowRecoveryChance, int arrowPickupLifetimeSeconds, boolean shieldbearerSpawns, boolean galeHarrierSpawns,
-                         boolean bogLurkerSpawns) {
+                         boolean bogLurkerSpawns, MarksmanRules.Tuning marksman) {
         this.vanillaCritOnFullDraw = vanillaCritOnFullDraw;
         this.tuning = tuning;
         this.blastArrowBreaksBlocks = blastArrowBreaksBlocks;
@@ -25,6 +27,7 @@ final class FabricConfig implements FullDrawConfig.Source {
         this.shieldbearerSpawns = shieldbearerSpawns;
         this.galeHarrierSpawns = galeHarrierSpawns;
         this.bogLurkerSpawns = bogLurkerSpawns;
+        this.marksman = marksman;
     }
 
     static FabricConfig load() {
@@ -54,9 +57,16 @@ final class FabricConfig implements FullDrawConfig.Source {
         boolean harriers = c.bool("galeHarrierSpawns", true, "Gale Harriers spawn on their own over the windswept hills and peaks by day; false means only spawn eggs and commands make them");
         boolean lurkers = c.bool("bogLurkerSpawns", true, "Bog Lurkers spawn on their own in swamp water; false means only spawn eggs and commands make them");
         boolean bearers = c.bool("shieldbearerSpawns", true, "Shieldbearers join raids from the third wave and guard pillager outposts; false means only spawn eggs and commands make them");
+        MarksmanRules.Tuning m = MarksmanRules.DEFAULTS;
+        double health = c.decimal("marksmanHealth", m.health(), 1.0, 1024.0, "The Marksman's health (a new one takes these Marksman numbers; one already met keeps its own health and blow)");
+        int draw = c.integer("marksmanDrawTicks", m.drawTicks(), 5, 200, "Ticks the Marksman draws in a crenel's gap before it looses");
+        int drawTwo = c.integer("marksmanDrawTicksPhaseTwo", m.drawTicksPhaseTwo(), 5, 200, "Ticks it draws below half its health");
+        double arrow = c.decimal("marksmanArrowBaseDamage", m.arrowBaseDamage(), 0.0, 20.0, "Its arrow's base damage (a skeleton's is 2.0; each of its shots is a Perfect one)");
+        double bash = c.decimal("marksmanBashDamage", m.bashDamage(), 0.0, 64.0, "The blow of its bow's end, for a foe on the battlements with it");
         c.save("Full Draw: server settings. Clients on this server use these numbers.");
         return new FabricConfig(crit, new ShotMath.Tuning(window, delay, perfect, mobs, players, cap, rangeStart, perBlock, rangeCap, pointBlank,
-                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope, recovery, lifetime, bearers, harriers, lurkers);
+                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope, recovery, lifetime, bearers, harriers, lurkers,
+                new MarksmanRules.Tuning((float) health, draw, drawTwo, arrow, bash));
     }
 
     @Override
@@ -92,6 +102,11 @@ final class FabricConfig implements FullDrawConfig.Source {
     @Override
     public boolean bogLurkerSpawns() {
         return bogLurkerSpawns;
+    }
+
+    @Override
+    public MarksmanRules.Tuning marksman() {
+        return marksman;
     }
 
     @Override

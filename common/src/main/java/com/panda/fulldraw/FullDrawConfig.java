@@ -1,6 +1,7 @@
 package com.panda.fulldraw;
 
 import com.panda.fulldraw.logic.ArrowTraits;
+import com.panda.fulldraw.logic.MarksmanRules;
 import com.panda.fulldraw.logic.ShotMath;
 
 /**
@@ -37,6 +38,11 @@ public final class FullDrawConfig {
 
         /** Bog Lurkers spawn on their own in swamp water (false: only spawn eggs and commands make them). */
         boolean bogLurkerSpawns();
+
+        /** The Marksman's health, draw, arrow and blow. */
+        default MarksmanRules.Tuning marksman() {
+            return MarksmanRules.DEFAULTS;
+        }
     }
 
     public static final Source DEFAULTS = new Source() {
@@ -129,6 +135,10 @@ public final class FullDrawConfig {
 
     public static boolean bogLurkerSpawns() {
         return source.bogLurkerSpawns();
+    }
+
+    public static MarksmanRules.Tuning marksman() {
+        return source.marksman();
     }
 
     /** Whether the client is connected to a server that sent its recovery chance, so a server with Full Draw. */

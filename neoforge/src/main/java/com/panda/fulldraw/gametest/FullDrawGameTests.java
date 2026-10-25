@@ -105,6 +105,14 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("harrier_drops", () -> HarrierGameTests::harrierDrops);
         FUNCTIONS.register("harrier_drops_with_looting", () -> HarrierGameTests::harrierDropsWithLooting);
         FUNCTIONS.register("harrier_parts_craft", () -> HarrierGameTests::harrierPartsCraft);
+        FUNCTIONS.register("bog_lurker_eye_weak_spot", () -> LurkerGameTests::bogLurkerEyeWeakSpot);
+        FUNCTIONS.register("bog_lurker_body_through_water", () -> LurkerGameTests::bogLurkerBodyThroughWater);
+        FUNCTIONS.register("bog_lurker_spits_in_range", () -> LurkerGameTests::bogLurkerSpitsInRange);
+        FUNCTIONS.register("bog_lurker_holds_fire_too_close", () -> LurkerGameTests::bogLurkerHoldsFireTooClose);
+        FUNCTIONS.register("bog_lurker_flees_close", () -> LurkerGameTests::bogLurkerFleesClose);
+        FUNCTIONS.register("bog_lurker_saves", () -> LurkerGameTests::bogLurkerSaves);
+        FUNCTIONS.register("bog_lurker_spawn_rules", () -> LurkerGameTests::bogLurkerSpawnRules);
+        FUNCTIONS.register("bog_lurker_drops", () -> LurkerGameTests::bogLurkerDrops);
     }
 
     /**
@@ -112,10 +120,12 @@ public final class FullDrawGameTests {
      * test's mobs would count too).
      */
     private static final java.util.Set<String> ALONE = java.util.Set.of("blast_arrow_explodes", "arrows_recovered_on_kill", "arrow_pickup_lifetime",
-            "harrier_spawn_rules");
+            "harrier_spawn_rules", "bog_lurker_spawn_rules");
     /** Tests that need the open sky over their arena (every other test gets a barrier roof). */
-    private static final java.util.Set<String> SKY = java.util.Set.of("harrier_spawn_rules", "harrier_steep_dive_headshot",
+    private static final java.util.Set<String> SKY = java.util.Set.of("harrier_spawn_rules", "bog_lurker_spawn_rules", "harrier_steep_dive_headshot",
             "harrier_dive_strikes_and_climbs");
+    /** Tests that watch a mob through more than one round of what it does: 10 s instead of 5. */
+    private static final java.util.Set<String> LONG = java.util.Set.of("bog_lurker_spits_in_range", "bog_lurker_flees_close");
 
     private FullDrawGameTests() {}
 
@@ -134,7 +144,7 @@ public final class FullDrawGameTests {
             // that counts a mob about it runs alone so that no other test's mobs are about
             Holder<TestEnvironmentDefinition<?>> own = ALONE.contains(name) ? event.registerEnvironment(FullDrawMod.id("alone_" + name)) : env;
             event.registerTest(key.identifier(), new FunctionGameTestInstance(key, new TestData<>(own, net.minecraft.world.level.Level.OVERWORLD, ARENA,
-                    100, 0, true, net.minecraft.world.level.block.Rotation.NONE, false, 1, 1, SKY.contains(name), 0)));
+                    LONG.contains(name) ? 200 : 100, 0, true, net.minecraft.world.level.block.Rotation.NONE, false, 1, 1, SKY.contains(name), 0)));
         }
     }
 

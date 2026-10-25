@@ -77,6 +77,8 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
             .define("shieldbearerSpawns", true);
     private static final ModConfigSpec.BooleanValue HARRIER_SPAWNS = B.comment("Gale Harriers spawn on their own over the windswept hills and peaks by day. false: only spawn eggs and commands make them.")
             .define("galeHarrierSpawns", true);
+    private static final ModConfigSpec.BooleanValue LURKER_SPAWNS = B.comment("Bog Lurkers spawn on their own in swamp water. false: only spawn eggs and commands make them.")
+            .define("bogLurkerSpawns", true);
 
     static {
         B.pop();
@@ -112,6 +114,11 @@ public final class NeoForgeConfig implements FullDrawConfig.Source {
     @Override
     public boolean galeHarrierSpawns() {
         return SPEC.isLoaded() ? HARRIER_SPAWNS.get() : FullDrawConfig.DEFAULTS.galeHarrierSpawns();
+    }
+
+    @Override
+    public boolean bogLurkerSpawns() {
+        return SPEC.isLoaded() ? LURKER_SPAWNS.get() : FullDrawConfig.DEFAULTS.bogLurkerSpawns();
     }
 
     @Override

@@ -8,13 +8,14 @@ import com.panda.fulldraw.logic.ShotMath;
  * rewritten with every key and comment. Clients on a server use the server's numbers.
  */
 final class FabricConfig implements FullDrawConfig.Source {
-    private final boolean vanillaCritOnFullDraw, blastArrowBreaksBlocks, shieldbearerSpawns, galeHarrierSpawns;
+    private final boolean vanillaCritOnFullDraw, blastArrowBreaksBlocks, shieldbearerSpawns, galeHarrierSpawns, bogLurkerSpawns;
     private final ShotMath.Tuning tuning;
     private final int ropeArrowLength, arrowPickupLifetimeSeconds;
     private final double arrowRecoveryChance;
 
     private FabricConfig(boolean vanillaCritOnFullDraw, ShotMath.Tuning tuning, boolean blastArrowBreaksBlocks, int ropeArrowLength,
-                         double arrowRecoveryChance, int arrowPickupLifetimeSeconds, boolean shieldbearerSpawns, boolean galeHarrierSpawns) {
+                         double arrowRecoveryChance, int arrowPickupLifetimeSeconds, boolean shieldbearerSpawns, boolean galeHarrierSpawns,
+                         boolean bogLurkerSpawns) {
         this.vanillaCritOnFullDraw = vanillaCritOnFullDraw;
         this.tuning = tuning;
         this.blastArrowBreaksBlocks = blastArrowBreaksBlocks;
@@ -23,6 +24,7 @@ final class FabricConfig implements FullDrawConfig.Source {
         this.arrowPickupLifetimeSeconds = arrowPickupLifetimeSeconds;
         this.shieldbearerSpawns = shieldbearerSpawns;
         this.galeHarrierSpawns = galeHarrierSpawns;
+        this.bogLurkerSpawns = bogLurkerSpawns;
     }
 
     static FabricConfig load() {
@@ -50,10 +52,11 @@ final class FabricConfig implements FullDrawConfig.Source {
         int lifetime = c.integer("arrowPickupLifetimeSeconds", com.panda.fulldraw.logic.ArrowTraits.PICKUP_LIFETIME_SECONDS, 1, com.panda.fulldraw.logic.ArrowTraits.MAX_PICKUP_LIFETIME_SECONDS,
                 "Seconds an arrow a player can pick up stays in a block (vanilla: 60)");
         boolean harriers = c.bool("galeHarrierSpawns", true, "Gale Harriers spawn on their own over the windswept hills and peaks by day; false means only spawn eggs and commands make them");
+        boolean lurkers = c.bool("bogLurkerSpawns", true, "Bog Lurkers spawn on their own in swamp water; false means only spawn eggs and commands make them");
         boolean bearers = c.bool("shieldbearerSpawns", true, "Shieldbearers join raids from the third wave and guard pillager outposts; false means only spawn eggs and commands make them");
         c.save("Full Draw: server settings. Clients on this server use these numbers.");
         return new FabricConfig(crit, new ShotMath.Tuning(window, delay, perfect, mobs, players, cap, rangeStart, perBlock, rangeCap, pointBlank,
-                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope, recovery, lifetime, bearers, harriers);
+                pointBlankMult, start, FullDrawConfig.trembleFull(start, full), max), blast, rope, recovery, lifetime, bearers, harriers, lurkers);
     }
 
     @Override
@@ -84,6 +87,11 @@ final class FabricConfig implements FullDrawConfig.Source {
     @Override
     public boolean galeHarrierSpawns() {
         return galeHarrierSpawns;
+    }
+
+    @Override
+    public boolean bogLurkerSpawns() {
+        return bogLurkerSpawns;
     }
 
     @Override

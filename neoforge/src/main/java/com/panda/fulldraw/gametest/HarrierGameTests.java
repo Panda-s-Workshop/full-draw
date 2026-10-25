@@ -254,10 +254,13 @@ final class HarrierGameTests {
                 without.add(home.identifier().getPath());
         }
         if (!without.isEmpty()) throw helper.assertionException("these biomes' monster spawns should list it: " + without);
-        // a roof over one spot; sky light takes a few ticks to follow a block
+        // a roof over one spot; sky light follows a block some ticks later (more under load), so the checks wait for it
         helper.setBlock(new BlockPos(9, 5, 9), Blocks.STONE);
-        helper.runAfterDelay(10, () -> {
-            BlockPos open = helper.absolutePos(new BlockPos(3, 1, 3)), roofed = helper.absolutePos(new BlockPos(9, 1, 9));
+        BlockPos open = helper.absolutePos(new BlockPos(3, 1, 3)), roofed = helper.absolutePos(new BlockPos(9, 1, 9));
+        boolean[] settled = {false};
+        helper.onEachTick(() -> {
+            if (settled[0] || level.canSeeSky(roofed)) return;
+            settled[0] = true;
             // a harrier from an earlier test that flew off before it was cleared would count toward the cap
             level.getEntitiesOfClass(GaleHarrier.class, new net.minecraft.world.phys.AABB(open).inflate(ModEntities.HARRIER_CAP_RADIUS)).forEach(GaleHarrier::discard);
             List<String> wrong = new ArrayList<>();
@@ -454,6 +457,7 @@ final class HarrierGameTests {
             @Override public int arrowPickupLifetimeSeconds() { return before.arrowPickupLifetimeSeconds(); }
             @Override public boolean shieldbearerSpawns() { return before.shieldbearerSpawns(); }
             @Override public boolean galeHarrierSpawns() { return false; }
+            @Override public boolean bogLurkerSpawns() { return before.bogLurkerSpawns(); }
         };
     }
 

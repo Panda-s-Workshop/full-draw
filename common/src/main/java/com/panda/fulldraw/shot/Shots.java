@@ -1,7 +1,9 @@
 package com.panda.fulldraw.shot;
 
 import com.panda.fulldraw.FullDrawConfig;
+import com.panda.fulldraw.entity.BogLurker;
 import com.panda.fulldraw.entity.GaleHarrier;
+import com.panda.fulldraw.logic.LurkerRules;
 import com.panda.fulldraw.logic.ShotMath;
 import com.panda.fulldraw.logic.WeakSpot;
 import com.panda.fulldraw.logic.WeaponStats;
@@ -134,6 +136,10 @@ public final class Shots {
             // a small burst where the weak spot was struck, for the shooter and anyone watching
             Vec3 at = impact.location();
             level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 10, 0.05, 0.05, 0.05, 0.35);
+        } else if (impact.precisionMult() < 1.0 && owner != null && owner.level() instanceof ServerLevel level) {
+            // the water took some of the blow: a splash where it struck
+            Vec3 at = impact.location();
+            level.sendParticles(ParticleTypes.SPLASH, at.x, at.y + 0.2, at.z, 14, 0.15, 0.05, 0.15, 0.1);
         }
         if (!(owner instanceof ServerPlayer player)) return;
         FullDrawNetwork.send(player, new FullDrawNetwork.ShotResult(shot.perfect(), impact.precision(), (float) impact.distance(), damage));
@@ -160,10 +166,16 @@ public final class Shots {
         return ShotMath.movementMult(shooter.isSprinting(), !shooter.onGround(), shooter.isShiftKeyDown(), dx * dx + dz * dz);
     }
 
-    /** Where an arrow hit: whether it found a weak spot, and how far it flew. */
+    /**
+     * Where an arrow hit: whether it found a weak spot, what the place it struck multiplies its damage by (a weak spot's
+     * bonus, or less where something stands between, as water over a Bog Lurker's body), and how far it flew.
+     */
     public record Impact(boolean precision, double precisionMult, double distance, Vec3 location) {}
 
-    /** Measures an impact against the target's weak spots and the shot's origin (3.5). */
+    /**
+     * Measures an impact against the target's weak spots and the shot's origin: a weak spot struck is a precision hit, and
+     * the distance is how far the arrow flew from where it was loosed.
+     */
     public static Impact impact(ShotRecord shot, Entity target, Vec3 location, Vec3 direction) {
         double distance = shot.origin().distanceTo(location);
         if (!(target instanceof LivingEntity living)) return new Impact(false, 1.0, distance, location);
@@ -174,7 +186,13 @@ public final class Shots {
                 ? harrier.diveHeadshot(location)
                 : WeakSpot.onSilhouette(dx, dy, dz, direction.x, direction.z, target.getBbWidth(), target.getBbHeight())
                         && spot.hit(dx, dy, dz, living.yBodyRot, target.getBbWidth(), target.getBbHeight());
-        if (!hit) return new Impact(false, 1.0, distance, location);
+        // a Bog Lurker's eyes are a weak spot only above the water: sunk, the water stands between them and the arrow
+        if (hit && target instanceof BogLurker lurker && lurker.belowSurface(location)) hit = false;
+        if (!hit) {
+            // a Bog Lurker's body under the water: the water takes half the blow
+            double through = target instanceof BogLurker lurker && lurker.belowSurface(location) ? LurkerRules.SUBMERGED_BODY_MULT : 1.0;
+            return new Impact(false, through, distance, location);
+        }
         ShotMath.Tuning t = FullDrawConfig.tuning();
         double mult = spot.multiplier() > 0 ? spot.multiplier() : target instanceof Player ? t.precisionPlayers() : t.precisionMobs();
         return new Impact(true, mult, distance, location);

@@ -54,10 +54,12 @@ public final class FullDrawClient {
             com.panda.fulldraw.client.FullDrawArrowRenderer.register(renderers);
             com.panda.fulldraw.client.ShieldbearerRenderer.registerRenderers(renderers);
             com.panda.fulldraw.client.GaleHarrierRenderer.registerRenderers(renderers);
+            com.panda.fulldraw.client.BogLurkerRenderer.registerRenderers(renderers);
         });
         modBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions e) -> {
             com.panda.fulldraw.client.ShieldbearerRenderer.registerLayers(e::registerLayerDefinition);
             com.panda.fulldraw.client.GaleHarrierRenderer.registerLayers(e::registerLayerDefinition);
+            com.panda.fulldraw.client.BogLurkerRenderer.registerLayers(e::registerLayerDefinition);
         });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterMenuScreensEvent e) ->
                 e.register(com.panda.fulldraw.registry.ModMenus.FLETCHING.get(), com.panda.fulldraw.client.FletchingScreen::new));

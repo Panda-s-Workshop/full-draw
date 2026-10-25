@@ -668,5 +668,180 @@
         "pitch": 0.6
       }
     ]
+  },
+  "bog_lurker_ambient": {
+    "subtitle": "subtitles.fulldraw.bog_lurker_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:mob/frog/idle1",
+        "volume": 0.9,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:mob/frog/idle2",
+        "volume": 0.9,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:mob/frog/idle3",
+        "volume": 0.9,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:mob/frog/idle4",
+        "volume": 0.9,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:mob/frog/idle5",
+        "volume": 0.9,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:mob/frog/idle6",
+        "volume": 0.9,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:mob/frog/idle7",
+        "volume": 0.9,
+        "pitch": 0.55
+      },
+      {
+        "name": "minecraft:mob/frog/idle8",
+        "volume": 0.9,
+        "pitch": 0.55
+      }
+    ]
+  },
+  "bog_lurker_gurgle": {
+    "subtitle": "subtitles.fulldraw.bog_lurker_gurgle",
+    "sounds": [
+      {
+        "name": "minecraft:block/bubble_column/bubble1",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:block/bubble_column/bubble2",
+        "volume": 1.0,
+        "pitch": 0.7
+      },
+      {
+        "name": "minecraft:block/bubble_column/bubble3",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "bog_lurker_spit": {
+    "subtitle": "subtitles.fulldraw.bog_lurker_spit",
+    "sounds": [
+      {
+        "name": "minecraft:mob/llama/spit1",
+        "volume": 1.0,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:mob/llama/spit2",
+        "volume": 1.0,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "bog_lurker_spit_hit": {
+    "subtitle": "subtitles.fulldraw.bog_lurker_spit_hit",
+    "sounds": [
+      {
+        "name": "minecraft:mob/slime/small1",
+        "volume": 0.8,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:mob/slime/small2",
+        "volume": 0.8,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:mob/slime/small3",
+        "volume": 0.8,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:mob/slime/small4",
+        "volume": 0.8,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:mob/slime/small5",
+        "volume": 0.8,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "bog_lurker_sink": {
+    "subtitle": "subtitles.fulldraw.bog_lurker_sink",
+    "sounds": [
+      {
+        "name": "minecraft:liquid/splash",
+        "volume": 0.7,
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:liquid/splash2",
+        "volume": 0.7,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "bog_lurker_hurt": {
+    "subtitle": "subtitles.fulldraw.bog_lurker_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:mob/frog/hurt1",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/frog/hurt2",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/frog/hurt3",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/frog/hurt4",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/frog/hurt5",
+        "volume": 1.0,
+        "pitch": 0.6
+      }
+    ]
+  },
+  "bog_lurker_death": {
+    "subtitle": "subtitles.fulldraw.bog_lurker_death",
+    "sounds": [
+      {
+        "name": "minecraft:mob/frog/death1",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/frog/death2",
+        "volume": 1.0,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:mob/frog/death3",
+        "volume": 1.0,
+        "pitch": 0.6
+      }
+    ]
   }
 }

@@ -45,6 +45,13 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> HARRIER_LAND = sound("gale_harrier_land");
     public static final DeferredHolder<SoundEvent, SoundEvent> HARRIER_HURT = sound("gale_harrier_hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> HARRIER_DEATH = sound("gale_harrier_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LURKER_AMBIENT = sound("bog_lurker_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LURKER_GURGLE = sound("bog_lurker_gurgle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LURKER_SPIT = sound("bog_lurker_spit");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LURKER_SPIT_HIT = sound("bog_lurker_spit_hit");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LURKER_SINK = sound("bog_lurker_sink");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LURKER_HURT = sound("bog_lurker_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> LURKER_DEATH = sound("bog_lurker_death");
     public static final DeferredHolder<SoundEvent, SoundEvent> FLARE = sound("flare");
 
     private ModSounds() {}

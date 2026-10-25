@@ -79,12 +79,12 @@ final class FletchingGameTests {
      * Every Fletching recipe loads, and each is found from its parts: 8 vanilla arrows from flint, a stick and a feather,
      * 8 Broadheads from two iron nuggets, 8 Bodkins from an iron ingot, 8 Blunts from any wool, 4 Rope Arrows with four
      * string in the extra slot, 4 Flare Arrows from glowstone dust with a Harrier Feather, 4 Blast Arrows from two
-     * gunpowder with a Harrier Talon. One nugget makes no Broadhead, and a plain arrow's parts with string in the extra
-     * slot make nothing.
+     * gunpowder with a Harrier Talon, and 8 Flare Arrows with a Bog Eye in the feather's place. One nugget makes no
+     * Broadhead, and a plain arrow's parts with string in the extra slot make nothing.
      */
     static void fletchingRecipesLoad(GameTestHelper helper) {
         var recipes = helper.getLevel().recipeAccess().getRecipes().stream().filter(r -> r.value() instanceof FletchingRecipe).toList();
-        if (recipes.size() != 7) throw helper.assertionException("expected 7 Fletching recipes, found " + recipes.size());
+        if (recipes.size() != 8) throw helper.assertionException("expected 8 Fletching recipes, found " + recipes.size());
         // a part its slot's tag leaves out can't be put in: the generator writes both from one table
         var untagged = FletchingMenu.untaggedParts(helper.getLevel());
         if (!untagged.isEmpty()) throw helper.assertionException("recipe parts missing from their slot tags: " + untagged);
@@ -104,6 +104,9 @@ final class FletchingGameTests {
             if (!made.is(entry.getKey()) || made.getCount() != counts.get(entry.getKey()))
                 throw helper.assertionException(entry.getKey() + "'s parts make " + made + ", expected " + counts.get(entry.getKey()));
         }
+        ItemStack fromEye = find(helper, new FletchingInput(new ItemStack(Items.GLOWSTONE_DUST), stick, feather, new ItemStack(ModItems.BOG_EYE.get())));
+        if (!fromEye.is(ModItems.FLARE_ARROW.get()) || fromEye.getCount() != 8)
+            throw helper.assertionException("glowstone dust with a Bog Eye should make 8 Flare Arrows, made " + fromEye);
         if (!find(helper, new FletchingInput(new ItemStack(Items.IRON_NUGGET), stick, feather, ItemStack.EMPTY)).isEmpty())
             throw helper.assertionException("one iron nugget, a stick and a feather should make nothing");
         if (!find(helper, new FletchingInput(new ItemStack(Items.FLINT), stick, feather, new ItemStack(Items.STRING))).isEmpty())

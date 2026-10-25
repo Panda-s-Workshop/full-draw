@@ -5,6 +5,8 @@ import com.panda.fulldraw.FullDrawMod;
 import com.panda.fulldraw.entity.BluntArrow;
 import com.panda.fulldraw.entity.BlastArrow;
 import com.panda.fulldraw.entity.BodkinArrow;
+import com.panda.fulldraw.entity.BogLurker;
+import com.panda.fulldraw.entity.BogSpit;
 import com.panda.fulldraw.entity.FlareArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
 import com.panda.fulldraw.entity.FullDrawArrow;
@@ -59,6 +61,14 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<GaleHarrier>> GALE_HARRIER = ENTITIES.registerEntityType("gale_harrier",
             GaleHarrier::new, MobCategory.MONSTER, b -> b.sized(1.0F, 0.6F).eyeHeight(0.35F).clientTrackingRange(10).notInPeaceful());
 
+    /** A frog-like ambusher of swamp water, a little wider than it is tall; its eyes are the top of its box. */
+    public static final DeferredHolder<EntityType<?>, EntityType<BogLurker>> BOG_LURKER = ENTITIES.registerEntityType("bog_lurker",
+            BogLurker::new, MobCategory.MONSTER, b -> b.sized(0.9F, 0.65F).eyeHeight(0.55F).clientTrackingRange(8).notInPeaceful());
+
+    /** A Bog Lurker's glob, sized and updated as a snowball. */
+    public static final DeferredHolder<EntityType<?>, EntityType<BogSpit>> BOG_SPIT = ENTITIES.registerEntityType("bog_spit",
+            BogSpit::new, MobCategory.MISC, b -> b.noLootTable().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10));
+
     /** Where Gale Harriers spawn: windswept hills and the high peaks. */
     public static final net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome> HARRIER_BIOMES =
             net.minecraft.tags.TagKey.create(Registries.BIOME, FullDrawMod.id("spawns/gale_harrier"));
@@ -68,6 +78,16 @@ public final class ModEntities {
     /** At most this many Gale Harriers hunt within {@link #HARRIER_CAP_RADIUS} blocks of each other. */
     public static final int HARRIER_CAP = 2;
     public static final double HARRIER_CAP_RADIUS = 96.0;
+
+    /** Where Bog Lurkers spawn: swamps and mangrove swamps. */
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.level.biome.Biome> LURKER_BIOMES =
+            net.minecraft.tags.TagKey.create(Registries.BIOME, FullDrawMod.id("spawns/bog_lurker"));
+    /** Their weight among a swamp's monsters (zombies, skeletons, spiders and creepers are about 100 each). */
+    public static final int LURKER_WEIGHT = 20;
+
+    /** At most this many Bog Lurkers lie within {@link #LURKER_CAP_RADIUS} blocks of each other. */
+    public static final int LURKER_CAP = 3;
+    public static final double LURKER_CAP_RADIUS = 32.0;
 
     /** Outposts keep at most one Shieldbearer about them, among their pillagers. */
     public static final double OUTPOST_GUARD_RADIUS = 48.0;
@@ -83,6 +103,7 @@ public final class ModEntities {
     public static void attributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> sink) {
         sink.accept(SHIELDBEARER.get(), Shieldbearer.createAttributes().build());
         sink.accept(GALE_HARRIER.get(), GaleHarrier.createAttributes().build());
+        sink.accept(BOG_LURKER.get(), BogLurker.createAttributes().build());
     }
 
     /** Where a mob may spawn on its own, for the loader's spawn placement registration. */
@@ -94,6 +115,7 @@ public final class ModEntities {
     public static void spawnRules(SpawnRules rules) {
         rules.set(SHIELDBEARER.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntities::outpostGuard);
         rules.set(GALE_HARRIER.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ModEntities::harrierSky);
+        rules.set(BOG_LURKER.get(), SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, ModEntities::lurkerWater);
     }
 
     private static boolean outpostGuard(EntityType<Shieldbearer> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
@@ -111,6 +133,24 @@ public final class ModEntities {
         if (!FullDrawConfig.galeHarrierSpawns() || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) return false;
         if (!level.getLevel().isBrightOutside() || !level.canSeeSky(pos)) return false;
         return level.getEntitiesOfClass(GaleHarrier.class, new AABB(pos).inflate(HARRIER_CAP_RADIUS)).size() < HARRIER_CAP;
+    }
+
+    /**
+     * Bog Lurkers rise in swamp water open to the sky, by day or night, no more than {@link #LURKER_CAP} to a stretch of
+     * swamp: never in a flooded cave or aquifer under one. Spawn eggs and commands work anywhere.
+     */
+    private static boolean lurkerWater(EntityType<BogLurker> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
+        if (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION) return true;
+        if (!FullDrawConfig.bogLurkerSpawns() || level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) return false;
+        if (!level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER) || !openWater(level, pos)) return false;
+        return level.getEntitiesOfClass(BogLurker.class, new AABB(pos).inflate(LURKER_CAP_RADIUS)).size() < LURKER_CAP;
+    }
+
+    /** Whether the water at {@code pos} lies open to the sky: what is over the top of its column sees the sky. */
+    private static boolean openWater(ServerLevelAccessor level, BlockPos pos) {
+        BlockPos top = pos;
+        for (int up = 0; up < 64 && level.getFluidState(top.above()).is(net.minecraft.tags.FluidTags.WATER); up++) top = top.above();
+        return level.canSeeSky(top.above());
     }
 
     /**

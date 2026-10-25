@@ -33,6 +33,9 @@ public final class FullDrawFabricClient implements ClientModInitializer {
         com.panda.fulldraw.client.GaleHarrierRenderer.registerRenderers(renderers);
         com.panda.fulldraw.client.GaleHarrierRenderer.registerLayers((layer, definition) ->
                 net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(layer, definition::get));
+        com.panda.fulldraw.client.BogLurkerRenderer.registerRenderers(renderers);
+        com.panda.fulldraw.client.BogLurkerRenderer.registerLayers((layer, definition) ->
+                net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(layer, definition::get));
         ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> DevExit.onClientStopping());
         com.panda.fulldraw.FullDrawClientConfig.use(FabricClientConfig.load());
         // Fabric API has no hook for item model properties; vanilla's registry is open until the models load

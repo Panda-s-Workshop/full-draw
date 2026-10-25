@@ -34,6 +34,9 @@ public final class FullDrawConfig {
 
         /** Gale Harriers spawn on their own over the windswept hills and peaks (false: only spawn eggs and commands make them). */
         boolean galeHarrierSpawns();
+
+        /** Bog Lurkers spawn on their own in swamp water (false: only spawn eggs and commands make them). */
+        boolean bogLurkerSpawns();
     }
 
     public static final Source DEFAULTS = new Source() {
@@ -45,6 +48,7 @@ public final class FullDrawConfig {
         @Override public int arrowPickupLifetimeSeconds() { return ArrowTraits.PICKUP_LIFETIME_SECONDS; }
         @Override public boolean shieldbearerSpawns() { return true; }
         @Override public boolean galeHarrierSpawns() { return true; }
+        @Override public boolean bogLurkerSpawns() { return true; }
     };
 
     private static Source source = DEFAULTS;
@@ -121,6 +125,10 @@ public final class FullDrawConfig {
 
     public static boolean galeHarrierSpawns() {
         return source.galeHarrierSpawns();
+    }
+
+    public static boolean bogLurkerSpawns() {
+        return source.bogLurkerSpawns();
     }
 
     /** Whether the client is connected to a server that sent its recovery chance, so a server with Full Draw. */

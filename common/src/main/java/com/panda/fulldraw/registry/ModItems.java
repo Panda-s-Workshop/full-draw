@@ -88,6 +88,12 @@ public final class ModItems {
     /** A Gale Harrier's talon: the Blast Arrow's extra part, and the Repeating Crossbow's trigger. */
     public static final DeferredItem<Item> HARRIER_TALON = ITEMS.registerItem("harrier_talon", Item::new);
 
+    /** A Bog Lurker's glowing eye: a Flare Arrow's extra part in place of a Harrier Feather, for twice the arrows. */
+    public static final DeferredItem<Item> BOG_EYE = ITEMS.registerItem("bog_eye", Item::new);
+
+    public static final DeferredItem<Item> BOG_LURKER_SPAWN_EGG = ITEMS.registerItem("bog_lurker_spawn_egg", Item::new,
+            p -> p.spawnEgg(ModEntities.BOG_LURKER.get()));
+
     public static final DeferredItem<Item> GALE_HARRIER_SPAWN_EGG = ITEMS.registerItem("gale_harrier_spawn_egg", Item::new,
             p -> p.spawnEgg(ModEntities.GALE_HARRIER.get()));
 

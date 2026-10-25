@@ -41,8 +41,15 @@ public class BroadheadArrow extends FullDrawArrow {
         int remaining = open == null ? 0 : open.getDuration();
         int ticks = ArrowTraits.bleedTicks(remaining, target.getArmorValue());
         if (ticks <= remaining) return;
-        // faint particles, as a beacon's: the wound shows without filling the bleeder's own view
-        target.addEffect(new MobEffectInstance(ModEffects.BLEEDING.holder(), ticks, 0, true, true, true), getEffectSource());
+        target.addEffect(wound(ticks), getEffectSource());
+    }
+
+    /**
+     * A wound's Bleeding: none of an effect's swirl (it filled the bleeder's own view; the effect's drips show the wound)
+     * and not ambient (that would frame its icon as a beacon's), the icon shown.
+     */
+    public static MobEffectInstance wound(int ticks) {
+        return new MobEffectInstance(ModEffects.BLEEDING.holder(), ticks, 0, false, false, true);
     }
 
     @Override

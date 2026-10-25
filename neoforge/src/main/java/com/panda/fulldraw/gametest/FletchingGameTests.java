@@ -165,6 +165,12 @@ final class FletchingGameTests {
         boolean broadhead = hints.stream().anyMatch(h -> h.result() == ModItems.BROADHEAD_ARROW.get() && h.slot() == FletchingMenu.HEAD && h.count() == 2 && h.item() == Items.IRON_NUGGET);
         boolean rope = hints.stream().anyMatch(h -> h.result() == ModItems.ROPE_ARROW.get() && h.slot() == FletchingMenu.EXTRA && h.count() == 4 && h.item() == Items.STRING);
         if (!broadhead || !rope) throw helper.assertionException("one nugget, a stick and a feather should hint at 2 nuggets and at 4 string: " + hints);
+        // a hint's item ids reach the client as shorts: ids of a pack with more items than a short holds come back whole
+        for (int id : new int[] {-1, 0, 1, 32767, 32768, 40000, 65535, 70000, 1 << 20}) {
+            int[] halves = FletchingMenu.idHalves(id);
+            if (halves[0] > Short.MAX_VALUE || halves[1] > Short.MAX_VALUE || FletchingMenu.idFromHalves((short) halves[0], (short) halves[1]) != id)
+                throw helper.assertionException("item id " + id + " should pass through two shorts: " + halves[0] + ", " + halves[1]);
+        }
 
         menu.getSlot(FletchingMenu.HEAD).set(new ItemStack(Items.FLINT));
         for (int i = 0; i < player.getInventory().getContainerSize() - 5; i++) player.getInventory().setItem(i, new ItemStack(Items.DIRT, 64));

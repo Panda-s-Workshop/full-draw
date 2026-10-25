@@ -46,12 +46,16 @@ public class FletchingMenu extends ItemCombinerMenu {
     public static final List<TagKey<Item>> SLOT_TAGS = List.of(tag("heads"), tag("shafts"), tag("fletchings"), tag("extras"));
     /** At most this many near misses are hinted at once. */
     public static final int HINTS = 2;
-    /** A hint's four numbers: the arrow it would make, the slot short of it, how many it needs there, of which item. */
-    private static final int HINT_RESULT = 0, HINT_SLOT = 1, HINT_COUNT = 2, HINT_ITEM = 3, HINT_SIZE = 4;
+    /**
+     * A hint's numbers: the arrow it would make, the slot short of it, how many it needs there, of which item. An item id
+     * takes two slots: a menu's data goes to the client as shorts (on Fabric with nothing to carry more), so ids past
+     * 32767 in a big pack would come back wrong.
+     */
+    private static final int HINT_RESULT = 0, HINT_SLOT = 2, HINT_COUNT = 3, HINT_ITEM = 4, HINT_SIZE = 6;
 
     private final Level level;
     private final DataSlot recipeError = DataSlot.standalone();
-    /** {@link #HINTS} hints of {@link #HINT_SIZE} numbers each; a result of -1 means none. */
+    /** {@link #HINTS} hints of {@link #HINT_SIZE} numbers each; a result of -1 (sent as 0) means none. */
     private final DataSlot[] hints = new DataSlot[HINTS * HINT_SIZE];
     @Nullable
     private RecipeHolder<FletchingRecipe> current;
@@ -67,7 +71,7 @@ public class FletchingMenu extends ItemCombinerMenu {
         super(ModMenus.FLETCHING.get(), id, inventory, access, slots());
         this.level = inventory.player.level();
         addDataSlot(recipeError).set(0);
-        for (int i = 0; i < hints.length; i++) addDataSlot(hints[i] = DataSlot.standalone()).set(-1);
+        for (int i = 0; i < hints.length; i++) addDataSlot(hints[i] = DataSlot.standalone()).set(0);
     }
 
     /** What a Fletching Table at this spot opens. */
@@ -149,7 +153,11 @@ public class FletchingMenu extends ItemCombinerMenu {
             List<int[]> near = current == null && assembled ? nearMisses(server, input) : List.of();
             for (int h = 0; h < HINTS; h++) {
                 int[] hint = h < near.size() ? near.get(h) : new int[] {-1, -1, 0, -1};
-                for (int n = 0; n < HINT_SIZE; n++) hints[h * HINT_SIZE + n].set(hint[n]);
+                int base = h * HINT_SIZE;
+                putId(base + HINT_RESULT, hint[0]);
+                hints[base + HINT_SLOT].set(hint[1]);
+                hints[base + HINT_COUNT].set(hint[2]);
+                putId(base + HINT_ITEM, hint[3]);
             }
         }
     }
@@ -189,13 +197,33 @@ public class FletchingMenu extends ItemCombinerMenu {
     public List<Hint> hints() {
         List<Hint> out = new ArrayList<>();
         for (int h = 0; h < HINTS; h++) {
-            int result = hints[h * HINT_SIZE + HINT_RESULT].get();
+            int result = id(h * HINT_SIZE + HINT_RESULT);
             if (result < 0) continue;
-            int item = hints[h * HINT_SIZE + HINT_ITEM].get();
+            int item = id(h * HINT_SIZE + HINT_ITEM);
             out.add(new Hint(BuiltInRegistries.ITEM.byId(result), hints[h * HINT_SIZE + HINT_SLOT].get(), hints[h * HINT_SIZE + HINT_COUNT].get(),
                     item < 0 ? Items.AIR : BuiltInRegistries.ITEM.byId(item)));
         }
         return out;
+    }
+
+    private void putId(int at, int id) {
+        int[] halves = idHalves(id);
+        hints[at].set(halves[0]);
+        hints[at + 1].set(halves[1]);
+    }
+
+    private int id(int at) {
+        return idFromHalves(hints[at].get(), hints[at + 1].get());
+    }
+
+    /** An item id (or -1) as two numbers of 15 bits, each a short can carry. */
+    public static int[] idHalves(int id) {
+        int value = id + 1;
+        return new int[] {value & 0x7FFF, value >>> 15};
+    }
+
+    public static int idFromHalves(int low, int high) {
+        return ((high & 0x7FFF) << 15 | low & 0x7FFF) - 1;
     }
 
     /** A near miss: {@code result} needs {@code count} of {@code item} in {@code slot}; a count of 0 means that slot must be empty. */

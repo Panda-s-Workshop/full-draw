@@ -30,6 +30,7 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> REPEATER_CLICK = sound("repeater_click");
     public static final DeferredHolder<SoundEvent, SoundEvent> BOLT_PIERCE = sound("bolt_pierce");
     public static final DeferredHolder<SoundEvent, SoundEvent> BOLT_ARMOUR = sound("bolt_armour");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROPE_PLACE = sound("rope_place");
 
     private ModSounds() {}
 

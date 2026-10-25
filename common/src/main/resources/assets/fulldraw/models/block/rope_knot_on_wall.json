@@ -1,0 +1,6 @@
+{
+  "parent": "fulldraw:block/template_rope_knot_on_wall",
+  "textures": {
+    "texture": "fulldraw:block/rope_knot"
+  }
+}

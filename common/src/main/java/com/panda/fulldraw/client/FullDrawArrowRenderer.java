@@ -31,6 +31,7 @@ public class FullDrawArrowRenderer<T extends AbstractArrow> extends ArrowRendere
         sink.register(ModEntities.BROADHEAD_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("broadhead_arrow")));
         sink.register(ModEntities.BODKIN_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("bodkin_arrow")));
         sink.register(ModEntities.BLUNT_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("blunt_arrow")));
+        sink.register(ModEntities.ROPE_ARROW.get(), context -> new FullDrawArrowRenderer<>(context, texture("rope_arrow")));
     }
 
     private static Identifier texture(String id) {

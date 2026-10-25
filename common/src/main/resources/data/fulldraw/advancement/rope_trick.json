@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "fulldraw:event",
+      "conditions": {
+        "event": "rope_trick"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "fulldraw:rope_arrow"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.rope_trick.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.rope_trick.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "fulldraw:root"
+}

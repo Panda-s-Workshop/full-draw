@@ -5,6 +5,7 @@ import com.panda.fulldraw.entity.BluntArrow;
 import com.panda.fulldraw.entity.BodkinArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
 import com.panda.fulldraw.entity.FullDrawArrow;
+import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.platform.registry.DeferredHolder;
 import com.panda.fulldraw.platform.registry.DeferredRegister;
 import net.minecraft.world.entity.EntityType;
@@ -16,6 +17,7 @@ public final class ModEntities {
     public static final DeferredHolder<EntityType<?>, EntityType<BroadheadArrow>> BROADHEAD_ARROW = arrow("broadhead_arrow", BroadheadArrow::new);
     public static final DeferredHolder<EntityType<?>, EntityType<BodkinArrow>> BODKIN_ARROW = arrow("bodkin_arrow", BodkinArrow::new);
     public static final DeferredHolder<EntityType<?>, EntityType<BluntArrow>> BLUNT_ARROW = arrow("blunt_arrow", BluntArrow::new);
+    public static final DeferredHolder<EntityType<?>, EntityType<RopeArrow>> ROPE_ARROW = arrow("rope_arrow", RopeArrow::new);
 
     private ModEntities() {}
 

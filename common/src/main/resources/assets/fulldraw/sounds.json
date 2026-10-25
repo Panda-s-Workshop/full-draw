@@ -293,5 +293,25 @@
         "pitch": 1.9
       }
     ]
+  },
+  "rope_place": {
+    "subtitle": "subtitles.fulldraw.rope_place",
+    "sounds": [
+      {
+        "name": "minecraft:entity/leashknot/leash1",
+        "volume": 0.9,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:entity/leashknot/leash2",
+        "volume": 0.9,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:entity/leashknot/leash3",
+        "volume": 0.9,
+        "pitch": 0.85
+      }
+    ]
   }
 }

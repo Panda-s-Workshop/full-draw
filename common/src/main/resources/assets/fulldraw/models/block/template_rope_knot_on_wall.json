@@ -1,0 +1,162 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "#texture",
+    "all": "#texture",
+    "peg": "minecraft:block/iron_block"
+  },
+  "elements": [
+    {
+      "from": [
+        6.5,
+        0,
+        3
+      ],
+      "to": [
+        9.5,
+        16,
+        3
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          3
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "shade_direction_override": "up",
+      "faces": {
+        "north": {
+          "uv": [
+            3,
+            0,
+            0,
+            16
+          ],
+          "texture": "#all"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            3,
+            16
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        0,
+        1.5
+      ],
+      "to": [
+        8,
+        16,
+        4.5
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          3
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "shade_direction_override": "up",
+      "faces": {
+        "west": {
+          "uv": [
+            6,
+            0,
+            3,
+            16
+          ],
+          "texture": "#all"
+        },
+        "east": {
+          "uv": [
+            3,
+            0,
+            6,
+            16
+          ],
+          "texture": "#all"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        12.5,
+        0
+      ],
+      "to": [
+        9,
+        14.5,
+        3.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#peg"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#peg"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            3.5,
+            2
+          ],
+          "texture": "#peg"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            3.5,
+            2
+          ],
+          "texture": "#peg"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            3.5,
+            2
+          ],
+          "texture": "#peg"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            3.5,
+            2
+          ],
+          "texture": "#peg"
+        }
+      }
+    }
+  ]
+}

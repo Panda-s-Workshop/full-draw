@@ -1,7 +1,10 @@
 package com.panda.fulldraw.gametest;
 
 import com.panda.fulldraw.entity.BodkinArrow;
+import com.panda.fulldraw.block.RopeBlock;
 import com.panda.fulldraw.entity.BroadheadArrow;
+import com.panda.fulldraw.entity.RopeArrow;
+import com.panda.fulldraw.registry.ModBlocks;
 import com.panda.fulldraw.registry.ModEffects;
 import com.panda.fulldraw.registry.ModItems;
 import com.panda.fulldraw.shot.ShotHolder;
@@ -11,6 +14,8 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -19,6 +24,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BowItem;
@@ -29,6 +35,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -212,6 +219,164 @@ final class ArrowGameTests {
         ((ShotHolder) arrow).fulldraw$setShot(new com.panda.fulldraw.shot.ShotRecord(true, from.add(0, 0, -10), 1.0, 1.0, 0.0,
                 net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(Items.BOW)));
         helper.getLevel().addFreshEntity(arrow);
+    }
+
+    /**
+     * A Rope Arrow into the side of a wall 5 blocks up ties a rope there that hangs to the floor (a knot over four more),
+     * climbable, hanging against the wall, and the arrow is spent; one shot up into a block's underside hangs a rope in
+     * the middle of the block below it; one shot down into the floor's top stays an arrow and hangs nothing.
+     */
+    static void ropeArrowPlacesRope(GameTestHelper helper) {
+        for (int x = 2; x <= 4; x++)
+            for (int y = 1; y <= 6; y++) helper.setBlock(new BlockPos(x, y, 9), Blocks.STONE);
+        Player player = shooter(helper);
+        RopeArrow wall = rope(helper, player, new Vec3(3.5, 5.5, 2.5), new Vec3(0, 0, 3.0));
+        RopeArrow floor = rope(helper, player, new Vec3(7.5, 4.0, 4.5), new Vec3(0, -3.0, 0));
+        helper.setBlock(new BlockPos(9, 6, 2), Blocks.STONE);
+        rope(helper, player, new Vec3(9.5, 2.0, 2.5), new Vec3(0, 3.0, 0));
+        helper.runAfterDelay(10, () -> {
+            for (int y = 1; y <= 5; y++) {
+                var state = helper.getBlockState(new BlockPos(3, y, 8));
+                if (!state.is(ModBlocks.ROPE.get())) throw helper.assertionException("no rope at y " + y + " under the arrow: " + state);
+                if (state.getValue(RopeBlock.KNOT) != (y == 5)) throw helper.assertionException("only the top rope is the knot, y " + y);
+                if (!state.is(BlockTags.CLIMBABLE)) throw helper.assertionException("the rope should be climbable");
+                if (state.getValue(RopeBlock.TIED) != Direction.SOUTH) throw helper.assertionException("the rope should hang against the wall: " + state);
+            }
+            if (helper.getBlockState(new BlockPos(3, 6, 8)).is(ModBlocks.ROPE.get())) throw helper.assertionException("rope above the knot");
+            for (int y = 1; y <= 5; y++) {
+                var state = helper.getBlockState(new BlockPos(9, y, 2));
+                if (!state.is(ModBlocks.ROPE.get()) || state.getValue(RopeBlock.TIED) != Direction.UP)
+                    throw helper.assertionException("an arrow into a ceiling should hang a rope in the middle, y " + y + ": " + state);
+            }
+            if (!wall.isRemoved()) throw helper.assertionException("the arrow that hung the rope should be spent");
+            if (floor.isRemoved()) throw helper.assertionException("an arrow in the floor's top should stay to be picked up");
+            if (helper.getBlockState(new BlockPos(7, 1, 4)).is(ModBlocks.ROPE.get())) throw helper.assertionException("an arrow in the floor hung rope");
+            helper.succeed();
+        });
+    }
+
+    /**
+     * A rope tied under a ceiling and stopped by a block above the floor; with the block gone, a rope used on the rope
+     * adds one at the bottom; a player breaking the knot takes every rope below with it, all four as items. Lose the
+     * ceiling and a hanging rope falls, one item a rope. Collecting stops at another knot (a rope tied to a wall right
+     * below keeps hanging), a creative player's break drops nothing, and rope burns.
+     */
+    static void ropeComesDownTogether(GameTestHelper helper) {
+        helper.setBlock(new BlockPos(3, 6, 3), Blocks.STONE);
+        helper.setBlock(new BlockPos(3, 2, 3), Blocks.STONE);
+        int hung = ModBlocks.ROPE.get().hang(helper.getLevel(), helper.absolutePos(new BlockPos(3, 5, 3)), Direction.UP);
+        if (hung != 3) throw helper.assertionException("a rope from y 5 should stop on the block at y 2: " + hung);
+        helper.setBlock(new BlockPos(3, 2, 3), Blocks.AIR);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ItemStack coil = new ItemStack(ModItems.ROPE.get(), 2);
+        player.setItemInHand(InteractionHand.MAIN_HAND, coil);
+        BlockPos top = helper.absolutePos(new BlockPos(3, 5, 3));
+        var result = helper.getLevel().getBlockState(top).useItemOn(coil, helper.getLevel(), player, InteractionHand.MAIN_HAND,
+                new BlockHitResult(Vec3.atCenterOf(top), Direction.NORTH, top, false));
+        if (!result.consumesAction() || !helper.getBlockState(new BlockPos(3, 2, 3)).is(ModBlocks.ROPE.get()))
+            throw helper.assertionException("a rope used on the rope should hang one more at the bottom: " + result);
+        if (coil.getCount() != 1) throw helper.assertionException("hanging a rope by hand should use one: " + coil.getCount());
+
+        ServerPlayer breaker = helper.makeMockServerPlayerInLevel();
+        breaker.gameMode.changeGameModeForPlayer(GameType.SURVIVAL);
+        breaker.gameMode.destroyBlock(top);
+        for (int y = 2; y <= 5; y++)
+            if (!helper.getBlockState(new BlockPos(3, y, 3)).isAir()) throw helper.assertionException("rope left at y " + y + " after breaking the knot");
+
+        helper.setBlock(new BlockPos(8, 6, 8), Blocks.STONE);
+        int second = ModBlocks.ROPE.get().hang(helper.getLevel(), helper.absolutePos(new BlockPos(8, 5, 8)), Direction.UP);
+        helper.setBlock(new BlockPos(8, 6, 8), Blocks.AIR);
+
+        // a rope under a ceiling stopped at y 3; then a rope tied to a wall at y 3, right below it
+        helper.setBlock(new BlockPos(10, 6, 3), Blocks.STONE);
+        helper.setBlock(new BlockPos(10, 3, 3), Blocks.STONE);
+        ModBlocks.ROPE.get().hang(helper.getLevel(), helper.absolutePos(new BlockPos(10, 5, 3)), Direction.UP);
+        helper.setBlock(new BlockPos(10, 3, 3), Blocks.AIR);
+        helper.setBlock(new BlockPos(10, 3, 2), Blocks.STONE);
+        ModBlocks.ROPE.get().hang(helper.getLevel(), helper.absolutePos(new BlockPos(10, 3, 3)), Direction.NORTH);
+        breaker.gameMode.destroyBlock(helper.absolutePos(new BlockPos(10, 5, 3)));
+        for (int y = 1; y <= 3; y++)
+            if (!helper.getBlockState(new BlockPos(10, y, 3)).is(ModBlocks.ROPE.get())) throw helper.assertionException("collecting went past another knot, y " + y);
+        if (!helper.getBlockState(new BlockPos(10, 4, 3)).isAir()) throw helper.assertionException("the rope below the broken knot is still there");
+        ServerPlayer builder = helper.makeMockServerPlayerInLevel();
+        builder.gameMode.changeGameModeForPlayer(GameType.CREATIVE);
+        builder.gameMode.destroyBlock(helper.absolutePos(new BlockPos(10, 3, 3)));
+        if (!helper.getBlockState(new BlockPos(10, 1, 3)).isAir()) throw helper.assertionException("a creative break should take the rope below too");
+        int burns = ((net.minecraft.world.level.block.FireBlock) Blocks.FIRE).getBurnOdds(ModBlocks.ROPE.get().defaultBlockState());
+        if (burns <= 0) throw helper.assertionException("rope should burn");
+        helper.runAfterDelay(5, () -> {
+            int separate = ropes(helper, new BlockPos(10, 3, 3));
+            int knot = ropes(helper, new BlockPos(3, 3, 3)), fell = ropes(helper, new BlockPos(8, 3, 8));
+            if (separate != 2) helper.fail("the survival break should drop its own 2 and the creative one none, found " + separate + ": " + drops(helper));
+            else if (knot != 4) helper.fail("breaking the knot should drop all four ropes, dropped " + knot + ": " + drops(helper));
+            else if (second != 5 || fell != 5) helper.fail("a rope losing its ceiling should fall, one item a rope: hung " + second + ", dropped " + fell);
+            else if (!helper.getBlockState(new BlockPos(8, 1, 8)).isAir()) helper.fail("the fallen rope is still there");
+            else helper.succeed();
+        });
+    }
+
+    /**
+     * Rope Arrows into a wall, five lanes: a survival player's hangs a rope and earns Rope Trick; a Multishot copy, one
+     * into a spot already taken (a light block), one into a fence's side (not solid) and an Adventure player's each stay
+     * an arrow and hang nothing.
+     */
+    static void ropeArrowRefusals(GameTestHelper helper) {
+        for (int x = 2; x <= 10; x++)
+            for (int y = 1; y <= 6; y++) helper.setBlock(new BlockPos(x, y, 9), Blocks.STONE);
+        helper.setBlock(new BlockPos(1, 4, 9), Blocks.OAK_FENCE);
+        helper.setBlock(new BlockPos(7, 4, 8), Blocks.LIGHT);
+        ServerPlayer builder = helper.makeMockServerPlayerInLevel(), visitor = helper.makeMockServerPlayerInLevel();
+        builder.gameMode.changeGameModeForPlayer(GameType.SURVIVAL);
+        visitor.gameMode.changeGameModeForPlayer(GameType.ADVENTURE);
+        Player archer = helper.makeMockPlayer(GameType.SURVIVAL);
+        RopeArrow paid = rope(helper, builder, new Vec3(3.5, 4.5, 2.5), new Vec3(0, 0, 3.0));
+        ItemStack copy = new ItemStack(ModItems.ROPE_ARROW.get());
+        copy.set(net.minecraft.core.component.DataComponents.INTANGIBLE_PROJECTILE, net.minecraft.util.Unit.INSTANCE);
+        List<RopeArrow> kept = List.of(rope(helper, archer, copy, new Vec3(5.5, 4.5, 2.5), new Vec3(0, 0, 3.0)),
+                rope(helper, archer, new Vec3(7.5, 4.5, 2.5), new Vec3(0, 0, 3.0)),
+                rope(helper, archer, new Vec3(1.5, 4.5, 2.5), new Vec3(0, 0, 3.0)),
+                rope(helper, visitor, new Vec3(9.5, 4.5, 2.5), new Vec3(0, 0, 3.0)));
+        helper.runAfterDelay(10, () -> {
+            for (int y = 1; y <= 4; y++)
+                if (!helper.getBlockState(new BlockPos(3, y, 8)).is(ModBlocks.ROPE.get())) throw helper.assertionException("the survival player's arrow hung no rope at y " + y);
+            if (!paid.isRemoved()) throw helper.assertionException("the arrow that hung the rope should be spent");
+            var trick = helper.getLevel().getServer().getAdvancements().get(com.panda.fulldraw.FullDrawMod.id("rope_trick"));
+            if (trick == null || !builder.getAdvancements().getOrStartProgress(trick).isDone()) throw helper.assertionException("hanging a rope should earn Rope Trick");
+            String[] why = {"a Multishot copy", "an arrow into a taken spot", "an arrow into a fence", "an Adventure player's arrow"};
+            int[] lane = {5, 7, 1, 9};
+            for (int i = 0; i < lane.length; i++) {
+                for (int y = 1; y <= 5; y++)
+                    if (helper.getBlockState(new BlockPos(lane[i], y, 8)).is(ModBlocks.ROPE.get())) throw helper.assertionException(why[i] + " hung rope");
+                if (kept.get(i).isRemoved()) throw helper.assertionException(why[i] + " should stay an arrow");
+            }
+            helper.succeed();
+        });
+    }
+
+    private static RopeArrow rope(GameTestHelper helper, Player player, Vec3 at, Vec3 motion) {
+        return rope(helper, player, new ItemStack(ModItems.ROPE_ARROW.get()), at, motion);
+    }
+
+    private static RopeArrow rope(GameTestHelper helper, Player player, ItemStack stack, Vec3 at, Vec3 motion) {
+        RopeArrow arrow = (RopeArrow) ((ArrowItem) ModItems.ROPE_ARROW.get()).createArrow(helper.getLevel(), stack, player, null);
+        Vec3 from = helper.absoluteVec(at);
+        arrow.setPos(from.x, from.y, from.z);
+        arrow.setNoGravity(true);
+        arrow.setDeltaMovement(motion);
+        helper.getLevel().addFreshEntity(arrow);
+        return arrow;
+    }
+
+    /** Every rope item in the arena, where it lies, for a failure message. */
+    private static String drops(GameTestHelper helper) {
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(16)).stream()
+                .map(e -> e.getItem().getCount() + " " + e.getItem().getItem() + " at " + helper.relativeVec(e.position())).toList().toString();
+    }
+
+    /** Rope items lying within 1.5 blocks of the column through pos, 4 up or down. */
+    private static int ropes(GameTestHelper helper, BlockPos pos) {
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(pos)).inflate(1.5, 4, 1.5),
+                e -> e.getItem().is(ModItems.ROPE.get())).stream().mapToInt(e -> e.getItem().getCount()).sum();
     }
 
     /** A husk 6 blocks down the arena's z axis at x, its armour points set, nothing worn. */

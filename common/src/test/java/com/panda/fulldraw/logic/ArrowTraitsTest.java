@@ -44,6 +44,15 @@ class ArrowTraitsTest {
     }
 
     @Test
+    void ropeHangsToTheFirstBlockOrItsLength() {
+        assertEquals(ArrowTraits.ROPE_LENGTH, ArrowTraits.ropeLength(i -> true), "open all the way down");
+        assertEquals(24, ArrowTraits.ROPE_LENGTH);
+        assertEquals(5, ArrowTraits.ropeLength(i -> i < 5), "stops on the floor");
+        assertEquals(0, ArrowTraits.ropeLength(i -> false), "no room for the knot");
+        assertEquals(0.5, ArrowTraits.ROPE.multFor(6.0, 15), EPS, "a weak hit, armour or not");
+    }
+
+    @Test
     void bleedIsOneASecondForFourSeconds() {
         assertEquals(4, ArrowTraits.BLEED_TICKS / ArrowTraits.BLEED_INTERVAL);
         assertEquals(1.0F, ArrowTraits.BLEED_DAMAGE);
@@ -70,6 +79,8 @@ class ArrowTraitsTest {
         assertTrue(lang.contains("1 damage a second for 4 s"), "bleed tooltip");
         assertTrue(lang.contains("×0.8 damage, but 60% of armour"), "bodkin tooltip");
         assertTrue(lang.contains("1 damage, whatever the bow or the shot"), "blunt tooltip");
+        assertTrue(lang.contains("×0.5 damage"), "rope arrow tooltip");
+        assertTrue(lang.contains("hangs a rope down to " + ArrowTraits.ROPE_LENGTH + " blocks"), "rope length tooltip");
     }
 
     /** Vanilla's {@code CombatRules.getDamageAfterAbsorb} with no toughness. */

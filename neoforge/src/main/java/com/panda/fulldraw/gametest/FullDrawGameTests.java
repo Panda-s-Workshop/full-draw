@@ -66,6 +66,9 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("blunt_cancels_creeper", () -> ArrowGameTests::bluntCancelsCreeper);
         FUNCTIONS.register("arrow_heads_in_the_pipeline", () -> ArrowGameTests::arrowHeadsInThePipeline);
         FUNCTIONS.register("blunt_interrupts_archer", () -> ArrowGameTests::bluntInterruptsArcher);
+        FUNCTIONS.register("rope_arrow_places_rope", () -> ArrowGameTests::ropeArrowPlacesRope);
+        FUNCTIONS.register("rope_comes_down_together", () -> ArrowGameTests::ropeComesDownTogether);
+        FUNCTIONS.register("rope_arrow_refusals", () -> ArrowGameTests::ropeArrowRefusals);
     }
 
     private FullDrawGameTests() {}

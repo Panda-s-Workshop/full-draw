@@ -5,6 +5,7 @@ import com.panda.fulldraw.item.FullDrawBowItem;
 import com.panda.fulldraw.entity.BluntArrow;
 import com.panda.fulldraw.entity.BodkinArrow;
 import com.panda.fulldraw.entity.BroadheadArrow;
+import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.item.FullDrawArrowItem;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import com.panda.fulldraw.item.QuiverItem;
@@ -15,6 +16,7 @@ import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.platform.registry.DeferredItem;
 import com.panda.fulldraw.platform.registry.DeferredRegister;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.UseEffects;
 
@@ -47,7 +49,7 @@ public final class ModItems {
             p -> new RepeatingCrossbowItem(p, WeaponStats.REPEATING_CROSSBOW, Magazine.REPEATING_CROSSBOW),
             p -> p.stacksTo(1).durability(520).component(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).enchantable(1));
 
-    /** A wide cutting head: ×1.5 on bare flesh down to ×0.75 on plate, and the wound bleeds. */
+    /** A wide cutting head: ×1.25 on bare flesh down to ×0.75 on plate, and the wound bleeds. */
     public static final DeferredItem<FullDrawArrowItem> BROADHEAD_ARROW = ITEMS.registerItem("broadhead_arrow",
             p -> new FullDrawArrowItem(p, BroadheadArrow::new, BroadheadArrow::new, 2));
 
@@ -58,6 +60,13 @@ public final class ModItems {
     /** A padded head: 1 damage, a hard shove, and the target's attack starts over. */
     public static final DeferredItem<FullDrawArrowItem> BLUNT_ARROW = ITEMS.registerItem("blunt_arrow",
             p -> new FullDrawArrowItem(p, BluntArrow::new, BluntArrow::new, 2));
+
+    /** A coil of rope behind a hook: hangs a rope where it strikes a wall or a ceiling. */
+    public static final DeferredItem<FullDrawArrowItem> ROPE_ARROW = ITEMS.registerItem("rope_arrow",
+            p -> new FullDrawArrowItem(p, RopeArrow::new, RopeArrow::new, 2));
+
+    /** Rope taken down from a Rope Arrow's column, to hang by hand: under a ledge, on a wall, or below more rope. */
+    public static final DeferredItem<BlockItem> ROPE = ITEMS.registerSimpleBlockItem(ModBlocks.ROPE);
 
     /** Four kinds of arrows anywhere in the inventory, R picks which one the bow draws. */
     public static final DeferredItem<QuiverItem> QUIVER = ITEMS.registerItem("quiver", QuiverItem::new, p -> p.stacksTo(1));

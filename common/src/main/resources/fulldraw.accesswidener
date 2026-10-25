@@ -11,3 +11,6 @@ accessible field net/minecraft/world/entity/projectile/arrow/AbstractArrow baseD
 accessible field net/minecraft/world/entity/monster/Creeper swell I
 accessible field net/minecraft/world/entity/monster/Creeper oldSwell I
 accessible method net/minecraft/world/entity/ai/goal/MeleeAttackGoal resetAttackCooldown ()V
+# rope burns as wool does: vanilla keeps what burns in the fire block's own table
+accessible method net/minecraft/world/level/block/FireBlock setFlammable (Lnet/minecraft/world/level/block/Block;II)V
+accessible method net/minecraft/world/level/block/FireBlock getBurnOdds (Lnet/minecraft/world/level/block/state/BlockState;)I

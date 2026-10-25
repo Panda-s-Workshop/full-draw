@@ -1,0 +1,40 @@
+{
+  "variants": {
+    "knot=true,tied=up": {
+      "model": "fulldraw:block/rope_knot"
+    },
+    "knot=true,tied=north": {
+      "model": "fulldraw:block/rope_knot_on_wall"
+    },
+    "knot=true,tied=east": {
+      "model": "fulldraw:block/rope_knot_on_wall",
+      "y": 90
+    },
+    "knot=true,tied=south": {
+      "model": "fulldraw:block/rope_knot_on_wall",
+      "y": 180
+    },
+    "knot=true,tied=west": {
+      "model": "fulldraw:block/rope_knot_on_wall",
+      "y": 270
+    },
+    "knot=false,tied=up": {
+      "model": "fulldraw:block/rope"
+    },
+    "knot=false,tied=north": {
+      "model": "fulldraw:block/rope_on_wall"
+    },
+    "knot=false,tied=east": {
+      "model": "fulldraw:block/rope_on_wall",
+      "y": 90
+    },
+    "knot=false,tied=south": {
+      "model": "fulldraw:block/rope_on_wall",
+      "y": 180
+    },
+    "knot=false,tied=west": {
+      "model": "fulldraw:block/rope_on_wall",
+      "y": 270
+    }
+  }
+}

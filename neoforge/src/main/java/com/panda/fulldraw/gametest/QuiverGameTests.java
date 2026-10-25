@@ -46,6 +46,22 @@ final class QuiverGameTests {
         helper.succeed();
     }
 
+    /** A quiver holding Broadheads and Bodkins, Bodkins selected, gives the bow a Bodkin; cycled, a Broadhead. */
+    static void quiverSuppliesNewArrows(GameTestHelper helper) {
+        Player player = archer(helper);
+        ItemStack quiver = new ItemStack(ModItems.QUIVER.get());
+        Quivers.set(quiver, QuiverContents.EMPTY.insert(new ItemStack(ModItems.BROADHEAD_ARROW.get()), 4).insert(new ItemStack(ModItems.BODKIN_ARROW.get()), 4).cycle(1));
+        player.getInventory().add(quiver);
+        AbstractArrow first = release(helper, player);
+        if (!(first instanceof com.panda.fulldraw.entity.BodkinArrow)) helper.fail("expected the quiver's selected Bodkin, got " + first.getType());
+        Quivers.set(Quivers.find(player), Quivers.contents(Quivers.find(player)).cycle(1));
+        AbstractArrow second = release(helper, player);
+        if (!(second instanceof com.panda.fulldraw.entity.BroadheadArrow)) helper.fail("cycled, expected a Broadhead, got " + second.getType());
+        QuiverContents after = Quivers.contents(Quivers.find(player));
+        if (after.stacks().get(0).count() != 3 || after.stacks().get(1).count() != 3) helper.fail("one of each should be spent: " + after);
+        helper.succeed();
+    }
+
     /**
      * Shooting a quiver's last arrow of a kind drops that kind and selects the next; cycling one kind or none does
      * nothing; cycling wraps.

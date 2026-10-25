@@ -45,12 +45,16 @@ public class RepeatingCrossbowItem extends FullDrawCrossbowItem {
         return weapon.getItem() instanceof RepeatingCrossbowItem repeater && Weapons.inPipeline(weapon) ? repeater.magazine : null;
     }
 
+    /** Ammo a magazine takes one at a time ({@code fulldraw:loads_alone}: the Blast Arrow and firework rockets). */
+    public static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> LOADS_ALONE =
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, com.panda.fulldraw.FullDrawMod.id("loads_alone"));
+
     /**
-     * Ammo that loads alone, a crank for one shot: a magazine of Blast Arrows would stack five explosions past any
-     * Arbalest bolt, so one comes first in a magazine by itself and the drawing stops before one.
+     * Ammo that loads alone, a crank for one shot: a magazine of explosions (Blast Arrows, rockets) would stack five of
+     * them past any Arbalest bolt, so one comes first in a magazine by itself and the drawing stops before one.
      */
     public static boolean loadsAlone(ItemStack ammo) {
-        return ammo.is(ModItems.BLAST_ARROW.get());
+        return ammo.is(LOADS_ALONE);
     }
 
     /** Shots still in the magazine (the sprite's pips, the tooltip). */

@@ -322,7 +322,7 @@ final class CrossbowGameTests {
 
     /**
      * A Blast Arrow loads alone: a crank on Blast Arrows loads one shot, and a crank on two arrows with Blast Arrows
-     * behind them loads the two arrows and stops.
+     * behind them loads the two arrows and stops. Firework rockets in the off hand load alone too.
      */
     static void repeaterLoadsBlastAlone(GameTestHelper helper) {
         Player player = shooter(helper, new Vec3(2.5, 1, 2.5), -90, 0);
@@ -334,7 +334,15 @@ final class CrossbowGameTests {
         int behind = RepeatingCrossbowItem.shotsLoaded(load(helper, player, new ItemStack(ModItems.REPEATING_CROSSBOW.get())));
         if (alone != 1 || blastLeft != 7) helper.fail("a crank on Blast Arrows should load one: " + alone + " shots, " + blastLeft + " left of 8");
         else if (behind != 2 || player.getInventory().getItem(10).getCount() != 8) helper.fail("the drawing should stop before a Blast Arrow: " + behind + " shots");
-        else helper.succeed();
+        else {
+            player.getInventory().setItem(9, ItemStack.EMPTY);
+            player.getInventory().setItem(10, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.FIREWORK_ROCKET, 8));
+            int rockets = RepeatingCrossbowItem.shotsLoaded(load(helper, player, new ItemStack(ModItems.REPEATING_CROSSBOW.get())));
+            int rocketsLeft = player.getOffhandItem().getCount();
+            if (rockets != 1 || rocketsLeft != 7) helper.fail("a crank on rockets should load one: " + rockets + " shots, " + rocketsLeft + " left of 8");
+            else helper.succeed();
+        }
     }
 
     /** A shot that breaks the Repeating Crossbow drops the four arrows still loaded instead of losing them. */

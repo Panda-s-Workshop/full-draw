@@ -14,7 +14,7 @@ import java.util.function.IntPredicate;
  * @param recovery     the chance one of these stuck in a mob drops back when it dies, at the default {@link #PLAIN_RECOVERY}
  */
 public record ArrowTraits(double mult, double armouredMult, double armourKept, float fixedDamage, float knockback, double recovery) {
-    /** A wide cutting head: tears into flesh, glances off plate, and the wound bleeds. */
+    /** A wide cutting head: tears into flesh, glances off plate, and the wound bleeds (less through armour; not through plate). */
     public static final ArrowTraits BROADHEAD = new ArrowTraits(1.25, 0.75, 1.0, 0.0F, 0.0F, 0.25);
     /** A narrow armour-piercing spike: a little lighter, but 60% of the armour doesn't count. */
     public static final ArrowTraits BODKIN = new ArrowTraits(0.8, 0.8, 0.4, 0.0F, 0.0F, 0.4);
@@ -101,13 +101,31 @@ public record ArrowTraits(double mult, double armouredMult, double armourKept, f
     }
 
     /**
-     * The bleed's length after a broadhead lands on a target with {@code remaining} ticks of it left: a fresh wound is
-     * {@link #BLEED_TICKS}; on an open one the count stays in step with its ticks and runs to the furthest point that
-     * still gives four of them, so hits faster than a second apart don't keep putting the next tick off.
+     * How many bleed ticks a broadhead's wound gives a target with {@code armour} points: all four up to light armour,
+     * falling with it, none from {@link #FULL_ARMOUR} on. Armour doesn't touch a bleed tick itself, so it shortens the
+     * bleed instead, and against plate a Bodkin is the better arrow.
      */
+    public static int bleedWounds(double armour) {
+        double full = (double) BLEED_TICKS / BLEED_INTERVAL;
+        return (int) Math.clamp(Math.ceil(full * (1.0 - armour / FULL_ARMOUR) - 1.0E-9), 0.0, full);
+    }
+
+    /** {@link #bleedTicks(int, double)} on an unarmoured target. */
     public static int bleedTicks(int remaining) {
-        if (remaining <= 0) return BLEED_TICKS;
-        return remaining + BLEED_INTERVAL * ((BLEED_TICKS - remaining) / BLEED_INTERVAL);
+        return bleedTicks(remaining, 0.0);
+    }
+
+    /**
+     * The bleed's length after a broadhead lands on a target with {@code remaining} ticks of it left and {@code armour}
+     * points: a fresh wound gives {@link #bleedWounds} ticks a second apart; on an open one the count stays in step with
+     * its ticks and runs to the furthest point that still gives that many, so hits faster than a second apart don't
+     * keep putting the next tick off. Never shorter than what's left.
+     */
+    public static int bleedTicks(int remaining, double armour) {
+        int longest = bleedWounds(armour) * BLEED_INTERVAL;
+        if (remaining <= 0) return longest;
+        if (remaining >= longest) return remaining;
+        return remaining + BLEED_INTERVAL * ((longest - remaining) / BLEED_INTERVAL);
     }
 
     /**

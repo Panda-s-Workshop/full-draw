@@ -84,7 +84,8 @@ final class ArrowGameTests {
 
     /**
      * A broadhead does ×1.25 to a husk with no armour (7.5) and ×0.75 before armour to one with 10 points (3.105 after),
-     * and the unarmoured husk bleeds 1 a second for 4 seconds: 11.5 in all. A skeleton takes the hit but doesn't bleed.
+     * and the unarmoured husk bleeds 1 a second for 4 seconds: 11.5 in all; the plated one doesn't bleed. A skeleton
+     * takes the hit but doesn't bleed.
      */
     static void broadheadBleeds(GameTestHelper helper) {
         LivingEntity bare = target(helper, 2.5, 0), plated = target(helper, 5.5, 10);
@@ -99,6 +100,7 @@ final class ArrowGameTests {
             if (Math.abs(bareLost - 7.5F) > 0.01F) helper.fail("a broadhead on a bare husk should do 6 × 1.25 = 7.5, not " + bareLost);
             else if (Math.abs(platedLost - 3.105F) > 0.01F) helper.fail("a broadhead on 10 armour should do 6 × 0.75 = 4.5 before armour, 3.105 after, not " + platedLost);
             else if (!bare.hasEffect(ModEffects.BLEEDING.holder())) helper.fail("the bare husk should be bleeding");
+            else if (plated.hasEffect(ModEffects.BLEEDING.holder())) helper.fail("10 armour points should stop the bleed");
             else if (skeleton.hasEffect(ModEffects.BLEEDING.holder()) || lost(skeleton) <= 0) helper.fail("the skeleton should be hit and not bleed");
         });
         helper.runAfterDelay(95, () -> {

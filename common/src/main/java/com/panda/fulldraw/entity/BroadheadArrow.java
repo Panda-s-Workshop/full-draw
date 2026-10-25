@@ -11,7 +11,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-/** Hits hard on flesh, weakly on plate, and leaves the target bleeding (none for those in {@code fulldraw:cannot_bleed}). */
+/**
+ * Hits hard on flesh, weakly on plate, and leaves the target bleeding: less through armour, not through plate, and none
+ * for those in {@code fulldraw:cannot_bleed}.
+ */
 public class BroadheadArrow extends FullDrawArrow {
     public BroadheadArrow(EntityType<? extends BroadheadArrow> type, Level level) {
         super(type, level);
@@ -35,7 +38,9 @@ public class BroadheadArrow extends FullDrawArrow {
         super.doPostHurtEffects(target);
         if (target.getType().builtInRegistryHolder().is(ModEffects.CANNOT_BLEED)) return;
         MobEffectInstance open = target.getEffect(ModEffects.BLEEDING.holder());
-        int ticks = ArrowTraits.bleedTicks(open == null ? 0 : open.getDuration());
+        int remaining = open == null ? 0 : open.getDuration();
+        int ticks = ArrowTraits.bleedTicks(remaining, target.getArmorValue());
+        if (ticks <= remaining) return;
         // faint particles, as a beacon's: the wound shows without filling the bleeder's own view
         target.addEffect(new MobEffectInstance(ModEffects.BLEEDING.holder(), ticks, 0, true, true, true), getEffectSource());
     }

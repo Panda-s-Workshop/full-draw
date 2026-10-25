@@ -56,6 +56,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("fulldraw_stats_needs_no_permission", () -> ShotGameTests::statsNeedsNoPermission);
         FUNCTIONS.register("quiver_supplies_selected_arrow", () -> QuiverGameTests::quiverSuppliesSelectedArrow);
         FUNCTIONS.register("quiver_cycle_skips_empty", () -> QuiverGameTests::quiverCycleSkipsEmpty);
+        FUNCTIONS.register("quiver_supplies_new_arrows", () -> QuiverGameTests::quiverSuppliesNewArrows);
         FUNCTIONS.register("quiver_bundle_clicks", () -> QuiverGameTests::quiverBundleClicks);
         FUNCTIONS.register("blocked_hit_reports_nothing", () -> AdvancementGameTests::blockedHitReportsNothing);
         FUNCTIONS.register("breeze_deflection_drops_record", () -> AdvancementGameTests::breezeDeflectionDropsRecord);

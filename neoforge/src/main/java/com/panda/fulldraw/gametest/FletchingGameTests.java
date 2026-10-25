@@ -39,7 +39,8 @@ final class FletchingGameTests {
 
     /**
      * The Fletcher's trades join vanilla's own in the trade sets a fletcher draws from at levels 2, 3 and 4,
-     * beside the two vanilla trades already there, and each makes its offer through vanilla's path: 8 Broadhead Arrows
+     * beside the two vanilla trades already there, each level now offering three so all stay; and each makes its offer
+     * through vanilla's path: 8 Broadhead Arrows
      * for an emerald, 8 Bodkin Arrows for 2, 4 Rope Arrows for 2.
      */
     static void fletcherTrades(GameTestHelper helper) {
@@ -64,6 +65,8 @@ final class FletchingGameTests {
                     .withParameter(LootContextParams.THIS_ENTITY, villager)
                     .withParameter(LootContextParams.ADDITIONAL_COST_COMPONENT_ALLOWED, net.minecraft.util.Unit.INSTANCE)
                     .create(LootContextParamSets.VILLAGER_TRADE)).create(set.randomSequence());
+            if (set.calculateNumberOfTrades(context) != 3)
+                throw helper.assertionException("level " + e.level() + " should offer 3, so vanilla's two stay beside ours: " + set.calculateNumberOfTrades(context));
             MerchantOffer offer = trade.value().getOffer(context);
             if (offer == null || !offer.getResult().is(e.result()) || offer.getResult().getCount() != e.count()
                     || !offer.getCostA().is(Items.EMERALD) || offer.getCostA().getCount() != e.emeralds() || !offer.getCostB().isEmpty())

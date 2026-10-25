@@ -104,11 +104,35 @@ class ArrowTraitsTest {
         }
     }
 
+    /**
+     * Armour shortens the bleed and plate stops it: a broadhead's hit and bleed together beat a bodkin's hit unarmoured,
+     * and from 10 armour points up the bodkin's hit is the better arrow.
+     */
+    @Test
+    void bleedStopsAtPlate() {
+        assertEquals(4, ArrowTraits.bleedWounds(0));
+        assertEquals(4, ArrowTraits.bleedWounds(2), "a zombie's own armour");
+        assertEquals(2, ArrowTraits.bleedWounds(5));
+        assertEquals(1, ArrowTraits.bleedWounds(9));
+        assertEquals(0, ArrowTraits.bleedWounds(10));
+        assertEquals(0, ArrowTraits.bleedWounds(20));
+        assertEquals(40, ArrowTraits.bleedTicks(0, 5), "a fresh wound through 5 points");
+        assertEquals(50, ArrowTraits.bleedTicks(50, 10), "plate never cuts an open wound short");
+        assertEquals(0, ArrowTraits.bleedTicks(0, 15), "no wound through plate");
+        double bleed = ArrowTraits.BLEED_DAMAGE;
+        assertTrue(afterArmour(6.0 * ArrowTraits.BROADHEAD.armourMult(0), 0) + 4 * bleed > afterArmour(6.0 * 0.8, 0), "unarmoured, the broadhead");
+        for (int armour = 10; armour <= 20; armour++) {
+            double broadhead = afterArmour(6.0 * ArrowTraits.BROADHEAD.armourMult(armour), armour) + ArrowTraits.bleedWounds(armour) * bleed;
+            double bodkin = afterArmour(6.0 * 0.8, armour * ArrowTraits.BODKIN.armourKept());
+            assertTrue(bodkin > broadhead, "at " + armour + " armour the bodkin should win: " + bodkin + " vs " + broadhead);
+        }
+    }
+
     @Test
     void tooltipsStateTheNumbers() throws Exception {
         String lang = Files.readString(Path.of("src", "main", "resources", "assets", "fulldraw", "lang", "en_us.json"));
         assertTrue(lang.contains("×1.25 damage unarmoured, falling to ×0.75"), "broadhead tooltip");
-        assertTrue(lang.contains("1 damage a second for 4 s"), "bleed tooltip");
+        assertTrue(lang.contains("1 damage a second for 4 s; armour shortens it and heavy armour stops it"), "bleed tooltip");
         assertTrue(lang.contains("×0.8 damage, but 60% of armour"), "bodkin tooltip");
         assertTrue(lang.contains("1 damage, whatever the bow or the shot"), "blunt tooltip");
         assertTrue(lang.contains("×0.5 damage"), "rope arrow tooltip");

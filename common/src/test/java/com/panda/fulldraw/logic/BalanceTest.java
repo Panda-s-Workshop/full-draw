@@ -50,10 +50,12 @@ class BalanceTest {
      */
     @Test
     void clankOnlyWhenTheBoltGetsThroughRealArmour() {
-        assertTrue(BoltTraits.ARBALEST.clanks(12.0F, 8.0F), "an Arbalest bolt into an iron chestplate clanks");
-        assertFalse(BoltTraits.ARBALEST.clanks(0.0F, 8.0F), "a bolt a shield stopped reaches the armour with 0: no clank");
-        assertFalse(BoltTraits.ARBALEST.clanks(12.0F, 2.0F), "a husk's own 2 points: no clank");
-        assertFalse(BoltTraits.NONE.clanks(12.0F, 20.0F), "a plain bolt ignores no armour: no clank");
+        double arbalest = BoltTraits.ARBALEST.armourKept();
+        assertTrue(BoltTraits.clanks(arbalest, 12.0F, 8.0F), "an Arbalest bolt into an iron chestplate clanks");
+        assertFalse(BoltTraits.clanks(arbalest, 0.0F, 8.0F), "a bolt a shield stopped reaches the armour with 0: no clank");
+        assertFalse(BoltTraits.clanks(arbalest, 12.0F, 2.0F), "a husk's own 2 points: no clank");
+        assertFalse(BoltTraits.clanks(BoltTraits.NONE.armourKept(), 12.0F, 20.0F), "a plain bolt ignores no armour: no clank");
+        assertTrue(BoltTraits.clanks(ArrowTraits.BODKIN.armourKept(), 4.0F, 8.0F), "a bodkin bites through armour too");
     }
 
     @Test

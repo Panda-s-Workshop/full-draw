@@ -2,6 +2,8 @@ package com.panda.fulldraw;
 
 import com.mojang.logging.LogUtils;
 import com.panda.fulldraw.registry.ModComponents;
+import com.panda.fulldraw.registry.ModEffects;
+import com.panda.fulldraw.registry.ModEntities;
 import com.panda.fulldraw.registry.ModItems;
 import com.panda.fulldraw.registry.ModSounds;
 import com.panda.fulldraw.registry.ModTabs;
@@ -16,7 +18,8 @@ public final class FullDrawMod {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     /** The classes whose static DeferredRegisters hold the mod's content. */
-    private static final List<Class<?>> CONTENT = List.of(ModComponents.class, ModSounds.class, ModTriggers.class, ModItems.class, ModTabs.class);
+    private static final List<Class<?>> CONTENT = List.of(ModComponents.class, ModSounds.class, ModTriggers.class, ModEffects.class, ModEntities.class,
+            ModItems.class, ModTabs.class);
 
     private FullDrawMod() {}
 
@@ -30,6 +33,12 @@ public final class FullDrawMod {
             }
         }
         LOGGER.info("Full Draw booting on {}", com.panda.fulldraw.platform.Services.PLATFORM.loaderName());
+    }
+
+    /** After registration: what vanilla keeps in its own tables (a dispenser fires the arrows as it fires its own). */
+    public static void setup() {
+        for (var arrow : List.of(ModItems.BROADHEAD_ARROW, ModItems.BODKIN_ARROW, ModItems.BLUNT_ARROW))
+            net.minecraft.world.level.block.DispenserBlock.registerProjectileBehavior(arrow.get());
     }
 
     public static Identifier id(String path) {

@@ -80,14 +80,25 @@ public final class ShotMath {
     }
 
     /**
-     * Every factor of a shot's damage, for {@code /fulldraw stats}: base × weapon × arrow × skill (Perfect × precision ×
-     * range, capped) × point-blank.
+     * Every factor of a shot's damage, for {@code /fulldraw stats}: base × weapon × the head's penalty × skill
+     * (Perfect × precision × range × the head's bonus, capped) × point-blank: a head's bonus can't lift a shot past the
+     * cap, and a capped shot still pays its penalty.
      */
     public record Breakdown(int base, double weaponMult, double arrowMult, double perfectMult, double precisionMult, double rangeMult,
                             double skillCap, double pointBlankMult, double distance) {
-        /** Perfect × precision × range before the cap. */
+        /** Perfect × precision × range × the arrow head's bonus, before the cap. */
         public double skillRaw() {
-            return perfectMult * precisionMult * rangeMult;
+            return perfectMult * precisionMult * rangeMult * headBonus();
+        }
+
+        /** What the head adds (above ×1): it counts toward the skill cap, so it can't lift a shot past it. */
+        public double headBonus() {
+            return Math.max(1.0, arrowMult);
+        }
+
+        /** What the head takes (below ×1): it applies after the cap, so a capped shot still pays it. */
+        public double headPenalty() {
+            return Math.min(1.0, arrowMult);
         }
 
         public double skillMult() {
@@ -99,7 +110,11 @@ public final class ShotMath {
         }
 
         public double total() {
-            return base * weaponMult * arrowMult * skillMult() * pointBlankMult;
+            return base * weaponMult * headPenalty() * skillMult() * pointBlankMult;
+        }
+
+        public Breakdown withArrowMult(double mult) {
+            return new Breakdown(base, weaponMult, mult, perfectMult, precisionMult, rangeMult, skillCap, pointBlankMult, distance);
         }
     }
 

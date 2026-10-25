@@ -18,6 +18,13 @@ import net.minecraft.client.KeyMapping;
 public final class FullDrawFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        com.panda.fulldraw.client.FullDrawArrowRenderer.register(new com.panda.fulldraw.client.ClientSinks.Renderers() {
+            @Override
+            public <E extends net.minecraft.world.entity.Entity> void register(net.minecraft.world.entity.EntityType<? extends E> type,
+                                                                               net.minecraft.client.renderer.entity.EntityRendererProvider<E> provider) {
+                net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(type, provider);
+            }
+        });
         ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> DevExit.onClientStopping());
         com.panda.fulldraw.FullDrawClientConfig.use(FabricClientConfig.load());
         // Fabric API has no hook for item model properties; vanilla's registry is open until the models load
@@ -31,6 +38,7 @@ public final class FullDrawFabricClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(FullDrawNetwork.BreathState.TYPE, (payload, ctx) -> com.panda.fulldraw.client.FocusClient.onBreathState(payload));
         ClientPlayNetworking.registerGlobalReceiver(FullDrawNetwork.ServerTuning.TYPE, (payload, ctx) -> com.panda.fulldraw.FullDrawConfig.useRemote(payload.tuning()));
         ClientPlayNetworking.registerGlobalReceiver(FullDrawNetwork.ArrowGravity.TYPE, (payload, ctx) -> ShotFeedback.onArrowGravity(payload));
+        ClientPlayNetworking.registerGlobalReceiver(FullDrawNetwork.FuseOut.TYPE, (payload, ctx) -> ShotFeedback.onFuseOut(payload));
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, mc) ->
                 com.panda.fulldraw.FullDrawConfig.useRemote(null));
         for (KeyMapping key : FullDrawKeys.create(KeyMapping.Category.register(FullDrawKeys.CATEGORY_ID))) KeyMappingHelper.registerKeyMapping(key);

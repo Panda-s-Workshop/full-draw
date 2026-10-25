@@ -80,8 +80,8 @@ public final class StatsCommand {
         var item = BuiltInRegistries.ITEM.getOptional(last.weapon());
         Component weaponName = item.isPresent() ? item.get().getName(item.get().getDefaultInstance()) : Component.literal(last.weapon().toString());
         out.add(Component.translatable("command.fulldraw.stats.last_shot", weaponName, f1(b.distance()), f2(b.total())));
-        out.add(Component.translatable("command.fulldraw.stats.factors", b.base(), f2(b.weaponMult()), f2(b.arrowMult()), f2(b.perfectMult()),
-                f2(b.precisionMult()), f2(b.rangeMult()), f2(b.skillMult()),
+        out.add(Component.translatable("command.fulldraw.stats.factors", b.base(), f2(b.weaponMult()), f2(b.headPenalty()), f2(b.perfectMult()),
+                f2(b.precisionMult()), f2(b.rangeMult()), f2(b.headBonus()), f2(b.skillMult()),
                 b.capped() ? Component.translatable("command.fulldraw.stats.capped", f2(b.skillRaw()), f2(b.skillCap())) : Component.empty(),
                 b.pointBlankMult() < 1.0 ? Component.translatable("command.fulldraw.stats.point_blank", f2(b.pointBlankMult())) : Component.empty()));
         return out;

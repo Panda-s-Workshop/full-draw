@@ -86,6 +86,24 @@ public final class FullDrawNetwork {
         }
     }
 
+    /** A creeper's fuse a blunt arrow put out, sent to the players near it: the client counts its own fuse and would run on. */
+    public record FuseOut(int entityId) implements CustomPacketPayload {
+        public static final Type<FuseOut> TYPE = new Type<>(FullDrawMod.id("fuse_out"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, FuseOut> STREAM_CODEC =
+                StreamCodec.composite(ByteBufCodecs.VAR_INT, FuseOut::entityId, FuseOut::new);
+
+        @Override
+        public Type<FuseOut> type() {
+            return TYPE;
+        }
+    }
+
+    public static void fuseOut(net.minecraft.server.level.ServerLevel level, net.minecraft.world.entity.Entity creeper) {
+        FuseOut payload = new FuseOut(creeper.getId());
+        for (ServerPlayer player : level.players())
+            if (player.distanceToSqr(creeper) < 96 * 96) send(player, payload);
+    }
+
     /** The server's shot numbers, sent to each player on joining and again when the server's config reloads. */
     public record ServerTuning(ShotMath.Tuning tuning) implements CustomPacketPayload {
         public static final Type<ServerTuning> TYPE = new Type<>(FullDrawMod.id("server_tuning"));

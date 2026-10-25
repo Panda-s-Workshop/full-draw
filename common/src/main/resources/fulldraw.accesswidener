@@ -7,3 +7,7 @@ accessible method net/minecraft/client/gui/screens/MenuScreens register (Lnet/mi
 # a heavy crossbow's bolts pierce on top of the Piercing enchantment, and hit harder than the ammo's own damage
 accessible method net/minecraft/world/entity/projectile/arrow/AbstractArrow setPierceLevel (B)V
 accessible field net/minecraft/world/entity/projectile/arrow/AbstractArrow baseDamage D
+# a blunt arrow knocks a creeper's fuse out and a melee mob's swing back to its start
+accessible field net/minecraft/world/entity/monster/Creeper swell I
+accessible field net/minecraft/world/entity/monster/Creeper oldSwell I
+accessible method net/minecraft/world/entity/ai/goal/MeleeAttackGoal resetAttackCooldown ()V

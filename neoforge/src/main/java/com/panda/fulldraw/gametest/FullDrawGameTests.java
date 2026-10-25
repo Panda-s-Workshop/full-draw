@@ -60,6 +60,12 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("breeze_deflection_drops_record", () -> AdvancementGameTests::breezeDeflectionDropsRecord);
         FUNCTIONS.register("slice_advancements", () -> AdvancementGameTests::sliceAdvancements);
         FUNCTIONS.register("recipes_loaded", () -> FullDrawGameTests::recipesLoaded);
+        FUNCTIONS.register("arrows_fire_from_bow_and_dispenser", () -> ArrowGameTests::arrowsFireFromBowAndDispenser);
+        FUNCTIONS.register("broadhead_bleeds", () -> ArrowGameTests::broadheadBleeds);
+        FUNCTIONS.register("bodkin_vs_armour", () -> ArrowGameTests::bodkinVsArmour);
+        FUNCTIONS.register("blunt_cancels_creeper", () -> ArrowGameTests::bluntCancelsCreeper);
+        FUNCTIONS.register("arrow_heads_in_the_pipeline", () -> ArrowGameTests::arrowHeadsInThePipeline);
+        FUNCTIONS.register("blunt_interrupts_archer", () -> ArrowGameTests::bluntInterruptsArcher);
     }
 
     private FullDrawGameTests() {}
@@ -106,7 +112,15 @@ public final class FullDrawGameTests {
             String key = h.get().getDescriptionId();
             if (!lang.has(key)) missing.add(key);
         });
-        for (String key : List.of("itemGroup.fulldraw")) {
+        com.panda.fulldraw.registry.ModEntities.ENTITIES.getEntries().forEach(h -> {
+            String key = h.get().getDescriptionId();
+            if (!lang.has(key)) missing.add(key);
+        });
+        com.panda.fulldraw.registry.ModEffects.EFFECTS.getEntries().forEach(h -> {
+            String key = h.get().getDescriptionId();
+            if (!lang.has(key)) missing.add(key);
+        });
+        for (String key : List.of("itemGroup.fulldraw", "death.attack.fulldraw.bleeding", "death.attack.fulldraw.bleeding.player")) {
             if (!lang.has(key)) missing.add(key);
         }
         var enchantments = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);

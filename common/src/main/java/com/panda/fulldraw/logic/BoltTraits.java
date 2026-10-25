@@ -19,10 +19,10 @@ public record BoltTraits(int pierce, double armourKept, float knockback) {
     public static final float CLANK_MIN_ARMOUR = 4.0F;
 
     /**
-     * Whether a bolt that ignores part of the armour clanks as it bites through: only on damage that gets past a
-     * shield (a blocked bolt reaches the armour with 0) and only through real armour.
+     * Whether a hit that counts only {@code armourKept} of the armour clanks as it bites through: only on damage that
+     * gets past a shield (a blocked hit reaches the armour with 0) and only through real armour.
      */
-    public boolean clanks(float damage, float armour) {
+    public static boolean clanks(double armourKept, float damage, float armour) {
         return armourKept < 1.0 && damage > 0 && armour >= CLANK_MIN_ARMOUR;
     }
 }

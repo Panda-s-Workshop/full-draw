@@ -39,9 +39,18 @@ public final class FullDrawClient {
             e.register(FullDrawNetwork.BreathState.TYPE, (payload, ctx) -> com.panda.fulldraw.client.FocusClient.onBreathState(payload));
             e.register(FullDrawNetwork.ServerTuning.TYPE, (payload, ctx) -> com.panda.fulldraw.FullDrawConfig.useRemote(payload.tuning()));
             e.register(FullDrawNetwork.ArrowGravity.TYPE, (payload, ctx) -> ShotFeedback.onArrowGravity(payload));
+            e.register(FullDrawNetwork.FuseOut.TYPE, (payload, ctx) -> ShotFeedback.onFuseOut(payload));
         });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterRangeSelectItemModelPropertyEvent e) ->
                 e.register(FullDrawMod.id("magazine"), com.panda.fulldraw.client.MagazineShots.MAP_CODEC));
+        modBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers e) ->
+                com.panda.fulldraw.client.FullDrawArrowRenderer.register(new com.panda.fulldraw.client.ClientSinks.Renderers() {
+                    @Override
+                    public <E extends net.minecraft.world.entity.Entity> void register(net.minecraft.world.entity.EntityType<? extends E> type,
+                                                                                       net.minecraft.client.renderer.entity.EntityRendererProvider<E> provider) {
+                        e.registerEntityRenderer(type, provider);
+                    }
+                }));
         modBus.addListener((RegisterKeyMappingsEvent e) -> {
             KeyMapping.Category category = new KeyMapping.Category(FullDrawKeys.CATEGORY_ID);
             e.registerCategory(category);

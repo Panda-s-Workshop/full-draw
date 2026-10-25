@@ -42,6 +42,15 @@ public final class ShotFeedback {
         }
     }
 
+    /** A creeper's fuse the server put out: this client's count goes back to 0 with it. */
+    public static void onFuseOut(FullDrawNetwork.FuseOut payload) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null && mc.level.getEntity(payload.entityId()) instanceof net.minecraft.world.entity.monster.Creeper creeper) {
+            creeper.swell = 0;
+            creeper.oldSwell = 0;
+        }
+    }
+
     /** The server's word on an arrow's gravity: set on this client's copy so its flight matches. */
     public static void onArrowGravity(FullDrawNetwork.ArrowGravity payload) {
         Minecraft mc = Minecraft.getInstance();

@@ -23,6 +23,7 @@ public final class FullDrawNeoForge {
     public FullDrawNeoForge(IEventBus modBus, ModContainer container) {
         FullDrawMod.init();
         modBus.addListener((RegisterEvent e) -> DeferredRegister.all().forEach(register -> registerInto(e, register)));
+        modBus.addListener((net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent e) -> e.enqueueWork(FullDrawMod::setup));
         container.registerConfig(ModConfig.Type.SYNCED, NeoForgeConfig.SPEC);
         FullDrawConfig.use(new NeoForgeConfig());
         modBus.addListener((net.neoforged.fml.event.config.ModConfigEvent.Reloading e) -> {
@@ -39,6 +40,7 @@ public final class FullDrawNeoForge {
             r.playToClient(FullDrawNetwork.BreathState.TYPE, FullDrawNetwork.BreathState.STREAM_CODEC);
             r.playToClient(FullDrawNetwork.ServerTuning.TYPE, FullDrawNetwork.ServerTuning.STREAM_CODEC);
             r.playToClient(FullDrawNetwork.ArrowGravity.TYPE, FullDrawNetwork.ArrowGravity.STREAM_CODEC);
+            r.playToClient(FullDrawNetwork.FuseOut.TYPE, FullDrawNetwork.FuseOut.STREAM_CODEC);
         });
 
         IEventBus game = NeoForge.EVENT_BUS;

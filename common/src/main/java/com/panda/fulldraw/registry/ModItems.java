@@ -2,6 +2,10 @@ package com.panda.fulldraw.registry;
 
 import com.panda.fulldraw.FullDrawMod;
 import com.panda.fulldraw.item.FullDrawBowItem;
+import com.panda.fulldraw.entity.BluntArrow;
+import com.panda.fulldraw.entity.BodkinArrow;
+import com.panda.fulldraw.entity.BroadheadArrow;
+import com.panda.fulldraw.item.FullDrawArrowItem;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
 import com.panda.fulldraw.item.QuiverItem;
 import com.panda.fulldraw.item.RepeatingCrossbowItem;
@@ -42,6 +46,18 @@ public final class ModItems {
     public static final DeferredItem<RepeatingCrossbowItem> REPEATING_CROSSBOW = ITEMS.registerItem("repeating_crossbow",
             p -> new RepeatingCrossbowItem(p, WeaponStats.REPEATING_CROSSBOW, Magazine.REPEATING_CROSSBOW),
             p -> p.stacksTo(1).durability(520).component(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).enchantable(1));
+
+    /** A wide cutting head: ×1.5 on bare flesh down to ×0.75 on plate, and the wound bleeds. */
+    public static final DeferredItem<FullDrawArrowItem> BROADHEAD_ARROW = ITEMS.registerItem("broadhead_arrow",
+            p -> new FullDrawArrowItem(p, BroadheadArrow::new, BroadheadArrow::new, 2));
+
+    /** An armour-piercing spike: ×0.8, but 60% of the armour doesn't count. */
+    public static final DeferredItem<FullDrawArrowItem> BODKIN_ARROW = ITEMS.registerItem("bodkin_arrow",
+            p -> new FullDrawArrowItem(p, BodkinArrow::new, BodkinArrow::new, 1));
+
+    /** A padded head: 1 damage, a hard shove, and the target's attack starts over. */
+    public static final DeferredItem<FullDrawArrowItem> BLUNT_ARROW = ITEMS.registerItem("blunt_arrow",
+            p -> new FullDrawArrowItem(p, BluntArrow::new, BluntArrow::new, 2));
 
     /** Four kinds of arrows anywhere in the inventory, R picks which one the bow draws. */
     public static final DeferredItem<QuiverItem> QUIVER = ITEMS.registerItem("quiver", QuiverItem::new, p -> p.stacksTo(1));

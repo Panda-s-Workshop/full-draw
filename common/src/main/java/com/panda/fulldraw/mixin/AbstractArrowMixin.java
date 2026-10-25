@@ -2,7 +2,9 @@ package com.panda.fulldraw.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.panda.fulldraw.entity.FullDrawArrow;
 import com.panda.fulldraw.item.FullDrawCrossbowItem;
+import com.panda.fulldraw.logic.ArrowTraits;
 import com.panda.fulldraw.logic.BoltTraits;
 import com.panda.fulldraw.logic.ShotMath;
 import com.panda.fulldraw.shot.ShotHolder;
@@ -29,7 +31,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Gives every arrow a {@link ShotRecord} slot (saved with it), applies the weapon's gravity, and replaces a player
- * arrow's damage with the shot pipeline's at impact. Arrows without a record (mobs', dispensers') stay vanilla.
+ * arrow's damage with the shot pipeline's at impact. Arrows without a record (mobs', dispensers') keep vanilla's damage,
+ * times their head's if they have one.
  */
 @Mixin(AbstractArrow.class)
 public abstract class AbstractArrowMixin implements ShotHolder {
@@ -131,9 +134,24 @@ public abstract class AbstractArrowMixin implements ShotHolder {
         Shots.Impact impact = fulldraw$impact;
         fulldraw$vanillaAmount = vanillaAmount;
         ShotMath.Breakdown breakdown = fulldraw$damage(source);
+        // the arrow's head: its share of the pipeline's damage, or of vanilla's for an arrow without a shot, against the
+        // armour that counts (a heavy crossbow's bolt already goes through part of it)
+        ArrowTraits head = FullDrawArrow.traitsOf((AbstractArrow) (Object) this);
+        if (head != null) {
+            BoltTraits weaponBolts = FullDrawCrossbowItem.boltsOf(((AbstractArrow) (Object) this).getWeaponItem());
+            double armour = (target instanceof net.minecraft.world.entity.LivingEntity living ? living.getArmorValue() : 0.0)
+                    * (weaponBolts == null ? 1.0 : weaponBolts.armourKept());
+            if (breakdown != null) breakdown = breakdown.withArrowMult(head.multFor(breakdown.total(), armour));
+            else vanillaAmount = (float) (vanillaAmount * head.multFor(vanillaAmount, armour));
+        }
         float damage = breakdown == null ? vanillaAmount : (float) breakdown.total();
         net.minecraft.world.item.ItemStack cracked = fulldraw$crackableShield(target, source, damage);
         boolean hurt = original.call(target, source, damage);
+        // a hit the damage cooldown turned away (not a shield, not invulnerability) still lands what a head does besides damage
+        if (!hurt && (Object) this instanceof FullDrawArrow arrow && target instanceof net.minecraft.world.entity.LivingEntity living
+                && living.damageCooldownTime > 10 && living.getItemBlockingWith() == null && target.level() instanceof ServerLevel level
+                && !living.isInvulnerableTo(level, source))
+            arrow.onTurnedAway(living, source);
         // a heavy bolt's own sound on every creature it goes into, under vanilla's hit sound
         BoltTraits bolts = FullDrawCrossbowItem.boltsOf(((AbstractArrow) (Object) this).getWeaponItem());
         if (hurt && bolts != null && bolts.pierce() > 0 && target instanceof net.minecraft.world.entity.LivingEntity)

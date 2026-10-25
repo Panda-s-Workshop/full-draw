@@ -36,6 +36,7 @@ public final class FullDrawFabric implements ModInitializer {
                     return i < 0 ? FIRST.size() : i;
                 }))
                 .forEach(FullDrawFabric::registerAll);
+        FullDrawMod.setup();
 
         PayloadTypeRegistry.serverboundPlay().register(FullDrawNetwork.CycleQuiver.TYPE, FullDrawNetwork.CycleQuiver.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(FullDrawNetwork.ShotResult.TYPE, FullDrawNetwork.ShotResult.STREAM_CODEC);
@@ -43,6 +44,7 @@ public final class FullDrawFabric implements ModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(FullDrawNetwork.BreathState.TYPE, FullDrawNetwork.BreathState.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(FullDrawNetwork.ServerTuning.TYPE, FullDrawNetwork.ServerTuning.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(FullDrawNetwork.ArrowGravity.TYPE, FullDrawNetwork.ArrowGravity.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(FullDrawNetwork.FuseOut.TYPE, FullDrawNetwork.FuseOut.STREAM_CODEC);
         net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 FullDrawNetwork.onJoin(handler.getPlayer()));
         net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->

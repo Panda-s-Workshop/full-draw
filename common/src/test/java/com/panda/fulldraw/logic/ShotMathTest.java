@@ -148,18 +148,37 @@ class ShotMathTest {
      */
     @Test
     void capHoldsAgainstIronZombie() {
-        for (WeaponStats w : List.of(BOW, WeaponStats.SHORTBOW, WeaponStats.LONGBOW, WeaponStats.RECURVE_BOW)) {
-            double best = ShotMath.damage(launchBase(w), w.damageMult(), 1, true, T.precisionMobs(), 200, T);
-            assertTrue(afterArmour(best, 17, 0) < 20, w + ": best shot after armour " + afterArmour(best, 17, 0));
-        }
+        for (WeaponStats w : List.of(BOW, WeaponStats.SHORTBOW, WeaponStats.LONGBOW, WeaponStats.RECURVE_BOW))
+            for (ArrowTraits head : HEADS) {
+                double best = ShotMath.damage(launchBase(w), w.damageMult(), head.armourMult(17), true, T.precisionMobs(), 200, T);
+                double armour = 17 * head.armourKept();
+                assertTrue(afterArmour(best, armour, 0) < 20, w + " with " + head + ": best shot after armour " + afterArmour(best, armour, 0));
+            }
     }
 
     /** A Longbow Perfect headshot at 50 m stays under 25, even counting its arrow at launch speed. */
     @Test
     void longbowCeiling() {
         WeaponStats w = WeaponStats.LONGBOW;
-        double headshot = ShotMath.damage(launchBase(w), w.damageMult(), 1, true, T.precisionMobs(), 50, T);
-        assertTrue(headshot < 25, "Longbow Perfect headshot at 50 m: " + headshot);
+        for (ArrowTraits head : HEADS) {
+            double headshot = ShotMath.damage(launchBase(w), w.damageMult(), head.armourMult(0), true, T.precisionMobs(), 50, T);
+            assertTrue(headshot < 25, "Longbow Perfect headshot at 50 m with " + head + ": " + headshot);
+        }
+    }
+
+    /** Every head, and a plain arrow's (×1, all armour). */
+    private static final List<ArrowTraits> HEADS = List.of(new ArrowTraits(1, 1, 1, 0, 0), ArrowTraits.BROADHEAD, ArrowTraits.BODKIN);
+
+    /** A head's bonus sits inside the skill cap: a plain broadhead is under a Perfect plain arrow, a capped shot can't grow. */
+    @Test
+    void arrowHeadsStayUnderTheCap() {
+        WeaponStats w = BOW;
+        double plainBroadhead = ShotMath.damage(launchBase(w), 1, ArrowTraits.BROADHEAD.armourMult(0), false, 1, 10, T);
+        double perfectArrow = ShotMath.damage(launchBase(w), 1, 1, true, 1, 10, T);
+        assertTrue(plainBroadhead < perfectArrow, "a plain broadhead " + plainBroadhead + " vs a Perfect arrow " + perfectArrow);
+        double cappedArrow = ShotMath.damage(launchBase(w), 1, 1, true, T.precisionMobs(), 50, T);
+        double cappedBroadhead = ShotMath.damage(launchBase(w), 1, ArrowTraits.BROADHEAD.armourMult(0), true, T.precisionMobs(), 50, T);
+        assertEquals(cappedArrow, cappedBroadhead, 1e-9, "a shot at the cap gains nothing from the head");
     }
 
     /** Vanilla's arrow damage for this bow's full-draw launch speed and a plain arrow (base 2). */

@@ -9,6 +9,7 @@ version="${mod_version}"
 displayName="${mod_name}"
 authors="${mod_authors}"
 displayURL="https://github.com/Panda-s-Workshop/full-draw"
+iconFile="logo.png"
 description='''${mod_description}'''
 
 [[mixins]]

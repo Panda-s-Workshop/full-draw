@@ -3,12 +3,17 @@ package com.panda.fulldraw.item;
 import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.shot.Shots;
 import com.panda.fulldraw.shot.Weapons;
+import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
@@ -33,8 +38,36 @@ public class FullDrawBowItem extends BowItem implements Weapons.Ranged {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (!startsWhileSprinting && player.isSprinting()) return InteractionResult.FAIL;
+        if (!startsWhileSprinting && player.isSprinting()) {
+            // said on the action bar, or the bow just seems not to work
+            if (!level.isClientSide()) player.sendOverlayMessage(Component.translatable("message.fulldraw.no_draw_sprinting", player.getItemInHand(hand).getHoverName()));
+            return InteractionResult.FAIL;
+        }
         return super.use(level, player, hand);
+    }
+
+    /** How it differs from vanilla's bow: its draw, its hit, its spread and arc, its Perfect window, and the run. */
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> lines, TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, lines, flag);
+        if (!Weapons.inPipeline(stack)) return;
+        WeaponStats vanilla = WeaponStats.VANILLA_BOW, stats = Weapons.stats(stack);
+        lines.accept(gray("tooltip.fulldraw.bow.draw", number(stats.drawTicks() / 20.0)));
+        if (stats.damageMult() != vanilla.damageMult()) lines.accept(gray("tooltip.fulldraw.bow.damage", number(stats.damageMult())));
+        if (stats.spread() < vanilla.spread()) lines.accept(gray("tooltip.fulldraw.bow.tight"));
+        else if (stats.spread() > vanilla.spread()) lines.accept(gray("tooltip.fulldraw.bow.wide"));
+        if (stats.gravityMult() < vanilla.gravityMult()) lines.accept(gray("tooltip.fulldraw.bow.flat"));
+        if (stats.extraWindow() > 0) lines.accept(gray("tooltip.fulldraw.bow.window", stats.extraWindow()));
+        if (!startsWhileSprinting) lines.accept(gray("tooltip.fulldraw.bow.no_sprint"));
+    }
+
+    /** Up to two decimals, with no trailing zeros: 0.6, 1.15, 1. */
+    private static String number(double value) {
+        return String.format(java.util.Locale.ROOT, "%.2f", value).replaceAll("\\.?0+$", "");
+    }
+
+    private static Component gray(String key, Object... args) {
+        return Component.translatable(key, args).withStyle(ChatFormatting.GRAY);
     }
 
     @Override

@@ -46,6 +46,70 @@ final class QuiverGameTests {
         helper.succeed();
     }
 
+    /** Another mod's bow that fires its own way: it may spend its arrows as it likes, so the Quiver gives it none. */
+    abstract static class OwnFiringBow extends BowItem {
+        OwnFiringBow(Properties properties) {
+            super(properties);
+        }
+
+        @Override
+        public boolean releaseUsing(ItemStack stack, net.minecraft.world.level.Level level, net.minecraft.world.entity.LivingEntity entity, int timeLeft) {
+            return false;
+        }
+    }
+
+    /** Another mod's bow that only changes its range: it still fires as vanilla's does. */
+    abstract static class LongerRangeBow extends BowItem {
+        LongerRangeBow(Properties properties) {
+            super(properties);
+        }
+
+        @Override
+        public int getDefaultProjectileRange() {
+            return 20;
+        }
+    }
+
+    /** A crossbow under another one that fires its own way. */
+    abstract static class OwnShootingCrossbow extends net.minecraft.world.item.CrossbowItem {
+        OwnShootingCrossbow(Properties properties) {
+            super(properties);
+        }
+
+        @Override
+        public void performShooting(net.minecraft.world.level.Level level, net.minecraft.world.entity.LivingEntity shooter, InteractionHand hand, ItemStack weapon,
+                                    float velocity, float inaccuracy, @org.jetbrains.annotations.Nullable net.minecraft.world.entity.LivingEntity target) {}
+    }
+
+    abstract static class UnderOwnShooting extends OwnShootingCrossbow {
+        UnderOwnShooting(Properties properties) {
+            super(properties);
+        }
+    }
+
+    /**
+     * The shot rules and the Quiver serve vanilla's bow and crossbow, Full Draw's weapons and other mods' weapons that
+     * fire as vanilla's do; a weapon that overrides how it fires (or is under one that does) gets neither. A vanilla
+     * bow with the Quiver as its only ammo draws from it.
+     */
+    static void quiverOnlyForWeaponsFiringAsVanilla(GameTestHelper helper) {
+        java.util.List<String> wrong = new java.util.ArrayList<>();
+        for (var item : List.of(Items.BOW, Items.CROSSBOW, ModItems.LONGBOW.get(), ModItems.REPEATING_CROSSBOW.get(), ModItems.ARBALEST.get()))
+            if (!com.panda.fulldraw.shot.Weapons.firesAsVanilla(item)) wrong.add(item + " should fire as vanilla");
+        if (!com.panda.fulldraw.shot.Weapons.firesAsVanilla(LongerRangeBow.class)) wrong.add("a bow that changes only its range should fire as vanilla");
+        if (com.panda.fulldraw.shot.Weapons.firesAsVanilla(OwnFiringBow.class)) wrong.add("a bow with its own release should be left alone");
+        if (com.panda.fulldraw.shot.Weapons.firesAsVanilla(UnderOwnShooting.class)) wrong.add("a crossbow under one with its own shooting should be left alone");
+        Player player = archer(helper);
+        ItemStack quiver = new ItemStack(ModItems.QUIVER.get());
+        Quivers.set(quiver, QuiverContents.EMPTY.insert(new ItemStack(Items.ARROW), 4));
+        player.getInventory().add(quiver);
+        ItemStack ammo = Quivers.projectileFor(player, new ItemStack(Items.BOW));
+        if (ammo == null || !ammo.is(Items.ARROW)) wrong.add("a vanilla bow should draw the quiver's arrows: " + ammo);
+        Quivers.clearPending();
+        if (!wrong.isEmpty()) helper.fail(String.join("; ", wrong));
+        helper.succeed();
+    }
+
     /** A quiver holding Broadheads and Bodkins, Bodkins selected, gives the bow a Bodkin; cycled, a Broadhead. */
     static void quiverSuppliesNewArrows(GameTestHelper helper) {
         Player player = archer(helper);

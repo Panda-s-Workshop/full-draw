@@ -17,7 +17,7 @@ Install it on the client, and on the server too when you play on one.
 
 ## Playing
 
-- **The shot.** Every bow has a Perfect window just after full draw: let go while the ring around the crosshair glows
+- **The shot.** Bows have a Perfect window just after full draw: let go while the ring around the crosshair glows
   gold and the arrow flies straight and crits. Hold too long and the aim trembles; sneak to hold your breath. Heads and
   weak spots take more, long shots gain a little, point-blank shots lose some.
 - **Weapons.** The Shortbow, Longbow and Recurve Bow; the Arbalest and the Repeating Crossbow.
@@ -32,8 +32,9 @@ Install it on the client, and on the server too when you play on one.
 ## For pack makers
 
 The server config (NeoForge `config/fulldraw-synced.toml`, Fabric `config/fulldraw.properties`) holds the shot's
-tuning, the creatures' spawns and numbers, and the Marksman's. The shot rules apply to every bow a player draws,
-other mods' included; `#fulldraw:no_shot_pipeline` leaves a weapon alone. Weak spots and fletching recipes are data.
+tuning, the creatures' spawns and numbers, and the Marksman's. The shot rules and the Quiver also serve other mods'
+bows and crossbows that fire as vanilla's do. One that overrides how it fires is left alone, and
+`#fulldraw:no_shot_pipeline` leaves any weapon alone. Weak spots and fletching recipes are data.
 The website's [Modpacks and config](https://panda-s-workshop.github.io/full-draw/packs.html) page lists every key,
 tag and data format.
 

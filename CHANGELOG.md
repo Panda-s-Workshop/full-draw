@@ -4,7 +4,7 @@
 
 The first release.
 
-- The shot: a Perfect window after full draw on every bow, the tremble when a draw is held too long, Steady Aim
+- The shot: a Perfect window after full draw on bows, the tremble when a draw is held too long, Steady Aim
   (sneak to hold your breath), headshots and weak spots, range and point-blank, and the Bow Bash.
 - Weapons: the Shortbow, Longbow, Recurve Bow, Arbalest and Repeating Crossbow.
 - Arrows: Broadhead, Bodkin, Blunt, Rope, Flare and Blast, made at the Fletching Table; fletchers sell some of them.

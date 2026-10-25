@@ -59,6 +59,9 @@ public final class Quivers {
     @Nullable
     public static ItemStack projectileFor(Player player, ItemStack weapon) {
         if (!(weapon.getItem() instanceof ProjectileWeaponItem item)) return null;
+        // only a weapon that spends its arrows as vanilla does: the quiver gets back what vanilla's draw leaves, and a
+        // weapon that shrinks its ammo some other way would shoot the quiver's arrows for free
+        if (!com.panda.fulldraw.shot.Weapons.inPipeline(weapon)) return null;
         if (!ProjectileWeaponItem.getHeldProjectile(player, item.getSupportedHeldProjectiles()).isEmpty()) return null;
         ItemStack quiver = find(player);
         if (quiver.isEmpty()) return null;

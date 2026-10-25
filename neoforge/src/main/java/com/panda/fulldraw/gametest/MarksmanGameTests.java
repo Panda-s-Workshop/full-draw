@@ -134,6 +134,33 @@ final class MarksmanGameTests {
     }
 
     /**
+     * A Blunt Arrow's knock in the middle of its draw costs it that shot: its bow comes down, it ducks again, and no
+     * arrow comes when the draw would have ended. (The foe is an iron golem: a mock player can't be held as a mob's
+     * target.)
+     */
+    static void marksmanLosesTheShotToABlunt(GameTestHelper helper) {
+        LivingEntity foe = golem(helper, 1.5, 6.5);
+        Marksman marksman = helper.spawn(ModEntities.MARKSMAN.get(), new Vec3(10.5, 1, 6.5));
+        marksman.setTarget(foe);
+        long[] knocked = {-1};
+        helper.onEachTick(() -> {
+            if (knocked[0] < 0 && marksman.isUsingItem() && marksman.getTicksUsingItem() >= 5) {
+                if (!marksman.loosed.isEmpty()) helper.fail("it loosed before it was knocked: " + marksman.loosed);
+                com.panda.fulldraw.entity.BluntArrow.interrupt(marksman);
+                knocked[0] = helper.getLevel().getGameTime();
+            }
+        });
+        helper.succeedWhen(() -> {
+            if (knocked[0] < 0) throw helper.assertionException("it hasn't drawn yet");
+            long after = helper.getLevel().getGameTime() - knocked[0];
+            if (!marksman.loosed.isEmpty()) helper.fail("knocked out of its draw it loosed anyway, " + after + " ticks later: " + marksman.loosed);
+            if (marksman.isUsingItem() && after < MarksmanRules.COVER_TICKS) helper.fail("knocked out of its draw it should let its bow down and duck");
+            if (after < MarksmanRules.DRAW_TICKS) throw helper.assertionException("waiting past when the draw would have ended");
+            if (marksman.getPose() != Pose.CROUCHING) helper.fail("knocked out of its draw it should duck again");
+        });
+    }
+
+    /**
      * Below half its health its bar turns red, and a foe who hides is lit up with a Flare Arrow (one not glowing) or
      * shelled with a Blast Arrow (one glowing); its bar shows to the players near it. (The foes are iron golems: a mock
      * player can't be held as a mob's target.)
@@ -161,6 +188,28 @@ final class MarksmanGameTests {
                 throw helper.assertionException("at a hidden foe glowing it should loose a blast: " + blasts.loosed);
             if (Math.abs(flares.loosed.getFirst().drawTicks() - MarksmanRules.DRAW_TICKS_PHASE_TWO) > 2)
                 throw helper.assertionException("in its second phase it should draw for 24 ticks: " + flares.loosed);
+        });
+    }
+
+    /**
+     * Its bar leaves a player's screen the moment that player stops tracking it (a portal, a teleport), and every
+     * screen when it is removed in any way, an unloaded chunk's included.
+     */
+    static void marksmanBossBarLeaves(GameTestHelper helper) {
+        Marksman marksman = helper.spawn(ModEntities.MARKSMAN.get(), new Vec3(2.5, 1, 2.5));
+        ServerPlayer near = player(helper, 5.5, 5.5);
+        boolean[] stopped = new boolean[1];
+        helper.succeedWhen(() -> {
+            if (!stopped[0]) {
+                if (!marksman.bossBarPlayers().contains(near)) throw helper.assertionException("a player near it should see its bar first");
+                marksman.stopSeenByPlayer(near);
+                if (marksman.bossBarPlayers().contains(near)) helper.fail("a player who stops tracking it should lose its bar at once");
+                stopped[0] = true;
+                throw helper.assertionException("now waiting for the bar to come back");
+            }
+            if (!marksman.bossBarPlayers().contains(near)) throw helper.assertionException("a player still near it should see its bar again");
+            marksman.setRemoved(net.minecraft.world.entity.Entity.RemovalReason.UNLOADED_TO_CHUNK);
+            if (!marksman.bossBarPlayers().isEmpty()) helper.fail("unloaded, its bar should leave every screen: " + marksman.bossBarPlayers());
         });
     }
 
@@ -237,6 +286,26 @@ final class MarksmanGameTests {
             FullDrawMod.LOGGER.info("from the gap the Marksman loosed at a foe 16 below and 23 out; the foe lost {}", foe.getMaxHealth() - foe.getHealth());
             marksman.discard();
             foe.discard();
+        });
+    }
+
+    /**
+     * Struck by a foe it had not taken on, standing beyond the reach of its post (as an archer on the ground below its
+     * tower stands), it takes that foe on and shoots back. (The foe is an iron golem: a mock player can't be held as a
+     * mob's target.)
+     */
+    static void marksmanShootsBackAtAnUnseenAttacker(GameTestHelper helper) {
+        Marksman marksman = helper.spawn(ModEntities.MARKSMAN.get(), new Vec3(1.5, 1, 1.5));
+        marksman.setHome(marksman.blockPosition());
+        LivingEntity foe = golem(helper, 10.5, 10.5);
+        helper.runAfterDelay(1, () -> {
+            if (marksman.getTarget() != null) helper.fail("it shouldn't have a foe before it is struck: " + marksman.getTarget());
+            marksman.hurtServer(helper.getLevel(), helper.getLevel().damageSources().mobAttack(foe), 1.0F);
+        });
+        helper.succeedWhen(() -> {
+            if (marksman.getTarget() != foe) throw helper.assertionException("struck, it should take on whoever struck it: " + marksman.getTarget());
+            if (marksman.loosed.isEmpty()) throw helper.assertionException("not loosed yet");
+            if (foe.getHealth() >= foe.getMaxHealth()) throw helper.assertionException("its arrow hasn't struck yet");
         });
     }
 

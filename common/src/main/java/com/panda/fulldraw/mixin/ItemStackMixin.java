@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Bow Bash: vanilla calls {@code hurtEnemy} on the server once a melee hit has landed. And a line under items whose use
- * Full Draw changes but doesn't own: vanilla's Fletching Table (it opens a menu now), the Rope (it extends a rope), and
- * vanilla's arrows (how often they come back from a kill).
+ * isn't plain from the item itself: vanilla's Fletching Table (it opens a menu now), the Rope (it extends a rope), the
+ * creatures' drops (what they make), and vanilla's arrows (how often they come back from a kill).
  */
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
@@ -23,7 +23,10 @@ public abstract class ItemStackMixin {
         ItemStack self = (ItemStack) (Object) this;
         String key = self.is(net.minecraft.world.item.Items.FLETCHING_TABLE) ? "item.fulldraw.fletching_table.tooltip"
                 : self.is(com.panda.fulldraw.registry.ModItems.ROPE.get()) ? "item.fulldraw.rope.tooltip"
-                : self.is(com.panda.fulldraw.registry.ModItems.MARKSMANS_EYE.get()) ? "item.fulldraw.marksmans_eye.tooltip" : null;
+                : self.is(com.panda.fulldraw.registry.ModItems.MARKSMANS_EYE.get()) ? "item.fulldraw.marksmans_eye.tooltip"
+                : self.is(com.panda.fulldraw.registry.ModItems.HARRIER_FEATHER.get()) ? "item.fulldraw.harrier_feather.tooltip"
+                : self.is(com.panda.fulldraw.registry.ModItems.HARRIER_TALON.get()) ? "item.fulldraw.harrier_talon.tooltip"
+                : self.is(com.panda.fulldraw.registry.ModItems.BOG_EYE.get()) ? "item.fulldraw.bog_eye.tooltip" : null;
         if (key != null) lines.accept(net.minecraft.network.chat.Component.translatable(key).withStyle(net.minecraft.ChatFormatting.GRAY));
         // any other arrow (vanilla's, another mod's) comes back from a kill at the plain arrow's chance, as Full Draw's say
         // of theirs; on a server without Full Draw nothing comes back, so nothing is said

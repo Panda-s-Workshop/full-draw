@@ -205,7 +205,7 @@ final class CrossbowGameTests {
     }
 
     /**
-     * Loaded after 80 ticks of cranking (not 79); each bolt leaves at 3.0 with ×0.45 of the arrow's damage (0.9 from a
+     * Loaded after 40 ticks of cranking (not 39); each bolt leaves at 3.0 with ×0.6 of the arrow's damage (1.2 from a
      * plain arrow's 2), strays at most 0.0172 × 2.0 per axis and further than a vanilla bolt can; 520 uses; walking
      * while cranking as with vanilla's crossbow.
      */
@@ -216,12 +216,12 @@ final class CrossbowGameTests {
         player.setItemInHand(InteractionHand.MAIN_HAND, repeater);
         CrossbowItem item = (CrossbowItem) repeater.getItem();
         int duration = item.getUseDuration(repeater, player);
-        item.onUseTick(helper.getLevel(), player, repeater, duration - 79);
+        item.onUseTick(helper.getLevel(), player, repeater, duration - 39);
         boolean earlyLoaded = CrossbowItem.isCharged(repeater);
-        item.onUseTick(helper.getLevel(), player, repeater, duration - 80);
+        item.onUseTick(helper.getLevel(), player, repeater, duration - 40);
         var use = repeater.get(DataComponents.USE_EFFECTS);
-        if (CrossbowItem.getChargeDuration(repeater, player) != 80) helper.fail("the Repeating Crossbow should load in 80 ticks, not " + CrossbowItem.getChargeDuration(repeater, player));
-        else if (earlyLoaded || !CrossbowItem.isCharged(repeater)) helper.fail("the Repeating Crossbow should load at 80 ticks of cranking, not 79: early " + earlyLoaded);
+        if (CrossbowItem.getChargeDuration(repeater, player) != 40) helper.fail("the Repeating Crossbow should load in 40 ticks, not " + CrossbowItem.getChargeDuration(repeater, player));
+        else if (earlyLoaded || !CrossbowItem.isCharged(repeater)) helper.fail("the Repeating Crossbow should load at 40 ticks of cranking, not 39: early " + earlyLoaded);
         else if (repeater.getMaxDamage() != 520) helper.fail("the Repeating Crossbow should last 520 uses, not " + repeater.getMaxDamage());
         else if (use != null && !use.equals(new ItemStack(Items.CROSSBOW).get(DataComponents.USE_EFFECTS)))
             helper.fail("cranking the Repeating Crossbow should slow you as vanilla's crossbow does: " + use);
@@ -238,7 +238,7 @@ final class CrossbowGameTests {
             }
             double speed = speeds / 35, limit = 0.0172275 * 2.0 + 1e-4;
             if (Math.abs(speed - 3.0) > 0.03) helper.fail("Repeating Crossbow bolts' mean speed " + speed + ", expected 3.0");
-            else if (Math.abs(first.baseDamage - 0.9) > 1e-6) helper.fail("Repeating Crossbow bolt base damage " + first.baseDamage + ", expected 0.9 (2 × 0.45)");
+            else if (Math.abs(first.baseDamage - 1.2) > 1e-6) helper.fail("Repeating Crossbow bolt base damage " + first.baseDamage + ", expected 1.2 (2 × 0.6)");
             else if (first.isCritArrow()) helper.fail("a Repeating Crossbow bolt shouldn't crit");
             else if (worst > limit) helper.fail(String.format(java.util.Locale.ROOT, "a Repeating Crossbow bolt strayed %.4f, more than %.4f", worst, limit));
             else if (worst <= 0.0172275) helper.fail(String.format(java.util.Locale.ROOT, "35 Repeating Crossbow bolts stayed within a vanilla bolt's %.4f", worst));
@@ -301,9 +301,9 @@ final class CrossbowGameTests {
     }
 
     /**
-     * A full magazine lands on one target: five bolts 12 ticks apart all hurt a husk 8 blocks away, 3 each through its 2
-     * armour (2.94), 14.7 in all. Fired 8 ticks apart, the husk's damage cooldown turns bolts 2 and 4 away, which is why
-     * the Repeating Crossbow waits 12.
+     * A full magazine lands on one target: five bolts 12 ticks apart all hurt a husk 8 blocks away, 4 each through its 2
+     * armour (3.936), 19.68 in all. Fired 8 ticks apart, the husk's damage cooldown turns bolts 2 and 4 away, which is
+     * why the Repeating Crossbow waits 12.
      */
     static void repeaterBurstLands(GameTestHelper helper) {
         Husk spaced = husk(helper, 10.5, 2.5), crowded = husk(helper, 10.5, 8.5);
@@ -322,13 +322,13 @@ final class CrossbowGameTests {
         });
         helper.runAfterDelay(80, () -> {
             float a = spaced.getMaxHealth() - spaced.getHealth(), b = crowded.getMaxHealth() - crowded.getHealth();
-            if (Math.abs(a - 14.7) > 0.05) {
+            if (Math.abs(a - 19.68) > 0.05) {
                 List<String> left = helper.getLevel().getEntitiesOfClass(AbstractArrow.class, spaced.getBoundingBox().inflate(16), e -> e.getOwner() == shooter).stream()
                         .map(e -> String.format(java.util.Locale.ROOT, "bolt at x%.2f y%.2f z%.2f%s", e.getX() - helper.absoluteVec(Vec3.ZERO).x,
                                 e.getY() - helper.absoluteVec(Vec3.ZERO).y, e.getZ() - helper.absoluteVec(Vec3.ZERO).z, e.getDeltaMovement().length() < 0.01 ? " at rest" : " moving")).toList();
-                helper.fail("five bolts 12 ticks apart should all land: lost " + a + ", expected 14.7; hurt " + hurts + "; left " + left);
+                helper.fail("five bolts 12 ticks apart should all land: lost " + a + ", expected 19.68; hurt " + hurts + "; left " + left);
             }
-            else if (b > 9.0) helper.fail("bolts 8 ticks apart were expected to lose two to the damage cooldown, but the husk lost " + b);
+            else if (b > 11.9) helper.fail("bolts 8 ticks apart were expected to lose two to the damage cooldown, but the husk lost " + b);
             else helper.succeed();
         });
     }

@@ -58,6 +58,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("quiver_cycle_skips_empty", () -> QuiverGameTests::quiverCycleSkipsEmpty);
         FUNCTIONS.register("quiver_supplies_new_arrows", () -> QuiverGameTests::quiverSuppliesNewArrows);
         FUNCTIONS.register("quiver_bundle_clicks", () -> QuiverGameTests::quiverBundleClicks);
+        FUNCTIONS.register("quiver_only_for_weapons_firing_as_vanilla", () -> QuiverGameTests::quiverOnlyForWeaponsFiringAsVanilla);
         FUNCTIONS.register("blocked_hit_reports_nothing", () -> AdvancementGameTests::blockedHitReportsNothing);
         FUNCTIONS.register("breeze_deflection_drops_record", () -> AdvancementGameTests::breezeDeflectionDropsRecord);
         FUNCTIONS.register("slice_advancements", () -> AdvancementGameTests::sliceAdvancements);
@@ -120,9 +121,12 @@ public final class FullDrawGameTests {
         // the Marksman
         FUNCTIONS.register("marksman_cover_only_precision", () -> MarksmanGameTests::marksmanCoverOnlyPrecision);
         FUNCTIONS.register("marksman_draws_perfect_shots", () -> MarksmanGameTests::marksmanDrawsPerfectShots);
+        FUNCTIONS.register("marksman_loses_the_shot_to_a_blunt", () -> MarksmanGameTests::marksmanLosesTheShotToABlunt);
         FUNCTIONS.register("marksman_phase_two", () -> MarksmanGameTests::marksmanPhaseTwo);
+        FUNCTIONS.register("marksman_boss_bar_leaves", () -> MarksmanGameTests::marksmanBossBarLeaves);
         FUNCTIONS.register("marksman_on_the_watchtower", () -> MarksmanGameTests::marksmanOnTheWatchtower);
         FUNCTIONS.register("marksman_shoots_from_the_gap", () -> MarksmanGameTests::marksmanShootsFromTheGap);
+        FUNCTIONS.register("marksman_shoots_back_at_an_unseen_attacker", () -> MarksmanGameTests::marksmanShootsBackAtAnUnseenAttacker);
         FUNCTIONS.register("marksman_back_to_post", () -> MarksmanGameTests::marksmanBackToPost);
         FUNCTIONS.register("marksman_bashes_a_foe_beside_it", () -> MarksmanGameTests::marksmanBashesAFoeBesideIt);
         FUNCTIONS.register("marksman_drops", () -> MarksmanGameTests::marksmanDrops);
@@ -152,8 +156,8 @@ public final class FullDrawGameTests {
             "harrier_dive_strikes_and_climbs");
     /** Tests that watch a mob through more than one round of what it does, or wait on the light: 10 s instead of 5. */
     private static final java.util.Set<String> LONG = java.util.Set.of("bog_lurker_spits_in_range", "bog_lurker_flees_close", "bog_lurker_dives_when_struck_from_afar",
-            "bog_lurker_spawn_rules", "harrier_spawn_rules", "marksman_draws_perfect_shots", "marksman_phase_two", "marksman_on_the_watchtower",
-            "marksman_shoots_from_the_gap", "marksman_back_to_post", "marksman_follows_the_config");
+            "bog_lurker_spawn_rules", "harrier_spawn_rules", "marksman_draws_perfect_shots", "marksman_loses_the_shot_to_a_blunt", "marksman_phase_two", "marksman_on_the_watchtower",
+            "marksman_shoots_from_the_gap", "marksman_shoots_back_at_an_unseen_attacker", "marksman_back_to_post", "marksman_follows_the_config");
 
     private FullDrawGameTests() {}
 

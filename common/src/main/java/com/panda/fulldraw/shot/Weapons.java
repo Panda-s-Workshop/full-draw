@@ -5,9 +5,11 @@ import com.panda.fulldraw.logic.WeaponStats;
 import com.panda.fulldraw.registry.ModEnchantments;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
 
 /** Which {@link WeaponStats} a weapon fires with: Full Draw's own weapons know theirs, every other bow or crossbow is vanilla's. */
 public final class Weapons {
@@ -27,9 +29,35 @@ public final class Weapons {
 
     private Weapons() {}
 
-    /** Whether the shot pipeline (Perfect, spread, Steady Aim, the ring) applies to this weapon. */
+    /**
+     * Whether the shot pipeline (Perfect, spread, Steady Aim, the ring) applies to this weapon: not one tagged out, and
+     * not another mod's bow or crossbow that fires its own way.
+     */
     public static boolean inPipeline(ItemStack weapon) {
-        return !weapon.is(NO_SHOT_PIPELINE);
+        return !weapon.is(NO_SHOT_PIPELINE) && firesAsVanilla(weapon.getItem());
+    }
+
+    private static final java.util.Map<Class<?>, Boolean> FIRES_AS_VANILLA = new java.util.concurrent.ConcurrentHashMap<>();
+    /** The methods a bow or crossbow fires through: a class that overrides one may spend, aim or shoot as it likes. */
+    private static final java.util.Set<String> FIRING = java.util.Set.of("releaseUsing", "shootProjectile", "performShooting");
+
+    /**
+     * A weapon that fires through vanilla's own release, so the pipeline's numbers are what it shoots and the Quiver's
+     * arrows are spent as vanilla spends them. Full Draw's own weapons do; another mod's bow that overrides how it fires
+     * is left alone.
+     */
+    public static boolean firesAsVanilla(Item item) {
+        return firesAsVanilla(item.getClass());
+    }
+
+    public static boolean firesAsVanilla(Class<? extends Item> item) {
+        if (Ranged.class.isAssignableFrom(item) || !ProjectileWeaponItem.class.isAssignableFrom(item)) return true;
+        return FIRES_AS_VANILLA.computeIfAbsent(item, type -> {
+            for (Class<?> c = type; c != null && c != BowItem.class && c != CrossbowItem.class && c != ProjectileWeaponItem.class; c = c.getSuperclass())
+                for (java.lang.reflect.Method m : c.getDeclaredMethods())
+                    if (FIRING.contains(m.getName())) return false;
+            return true;
+        });
     }
 
     /** The weapon's numbers as it fires: its own, with Quickdraw's shorter draw and Steady's wider Perfect window. */

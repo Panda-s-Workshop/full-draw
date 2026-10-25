@@ -312,6 +312,10 @@ public class Marksman extends AbstractSkeleton {
     public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
         boolean head = throughCover != null && source.getDirectEntity() == throughCover;
         throughCover = null;
+        // whoever struck it takes its eye, from wherever they shot (the hurt-by goal never looks past its battlements)
+        if (source.getEntity() instanceof LivingEntity attacker && attacker != this && attacker.isAlive() && attacker != getTarget()
+                && level.getDifficulty() != Difficulty.PEACEFUL && !(attacker instanceof Player p && (p.isCreative() || p.isSpectator())))
+            setTarget(attacker);
         Crenel cover = coverAt();
         if (cover != null && !head && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && MarksmanRules.screens(true, false, beyond(cover, source)))
             return false;
@@ -417,7 +421,7 @@ public class Marksman extends AbstractSkeleton {
                 foeSpeed = Vec3.ZERO;
             }
             if (foe != null && (peaceful || !foe.isAlive() || foe.isRemoved() || foe.level() != level()
-                    || foe.distanceTo(Marksman.this) > MarksmanRules.SIGHT + 16 || foe instanceof Player p && (p.isCreative() || p.isSpectator())
+                    || foe.distanceTo(Marksman.this) > MarksmanRules.SIGHT + 16 && !inReach(getEyePosition(), foe.getEyePosition()) || foe instanceof Player p && (p.isCreative() || p.isSpectator())
                     || hidden > 600)) {
                 foe = null;
                 hidden = 0;
@@ -527,6 +531,11 @@ public class Marksman extends AbstractSkeleton {
         }
 
         private void draw(boolean seen) {
+            // knocked out of its draw (a Blunt Arrow lets its bow down): that shot is lost, and it ducks to draw again
+            if (ticks > 1 && !isUsingItem() && getMainHandItem().getItem() instanceof net.minecraft.world.item.BowItem) {
+                duck();
+                return;
+            }
             getNavigation().stop();
             Vec3 aim = shot == MarksmanRules.Shot.ARROW && seen ? foe.getEyePosition() : lastSeen;
             getLookControl().setLookAt(aim.x, aim.y, aim.z, 30.0F, 30.0F);
@@ -572,7 +581,7 @@ public class Marksman extends AbstractSkeleton {
         private boolean seesFoe() {
             Crenel crenel = at != null ? at : bestCrenel();
             Vec3 eye = (crenel == null ? position() : Vec3.atBottomCenterOf(shootingSpot(crenel))).add(0, 1.74, 0);
-            if (foe.getEyePosition().distanceTo(eye) > MarksmanRules.SIGHT) return false;
+            if (foe.getEyePosition().distanceTo(eye) > MarksmanRules.SIGHT && !inReach(eye, foe.getEyePosition())) return false;
             return level().clip(new ClipContext(eye, foe.getEyePosition(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, Marksman.this))
                     .getType() == HitResult.Type.MISS;
         }
@@ -605,6 +614,11 @@ public class Marksman extends AbstractSkeleton {
      * Looses at a point: a Perfect arrow from its bow, carrying the shot record a player's would (so a hit is scored as a
      * Perfect one, headshots included), or a Flare or Blast Arrow; each on the flatter arc that drops onto the point.
      */
+    /** Its arrow reaches from one point to the other: a foe it has taken on stays seen, and kept, as far as it can shoot. */
+    private static boolean inReach(Vec3 from, Vec3 to) {
+        return !Double.isNaN(MarksmanRules.pitch(Math.hypot(to.x - from.x, to.z - from.z), to.y - from.y, MarksmanRules.ARROW_SPEED, MarksmanRules.ARROW_GRAVITY));
+    }
+
     void loose(MarksmanRules.Shot kind, Vec3 point) {
         if (!(level() instanceof ServerLevel level) || kind == MarksmanRules.Shot.NONE) return;
         ItemStack bow = getMainHandItem();
@@ -640,12 +654,13 @@ public class Marksman extends AbstractSkeleton {
 
     @Override
     protected void customServerAiStep(ServerLevel level) {
-        // placed without finalizeSpawn (a command, `place template`): where it first stands is home, and it takes its bow
+        // placed without finalizeSpawn (a command, `place template`): where it first stands is home
         if (home == null) {
             setHome(blockPosition());
-            if (getMainHandItem().isEmpty()) populateDefaultEquipmentSlots(random, level.getCurrentDifficultyAt(blockPosition()));
             applyTuning();
         }
+        // it always carries its bow (an arrow loosed from an empty hand is refused outright)
+        if (getMainHandItem().isEmpty()) populateDefaultEquipmentSlots(random, level.getCurrentDifficultyAt(blockPosition()));
         // the parapet can be broken: look again for its crenels now and then
         if (tickCount % 200 == 0) {
             crenels.clear();
@@ -714,10 +729,18 @@ public class Marksman extends AbstractSkeleton {
         bossEvent.setName(getDisplayName());
     }
 
+    /** A player who stops tracking it (gone through a portal, teleported away) loses the bar at once, as the wither's do. */
     @Override
-    public void remove(RemovalReason reason) {
+    public void stopSeenByPlayer(ServerPlayer player) {
+        super.stopSeenByPlayer(player);
+        bossEvent.removePlayer(player);
+    }
+
+    /** Any removal, an unloaded chunk's too (which never calls {@link #remove}), takes the bar off every screen. */
+    @Override
+    public void onRemoval(RemovalReason reason) {
+        super.onRemoval(reason);
         bossEvent.removeAllPlayers();
-        super.remove(reason);
     }
 
     @Override

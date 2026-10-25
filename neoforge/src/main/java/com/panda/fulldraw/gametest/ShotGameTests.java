@@ -131,7 +131,7 @@ final class ShotGameTests {
     }
 
     /**
-     * The Recurve Bow: an 18-tick draw with a Perfect window of 6 ticks (20 to 25), arrows at 3.2 for ×1.15 with an
+     * The Recurve Bow: an 18-tick draw with a Perfect window of 6 ticks (20 to 25), arrows at 3.0 for ×1.15 with an
      * arrow's usual gravity, 0.9 of the spread (a still archer's late shot: 0.45) and 512 uses.
      */
     static void weaponStatsRecurveBow(GameTestHelper helper) {
@@ -152,7 +152,7 @@ final class ShotGameTests {
         else if (last == null || !last.perfect()) helper.fail("a Recurve Bow released at 25 ticks is still in its 6-tick window");
         else if (after == null || after.perfect()) helper.fail("a Recurve Bow released at 26 ticks is past its window");
         else if (Math.abs(last.weaponMult() - 1.15) > 1e-6) helper.fail("Recurve Bow damage multiplier " + last.weaponMult());
-        else if (Math.abs(lastArrow.getDeltaMovement().length() - 3.2) > 0.05) helper.fail("Recurve Bow launch speed " + lastArrow.getDeltaMovement().length() + ", expected 3.2");
+        else if (Math.abs(lastArrow.getDeltaMovement().length() - 3.0) > 0.05) helper.fail("Recurve Bow launch speed " + lastArrow.getDeltaMovement().length() + ", expected 3.0");
         else if (Math.abs(lastArrow.getGravity() - 0.05) > 1e-6) helper.fail("Recurve Bow arrow gravity " + lastArrow.getGravity() + ", expected vanilla's 0.05");
         else if (Math.abs(after.spread() - 0.45) > 1e-6) helper.fail("a still archer's late Recurve Bow shot should spread 0.45: " + after.spread());
         else if (bow.getMaxDamage() != 512) helper.fail("the Recurve Bow should last 512 uses, not " + bow.getMaxDamage());
@@ -345,7 +345,7 @@ final class ShotGameTests {
                 if (!crossbow.contains("loads in 1.25 s, no Perfect window") || !crossbow.contains("63 blocks/s")) helper.fail("crossbow stats: " + crossbow);
                 else if (!arbalest.contains("loads in 3.00 s") || !arbalest.contains("72 blocks/s, spread 0.4") || !arbalest.contains("pierce 2 more mobs, ignore 50% of armour")
                         || !arbalest.contains("knock raised shields down for 3 s")) helper.fail("Arbalest stats: " + arbalest);
-                else if (!repeaterStats(player).contains("loads in 4.00 s") || !repeaterStats(player).contains("a crank loads 5 shots, fired one a click, 0.60 s apart")
+                else if (!repeaterStats(player).contains("loads in 2.00 s") || !repeaterStats(player).contains("a crank loads 5 shots, fired one a click, 0.60 s apart")
                         || repeaterStats(player).contains("bolts pierce")) helper.fail("Repeating Crossbow stats: " + repeaterStats(player));
                 else helper.succeed();
             }

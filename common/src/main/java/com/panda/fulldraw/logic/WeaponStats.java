@@ -19,11 +19,13 @@ public record WeaponStats(int drawTicks, double damageMult, double velocityMult,
     /** The siege crossbow: a 3 s crank, bolts at 3.6 for ×1.6 with a 0.4 spread. Its bolts' extras are {@link BoltTraits#ARBALEST}. */
     public static final WeaponStats ARBALEST = new WeaponStats(60, 1.6, 3.6 / 3.15, 0.4, 0, 1.0);
     /**
-     * The burst crossbow: a 4 s crank loads a magazine ({@link Magazine#REPEATING_CROSSBOW}), each bolt at 3.0 for ×0.45
-     * with a 2.0 spread. A bolt hits for ceil(speed × 0.9) = 3 at any speed from 2.23 to 3.33, so the spread's swing in
-     * speed doesn't make some bolts 4, and a magazine of 15 stays within 1.5 × one Arbalest bolt (12).
+     * The burst crossbow: a 2 s crank loads a magazine ({@link Magazine#REPEATING_CROSSBOW}), each bolt at 3.0 for ×0.6
+     * with a 2.0 spread. A bolt hits for ceil(speed × 1.2) = 4 at any speed from 2.5 to 3.33, so the spread's swing in
+     * speed (a tenth at most) doesn't make some bolts 3 or 5. A magazine of 20 out-damages a vanilla crossbow over the
+     * same 2.4 s and stays under two Arbalest bolts; fired back to back it deals about 0.6 × a vanilla crossbow's damage a
+     * minute.
      */
-    public static final WeaponStats REPEATING_CROSSBOW = new WeaponStats(80, 0.45, 3.0 / 3.15, 2.0, 0, 1.0);
+    public static final WeaponStats REPEATING_CROSSBOW = new WeaponStats(40, 0.6, 3.0 / 3.15, 2.0, 0, 1.0);
     public static final WeaponStats SHORTBOW = new WeaponStats(12, 0.7, 2.6 / 3.0, 1.5, 0, 1.0);
     /**
      * Slow, heavy and true: a long draw, hard hits, a tight spread and a flatter arc. ×1.2, not more: its fast arrow
@@ -32,10 +34,11 @@ public record WeaponStats(int drawTicks, double damageMult, double velocityMult,
      */
     public static final WeaponStats LONGBOW = new WeaponStats(32, 1.2, 3.8 / 3.0, 0.6, 0, 0.75);
     /**
-     * A little quicker and harder than vanilla's bow (full draw at 18 ticks, not 20), with a Perfect window two ticks
-     * wider.
+     * The forgiving bow: a Perfect window two ticks wider, a little quicker to draw (18 ticks, not 20) and a little
+     * harder, at vanilla's launch speed. Not faster too: its arrow at 3.2 hits for 7, and an untimed full draw every 18
+     * ticks would then out-damage a vanilla bow that never misses its Perfect window.
      */
-    public static final WeaponStats RECURVE_BOW = new WeaponStats(18, 1.15, 3.2 / 3.0, 0.9, 2, 1.0);
+    public static final WeaponStats RECURVE_BOW = new WeaponStats(18, 1.15, 1.0, 0.9, 2, 1.0);
 
     /** Converts ticks held on this weapon to the ticks a vanilla bow would need for the same draw fraction. */
     public int toVanillaTicks(int ticksHeld) {

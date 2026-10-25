@@ -79,11 +79,6 @@ class BalanceTest {
         assertTrue(arbalest / 60 < DIAMOND_SWORD_DPS, "Arbalest " + arbalest / 60 + " damage a second, a diamond sword does " + DIAMOND_SWORD_DPS);
     }
 
-    /**
-     * A full magazine from the Repeating Crossbow, every bolt landing, deals at most 1.5 × one Arbalest bolt (a burst,
-     * not a heavier hit) and at least one Arbalest bolt (else it has no reason to exist). Plain arrows, no crit on either.
-     * That every bolt does land on one target is the GameTest {@code repeater_burst_lands}.
-     */
     @Test
     void clankOnlyWhenTheBoltGetsThroughRealArmour() {
         double arbalest = BoltTraits.ARBALEST.armourKept();
@@ -94,13 +89,43 @@ class BalanceTest {
         assertTrue(BoltTraits.clanks(ArrowTraits.BODKIN.armourKept(), 4.0F, 8.0F), "a bodkin bites through armour too");
     }
 
+    /**
+     * The Repeating Crossbow is the burst: a full magazine, every bolt landing, out-damages a vanilla crossbow over the
+     * same time (its first shot and the one it loads and fires after 25 ticks, crits at their mean), and stays under two
+     * Arbalest bolts (a burst, not a heavier hit). Fired back to back, crank and magazine, it keeps at least 0.55 × a
+     * vanilla crossbow's damage a minute: what it gives up for the burst. Plain arrows, unarmoured. That every bolt does
+     * land on one target is the GameTest {@code repeater_burst_lands}.
+     */
     @Test
     void repeaterBurst() {
-        int bolt = ShotMath.vanillaDamage(3.15 * WeaponStats.REPEATING_CROSSBOW.velocityMult(), 2.0 * WeaponStats.REPEATING_CROSSBOW.damageMult());
-        int magazine = bolt * Magazine.REPEATING_CROSSBOW.shots();
+        WeaponStats r = WeaponStats.REPEATING_CROSSBOW;
+        Magazine m = Magazine.REPEATING_CROSSBOW;
+        int bolt = ShotMath.vanillaDamage(3.15 * r.velocityMult(), 2.0 * r.damageMult());
+        int magazine = bolt * m.shots();
         int arbalest = ShotMath.vanillaDamage(3.15 * WeaponStats.ARBALEST.velocityMult(), 2.0 * WeaponStats.ARBALEST.damageMult());
-        assertTrue(magazine <= 1.5 * arbalest, "a magazine deals " + magazine + ", one Arbalest bolt " + arbalest);
-        assertTrue(magazine >= arbalest, "a magazine deals " + magazine + ", less than one Arbalest bolt's " + arbalest);
+        int burstTicks = (m.shots() - 1) * m.shotTicks();
+        int vanillaShots = 1 + burstTicks / WeaponStats.VANILLA_CROSSBOW.drawTicks();
+        double vanillaBurst = vanillaShots * perMinute(WeaponStats.VANILLA_CROSSBOW, true, 0, 0, 1.0) * WeaponStats.VANILLA_CROSSBOW.drawTicks() / 1200.0;
+        assertTrue(magazine > vanillaBurst, "a magazine deals " + magazine + " over " + burstTicks + " ticks, a vanilla crossbow " + vanillaBurst);
+        assertTrue(magazine < 2 * arbalest, "a magazine deals " + magazine + ", two Arbalest bolts " + 2 * arbalest);
+        double sustained = magazine * 1200.0 / (r.drawTicks() + burstTicks);
+        double vanilla = perMinute(WeaponStats.VANILLA_CROSSBOW, true, 0, 0, 1.0);
+        assertTrue(sustained >= 0.55 * vanilla, "back to back it deals " + sustained + " a minute, a vanilla crossbow " + vanilla);
+        assertTrue(sustained / 60 < DIAMOND_SWORD_DPS, "back to back it deals " + sustained / 60 + " a second, a diamond sword " + DIAMOND_SWORD_DPS);
+    }
+
+    /**
+     * Gear never replaces a good shot: no bow released untimed at full draw, shot after shot, deals as much a second as
+     * vanilla's bow with every shot Perfect. Ten blocks out, body hits.
+     */
+    @Test
+    void noBowOutshootsATimedVanillaBowUntimed() {
+        WeaponStats v = WeaponStats.VANILLA_BOW;
+        double perfect = ShotMath.damage(ShotMathTest.launchBase(v), v.damageMult(), 1, true, 1.0, 10, T) / ((v.drawTicks() + T.perfectDelay()) / 20.0);
+        for (WeaponStats w : List.of(WeaponStats.SHORTBOW, WeaponStats.LONGBOW, WeaponStats.RECURVE_BOW)) {
+            double untimed = ShotMath.damage(ShotMathTest.launchBase(w), w.damageMult(), 1, false, 1.0, 10, T) / (w.drawTicks() / 20.0);
+            assertTrue(untimed < perfect, w + ": " + untimed + " a second untimed, vanilla's bow Perfect every shot " + perfect);
+        }
     }
 
     /**

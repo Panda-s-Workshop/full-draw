@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modpacks and config · Full Draw</title>
+<meta name="description" content="Full Draw&#x27;s server and client config, tags and data hooks.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Modpacks and config · Full Draw">
+<meta property="og:description" content="Full Draw&#x27;s server and client config, tags and data hooks.">
+<meta property="og:image" content="https://panda-s-workshop.github.io/full-draw/img/social.jpg">
+<meta property="og:url" content="https://panda-s-workshop.github.io/full-draw/packs.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#120e1a">
+<link rel="icon" type="image/png" href="img/icon.png">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+<a class="brand" href="index.html"><img src="img/icon.png" alt="">Full Draw</a>
+<button class="menu-btn" aria-label="Menu" aria-expanded="false">Menu</button>
+<nav class="nav" aria-label="Main"><a href="index.html">Home</a><a href="guide.html">How it plays</a><a href="arsenal.html">Arsenal</a><a href="bestiary.html">Bestiary</a><a href="showcase.html">Showcase</a><a href="packs.html" aria-current="page">Modpacks and config</a><a href="https://github.com/Panda-s-Workshop/full-draw" rel="noopener">GitHub</a></nav>
+</div></header>
+<main id="main">
+<div class="pagehead"><div class="wrap"><div class="eyebrow">Modpacks</div><h1>Modpacks and config</h1><p>The server and client config, the tags and data a pack can change, and how Full Draw sits beside other mods.</p></div></div><div class="wrap narrow">
+<section id="config"><h2>Server config</h2>
+<p>NeoForge: <code>config/fulldraw-synced.toml</code>, sent to every player and re-sent when it changes. Fabric:
+<code>config/fulldraw.properties</code>, read at startup. The keys are the same on both.</p>
+<div class="tw"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>vanillaCritOnFullDraw</code></td><td>false</td><td>Players&#x27; full-draw bow shots crit as in vanilla. false: only a Perfect Release crits.</td></tr><tr><td><code>perfectWindowTicks</code></td><td>4</td><td>Ticks the Perfect window stays open (a weapon&#x27;s own extra window adds to this).</td></tr><tr><td><code>perfectDelayTicks</code></td><td>2</td><td>Ticks after full draw the Perfect window opens.</td></tr><tr><td><code>perfectMultiplier</code></td><td>1.5</td><td>Damage multiplier of a Perfect Release.</td></tr><tr><td><code>precisionMultiplierMobs</code></td><td>1.5</td><td>Head or weak-spot multiplier against mobs.</td></tr><tr><td><code>precisionMultiplierPlayers</code></td><td>1.25</td><td>Head multiplier against players.</td></tr><tr><td><code>skillCap</code></td><td>2.5</td><td>The most Perfect × precision × range may multiply a shot by.</td></tr><tr><td><code>rangeBonusStart</code></td><td>20</td><td>Blocks of flight before the range bonus starts.</td></tr><tr><td><code>rangeBonusPerBlock</code></td><td>0.01</td><td>Range bonus per block beyond the start.</td></tr><tr><td><code>rangeBonusCap</code></td><td>1.3</td><td>The largest range multiplier.</td></tr><tr><td><code>pointBlankDistance</code></td><td>3</td><td>Below this many blocks, a shot is point-blank.</td></tr><tr><td><code>pointBlankMultiplier</code></td><td>0.6</td><td>Damage multiplier of a point-blank shot.</td></tr><tr><td><code>trembleStartSeconds</code></td><td>3</td><td>Seconds past full draw the tremble starts.</td></tr><tr><td><code>trembleFullSeconds</code></td><td>6</td><td>Seconds past full draw the tremble is at its worst.</td></tr><tr><td><code>trembleMaxSpread</code></td><td>3</td><td>Spread at the worst of the tremble (vanilla&#x27;s bow is 1.0).</td></tr><tr><td><code>blastArrowBreaksBlocks</code></td><td>false</td><td>Blast Arrows break blocks, as TNT does, where the tnt_explodes game rule allows (a mob&#x27;s under mobGriefing). false: they only hurt and knock back.</td></tr><tr><td><code>ropeArrowLength</code></td><td>24</td><td>The most rope one Rope Arrow hangs, counting its knot.</td></tr><tr><td><code>arrowRecoveryChance</code></td><td>0.4</td><td>The chance a plain arrow stuck in a mob drops back when it dies. Other arrows keep their ratio to it (a Broadhead&#x27;s is 5/8 of it; a Blunt&#x27;s always comes back at the default). 0: none come back.</td></tr><tr><td><code>arrowPickupLifetimeSeconds</code></td><td>300</td><td>Seconds an arrow a player can pick up stays in a block (vanilla: 60).</td></tr><tr><td><code>shieldbearerSpawns</code></td><td>true</td><td>Shieldbearers join raids from the third wave and guard pillager outposts. false: only spawn eggs and commands make them.</td></tr><tr><td><code>galeHarrierSpawns</code></td><td>true</td><td>Gale Harriers spawn on their own over the windswept hills and peaks by day. false: only spawn eggs and commands make them.</td></tr><tr><td><code>bogLurkerSpawns</code></td><td>true</td><td>Bog Lurkers spawn on their own in swamp water. false: only spawn eggs and commands make them.</td></tr><tr><td><code>marksmanHealth</code></td><td>100</td><td>The Marksman&#x27;s health.</td></tr><tr><td><code>marksmanDrawTicks</code></td><td>30</td><td>Ticks the Marksman draws in a crenel&#x27;s gap before it looses.</td></tr><tr><td><code>marksmanDrawTicksPhaseTwo</code></td><td>24</td><td>Ticks it draws below half its health.</td></tr><tr><td><code>marksmanArrowBaseDamage</code></td><td>1.3</td><td>Its arrow&#x27;s base damage (a skeleton&#x27;s is 2.0; each of its shots is a Perfect one).</td></tr><tr><td><code>marksmanBashDamage</code></td><td>3</td><td>The blow of its bow&#x27;s end, for a foe on the battlements with it.</td></tr></tbody></table></div>
+<h2>Client config</h2>
+<p>Each player's own: what they see and hear. NeoForge <code>config/fulldraw-client.toml</code>, Fabric
+<code>config/fulldraw-client.properties</code>.</p>
+<div class="tw"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>showRing</code></td><td>true</td><td>The draw ring, the hit tick and early/late around the crosshair.</td></tr><tr><td><code>distanceReadout</code></td><td>true</td><td>&quot;Long shot: N m&quot; on the action bar.</td></tr><tr><td><code>fovEffects</code></td><td>true</td><td>Bow zoom on every bow, Steady Aim&#x27;s narrower view and the release kick.</td></tr><tr><td><code>perfectTrail</code></td><td>true</td><td>The particle trail behind Perfect arrows.</td></tr><tr><td><code>drawSounds</code></td><td>true</td><td>The draw creak, the strain of a held draw, the twang on release and your own breath.</td></tr><tr><td><code>perfectChime</code></td><td>true</td><td>The chime and the flash at the bow of your own Perfect Release.</td></tr><tr><td><code>hitSounds</code></td><td>true</td><td>The hit tick and the precision thock.</td></tr><tr><td><code>bowShake</code></td><td>true</td><td>The bow shaking in the hand when a draw is held too long.</td></tr><tr><td><code>quiverStrip</code></td><td>LEFT</td><td>Where the Quiver strip sits beside the hotbar: LEFT, RIGHT or HIDDEN.</td></tr></tbody></table></div></section>
+<section id="data"><h2>Tags and data</h2>
+<div class="tw"><table><thead><tr><th>Item tag</th><th>Holds</th></tr></thead><tbody><tr><td><code>#fulldraw:no_shot_pipeline</code></td><td>Weapons Full Draw leaves alone: they shoot as their mod made them.</td></tr><tr><td><code>#fulldraw:quiver_ammo</code></td><td>What a Quiver takes (by default <code>#minecraft:arrows</code>).</td></tr><tr><td><code>#fulldraw:shield_piercing</code></td><td>Weapons whose bolts crack a Shieldbearer's shield (the Arbalest).</td></tr><tr><td><code>#fulldraw:loads_alone</code></td><td>Arrows a magazine crossbow loads one at a time (the Blast Arrow).</td></tr><tr><td><code>#fulldraw:fletching/heads</code></td><td>What the Fletching Table's head slot takes; also <code>shafts</code>, <code>fletchings</code>, <code>extras</code>.</td></tr></tbody></table></div>
+<p>Full Draw's bows join <code>#minecraft:enchantable/bow</code> and <code>#c:tools/bow</code>, its crossbows
+<code>#minecraft:enchantable/crossbow</code> and <code>#c:tools/crossbow</code>, and its arrows <code>#minecraft:arrows</code>.</p>
+<h3>Weak spots</h3>
+<p>A creature's head is found from its eye height. To give one a different weak spot, add
+<code>data/&lt;namespace&gt;/fulldraw/weak_spot/&lt;entity&gt;.json</code>, with boxes in fractions of its bounding box
+(0 to 1 across, up and front to back; past the edges is fine) and an optional multiplier:</p>
+<pre><code>{&quot;boxes&quot;: [{&quot;min&quot;: [-1, 0.68, 0.4], &quot;max&quot;: [2, 2, 2]}], &quot;multiplier&quot;: 2.0}</code></pre>
+<p>Or <code>{"none": true}</code> for a creature with no weak spot, as the slime has.</p>
+<h3>Fletching recipes</h3>
+<p>Recipes of type <code>fulldraw:fletching</code> take <code>head</code>, <code>shaft</code>, <code>fletching</code> and an
+optional <code>extra</code>, each an ingredient with a count:</p>
+<pre><code>{
+  &quot;type&quot;: &quot;fulldraw:fletching&quot;,
+  &quot;head&quot;: {
+    &quot;ingredient&quot;: &quot;minecraft:iron_nugget&quot;,
+    &quot;count&quot;: 2
+  },
+  &quot;shaft&quot;: {
+    &quot;ingredient&quot;: &quot;minecraft:stick&quot;
+  },
+  &quot;fletching&quot;: {
+    &quot;ingredient&quot;: &quot;minecraft:feather&quot;
+  },
+  &quot;result&quot;: {
+    &quot;id&quot;: &quot;fulldraw:broadhead_arrow&quot;,
+    &quot;count&quot;: 8
+  }
+}</code></pre></section>
+<section id="compat"><h2>Other mods</h2>
+<ul>
+<li>Other mods' bows get the shot rules (Perfect window, headshots, range) at a vanilla bow's numbers, unless tagged out. Crossbows, ours and theirs, have no Perfect window and their bolts take no head or range multiplier.</li>
+<li>Other mods' creatures get a weak spot from their eye height.</li>
+<li>Arrows from other mods go in the Quiver when they're in <code>#minecraft:arrows</code>.</li>
+<li>The enchantments are ordinary data enchantments, so mods that list or move enchantments see them.</li>
+</ul></section>
+</div>
+</main>
+<footer><div class="wrap cols">
+<div><b>Full Draw</b><br>A Minecraft 26.3 mod for NeoForge and Fabric.</div>
+<div><ul><li><a href="index.html">Home</a></li><li><a href="guide.html">How it plays</a></li><li><a href="arsenal.html">Arsenal</a></li><li><a href="bestiary.html">Bestiary</a></li><li><a href="showcase.html">Showcase</a></li><li><a href="packs.html">Modpacks and config</a></li></ul></div>
+<div><ul>
+<li><a href="https://www.curseforge.com/minecraft/mc-mods/full-draw" rel="noopener">Download on CurseForge</a></li>
+<li><a href="https://github.com/Panda-s-Workshop/full-draw/releases">GitHub Releases (manual installs)</a></li>
+<li><a href="https://github.com/Panda-s-Workshop/full-draw">Source code</a></li>
+<li><a href="https://github.com/Panda-s-Workshop/full-draw/issues">Report a bug</a></li>
+</ul></div>
+</div></footer>
+<script src="assets/site.js" defer></script>
+</body>
+</html>

@@ -36,6 +36,8 @@
   "gui.fulldraw.fletching.extra": "Extra",
   "gui.fulldraw.fletching.fletching": "Fletching",
   "gui.fulldraw.fletching.head": "Head",
+  "gui.fulldraw.fletching.inline_needs": "needs",
+  "gui.fulldraw.fletching.inline_without": "without",
   "gui.fulldraw.fletching.leave_empty": "%1$s: leave the %2$s slot empty",
   "gui.fulldraw.fletching.needs": "%1$s: needs %2$s %3$s in the %4$s slot",
   "gui.fulldraw.fletching.no_recipe": "Nothing is fletched from these",
@@ -77,6 +79,7 @@
   "subtitles.fulldraw.arbalest_crank_end": "Arbalest locks",
   "subtitles.fulldraw.arbalest_crank_middle": "Arbalest cranks",
   "subtitles.fulldraw.arbalest_crank_start": "Arbalest cranks",
+  "subtitles.fulldraw.bleed": "Wound bleeds",
   "subtitles.fulldraw.bolt_armour": "Bolt bites through armour",
   "subtitles.fulldraw.bolt_pierce": "Bolt pierces",
   "subtitles.fulldraw.bow_bash": "Bow bashes",
@@ -92,6 +95,7 @@
   "subtitles.fulldraw.quiver_remove": "Arrows come out of a quiver",
   "subtitles.fulldraw.repeater_click": "Magazine clicks",
   "subtitles.fulldraw.rope_place": "Rope is tied",
+  "subtitles.fulldraw.rope_slip": "Rope Arrow slips",
   "subtitles.fulldraw.strain": "Bow strains",
   "subtitles.fulldraw.twang": "Bowstring twangs",
   "tag.item.fulldraw.fletching.extras": "Fletching Extras",
@@ -111,5 +115,9 @@
   "tooltip.fulldraw.quiver.empty": "Empty: right-click arrows onto it",
   "tooltip.fulldraw.quiver.entry": "   %2$s ×%1$s",
   "tooltip.fulldraw.quiver.hint": "%s: next arrows",
-  "tooltip.fulldraw.quiver.selected": "▶ %2$s ×%1$s"
+  "tooltip.fulldraw.quiver.selected": "▶ %2$s ×%1$s",
+  "tooltip.fulldraw.recovery.always": "Always comes back from a kill",
+  "tooltip.fulldraw.recovery.chance": "Comes back from a kill %s%% of the time",
+  "tooltip.fulldraw.recovery.never": "Never comes back from a kill",
+  "tooltip.fulldraw.recovery.spent": "Spent on impact"
 }

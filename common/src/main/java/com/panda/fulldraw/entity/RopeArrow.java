@@ -48,17 +48,38 @@ public class RopeArrow extends FullDrawArrow {
     @Override
     protected void onHitBlock(BlockHitResult hit) {
         super.onHitBlock(hit);
-        if (!(level() instanceof ServerLevel level) || hit.getDirection() == Direction.UP || !paidFor()) return;
+        if (!(level() instanceof ServerLevel level) || !paidFor()) return;
+        if (hit.getDirection() == Direction.UP) {
+            slipped(level, hit);
+            return;
+        }
         BlockPos knot = hit.getBlockPos().relative(hit.getDirection());
-        if (!mayInteract(level, knot) || getOwner() instanceof Player player && !player.mayBuild()) return;
+        if (!mayInteract(level, knot) || getOwner() instanceof Player player && !player.mayBuild()) {
+            slipped(level, hit);
+            return;
+        }
         // under a ceiling it hangs from it; on a wall's side it hangs against that wall
         Direction tied = hit.getDirection() == Direction.DOWN ? Direction.UP : hit.getDirection().getOpposite();
         int hung = ModBlocks.ROPE.get().hang(level, knot, tied);
-        if (hung == 0) return;
+        if (hung == 0) {
+            slipped(level, hit);
+            return;
+        }
         level.playSound(null, knot, ModSounds.ROPE_PLACE.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
         level.gameEvent(GameEvent.BLOCK_PLACE, knot, GameEvent.Context.of(this, level.getBlockState(knot)));
         if (getOwner() instanceof ServerPlayer player) ModTriggers.EVENT.get().trigger(player, "rope_trick", hung);
         discard();
+    }
+
+    /**
+     * A Rope Arrow whose rope can't hold (a floor, a fence, a taken spot, where the shooter may not build): a dull knock
+     * and a small puff where it struck, so it reads as a failed rope and not a plain arrow. It stays as an arrow.
+     */
+    private void slipped(ServerLevel level, BlockHitResult hit) {
+        // a tenth of a block out from the face, so the puff isn't lit (black) from inside the block
+        var at = hit.getLocation().add(hit.getDirection().getUnitVec3().scale(0.1));
+        level.playSound(null, at.x, at.y, at.z, ModSounds.ROPE_SLIP.get(), SoundSource.BLOCKS, 1.0F, 0.9F + random.nextFloat() * 0.2F);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, at.x, at.y, at.z, 3, 0.05, 0.05, 0.05, 0.01);
     }
 
     /** An arrow its shooter spent (one that can be picked up), or any arrow from a player who builds for free. */

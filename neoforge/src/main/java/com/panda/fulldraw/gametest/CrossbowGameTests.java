@@ -82,8 +82,8 @@ final class CrossbowGameTests {
     static void arbalestSpread(GameTestHelper helper) {
         double heavy = 0, plain = 0;
         for (int i = 0; i < 12; i++) {
-            heavy = Math.max(heavy, stray(loadAndFire(helper, shooter(helper, new Vec3(2.5, 1, 2.5), -90, -10), ModItems.ARBALEST.get())));
-            plain = Math.max(plain, stray(loadAndFire(helper, shooter(helper, new Vec3(2.5, 1, 8.5), -90, -10), Items.CROSSBOW)));
+            heavy = Math.max(heavy, stray(loadAndFire(helper, shooter(helper, new Vec3(2.5, 1, 2.5), -90, -10), ModItems.ARBALEST.get()), 3.15 * com.panda.fulldraw.logic.WeaponStats.ARBALEST.velocityMult()));
+            plain = Math.max(plain, stray(loadAndFire(helper, shooter(helper, new Vec3(2.5, 1, 8.5), -90, -10), Items.CROSSBOW), 3.15));
             helper.getLevel().getEntitiesOfClass(AbstractArrow.class, new AABB(helper.absolutePos(net.minecraft.core.BlockPos.ZERO)).inflate(16))
                     .forEach(net.minecraft.world.entity.Entity::discard);
         }
@@ -93,10 +93,14 @@ final class CrossbowGameTests {
         else helper.succeed();
     }
 
-    /** The largest per-axis gap between a bolt's flight and where its shooter looked (pitch -10, yaw -90). */
-    private static double stray(AbstractArrow bolt) {
+    /**
+     * The spread vanilla added to a bolt fired at {@code speed}, along its largest axis: vanilla adds it to the unit aim
+     * and scales by the speed without normalizing again, so this is the motion over the speed less the aim. (Normalizing
+     * the motion instead would stretch the sideways part whenever the spread shortens the vector.)
+     */
+    private static double stray(AbstractArrow bolt, double speed) {
         Vec3 aim = net.minecraft.world.entity.Entity.calculateViewVector(-10, -90);
-        Vec3 d = bolt.getDeltaMovement().normalize().subtract(aim);
+        Vec3 d = bolt.getDeltaMovement().scale(1.0 / speed).subtract(aim);
         return Math.max(Math.abs(d.x), Math.max(Math.abs(d.y), Math.abs(d.z)));
     }
 
@@ -229,7 +233,7 @@ final class CrossbowGameTests {
                 if (i > 0 && i % 5 == 0) load(helper, player, repeater);
                 AbstractArrow bolt = fire(helper, player, item, repeater);
                 if (first == null) first = bolt;
-                worst = Math.max(worst, stray(bolt));
+                worst = Math.max(worst, stray(bolt, 3.15 * com.panda.fulldraw.logic.WeaponStats.REPEATING_CROSSBOW.velocityMult()));
                 speeds += bolt.getDeltaMovement().length();
             }
             double speed = speeds / 35, limit = 0.0172275 * 2.0 + 1e-4;

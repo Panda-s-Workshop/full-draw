@@ -44,6 +44,8 @@ public final class FullDrawConfig {
     private static ShotMath.Tuning remote;
     /** The connected server's rope length, on a client; 0 when not connected. */
     private static int remoteRopeLength;
+    /** The connected server's arrow recovery chance, on a client; NaN when not connected. */
+    private static double remoteRecovery = Double.NaN;
 
     private FullDrawConfig() {}
 
@@ -51,10 +53,11 @@ public final class FullDrawConfig {
         source = loaderConfig;
     }
 
-    /** On the client: the server's numbers, or null (and 0) on disconnect. */
-    public static void useRemote(ShotMath.Tuning serverTuning, int ropeLength) {
+    /** On the client: the server's numbers, or null (and 0, NaN) on disconnect. */
+    public static void useRemote(ShotMath.Tuning serverTuning, int ropeLength, double recoveryChance) {
         remote = serverTuning;
         remoteRopeLength = ropeLength;
+        remoteRecovery = recoveryChance;
     }
 
     /** The source the loader plugged in, so a test can wrap it and put it back. */
@@ -102,6 +105,16 @@ public final class FullDrawConfig {
 
     public static int arrowPickupLifetimeSeconds() {
         return source.arrowPickupLifetimeSeconds();
+    }
+
+    /** Whether the client is connected to a server that sent its recovery chance, so a server with Full Draw. */
+    public static boolean knowsServerRecovery() {
+        return !Double.isNaN(remoteRecovery);
+    }
+
+    /** The plain arrow's recovery chance the client's tooltips state: the connected server's, or this side's own. */
+    public static double clientArrowRecoveryChance() {
+        return Double.isNaN(remoteRecovery) ? source.arrowRecoveryChance() : remoteRecovery;
     }
 
     /** The rope length the client's tooltip states: the connected server's, or this side's own. */

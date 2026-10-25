@@ -323,5 +323,65 @@
         "pitch": 1.3
       }
     ]
+  },
+  "bleed": {
+    "subtitle": "subtitles.fulldraw.bleed",
+    "sounds": [
+      {
+        "name": "minecraft:block/pointed_dripstone/drip_lava1",
+        "volume": 0.7,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:block/pointed_dripstone/drip_lava2",
+        "volume": 0.7,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:block/pointed_dripstone/drip_lava3",
+        "volume": 0.7,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:block/pointed_dripstone/drip_lava4",
+        "volume": 0.7,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:block/pointed_dripstone/drip_lava5",
+        "volume": 0.7,
+        "pitch": 0.75
+      },
+      {
+        "name": "minecraft:block/pointed_dripstone/drip_lava6",
+        "volume": 0.7,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "rope_slip": {
+    "subtitle": "subtitles.fulldraw.rope_slip",
+    "sounds": [
+      {
+        "name": "minecraft:dig/wood1",
+        "volume": 0.6,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:dig/wood2",
+        "volume": 0.6,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:dig/wood3",
+        "volume": 0.6,
+        "pitch": 0.6
+      },
+      {
+        "name": "minecraft:dig/wood4",
+        "volume": 0.6,
+        "pitch": 0.6
+      }
+    ]
   }
 }

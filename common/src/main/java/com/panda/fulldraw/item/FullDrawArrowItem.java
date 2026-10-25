@@ -32,18 +32,21 @@ public class FullDrawArrowItem extends ArrowItem {
 
     private final Fired fired;
     private final Dispensed dispensed;
+    private final com.panda.fulldraw.logic.ArrowTraits head;
     private final int tooltipLines;
     private final java.util.function.Supplier<Object[]> tooltipArgs;
 
-    public FullDrawArrowItem(Properties properties, Fired fired, Dispensed dispensed, int tooltipLines) {
-        this(properties, fired, dispensed, tooltipLines, () -> new Object[0]);
+    public FullDrawArrowItem(Properties properties, Fired fired, Dispensed dispensed, com.panda.fulldraw.logic.ArrowTraits head, int tooltipLines) {
+        this(properties, fired, dispensed, head, tooltipLines, () -> new Object[0]);
     }
 
     /** With numbers for the tooltip's {@code %s}: what the server has set, read when the tooltip is drawn. */
-    public FullDrawArrowItem(Properties properties, Fired fired, Dispensed dispensed, int tooltipLines, java.util.function.Supplier<Object[]> tooltipArgs) {
+    public FullDrawArrowItem(Properties properties, Fired fired, Dispensed dispensed, com.panda.fulldraw.logic.ArrowTraits head, int tooltipLines,
+                             java.util.function.Supplier<Object[]> tooltipArgs) {
         super(properties);
         this.fired = fired;
         this.dispensed = dispensed;
+        this.head = head;
         this.tooltipLines = tooltipLines;
         this.tooltipArgs = tooltipArgs;
     }
@@ -65,5 +68,19 @@ public class FullDrawArrowItem extends ArrowItem {
         super.appendHoverText(stack, context, display, lines, flag);
         for (int i = 0; i < tooltipLines; i++)
             lines.accept(Component.translatable(getDescriptionId() + ".tooltip." + i, tooltipArgs.get()).withStyle(ChatFormatting.GRAY));
+        lines.accept(recoveryLine(head.recovery()));
+    }
+
+    /**
+     * How often an arrow with this head recovery comes back from a kill, at the server's plain-arrow chance: spent on
+     * impact for a head that never stays in a creature, always, never, or the share.
+     */
+    public static Component recoveryLine(double recovery) {
+        double chance = com.panda.fulldraw.logic.ArrowTraits.recoveryChance(recovery, com.panda.fulldraw.FullDrawConfig.clientArrowRecoveryChance());
+        Component line = recovery <= 0 ? Component.translatable("tooltip.fulldraw.recovery.spent")
+                : chance >= 1.0 ? Component.translatable("tooltip.fulldraw.recovery.always")
+                : chance <= 0.0 ? Component.translatable("tooltip.fulldraw.recovery.never")
+                : Component.translatable("tooltip.fulldraw.recovery.chance", Math.clamp(Math.round(chance * 100), 1, 99));
+        return line.copy().withStyle(ChatFormatting.GRAY);
     }
 }

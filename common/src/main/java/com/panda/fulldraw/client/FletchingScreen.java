@@ -23,8 +23,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Fletching Table's screen: the four part slots, each empty one with a faint picture of its part, an arrow to the result, and
- * vanilla's crossed-out arrow when what lies there makes nothing. Hovering an empty part slot names the items it takes.
+ * The Fletching Table's screen: the four part slots, each empty one showing a faded part it takes (in turn, when it takes
+ * several), an arrow to the result, and vanilla's crossed-out arrow when what lies there makes nothing, with what the
+ * nearest arrow still needs written under the result. Hovering an empty part slot names the items it takes;
+ * hovering the crossed-out arrow names what the nearest arrows need.
  */
 public class FletchingScreen extends ItemCombinerScreen<FletchingMenu> {
     private static final Identifier TEXTURE = FullDrawMod.id("textures/gui/container/fletching.png");
@@ -34,24 +36,76 @@ public class FletchingScreen extends ItemCombinerScreen<FletchingMenu> {
     /** The parts' faint pictures in the texture, in slot order, 16 apart from here at v = 0. */
     private static final int GHOST_U = 176;
     private static final String[] SLOT_NAMES = {"head", "shaft", "fletching", "extra"};
+    /** How long each of an empty slot's parts shows before the next, as vanilla's cycling slot pictures. */
+    private static final long CYCLE_MS = 1500;
+    /** The slot's grey drawn over a faded part, so it reads as a picture, not an item. */
+    private static final int FADE = 0xC08B8B8B;
+    /** Where the nearest arrow's need is written: the free row under the result, right of the Extra slot, in the label colour. */
+    private static final int HINT_X = 66, HINT_Y = 61, LABEL = 0xFF404040;
     /** At most this many items listed under a slot's name; the rest are counted. */
     private static final int LISTED = 6;
     /** Dyed families a slot takes whole, named once rather than colour by colour. */
     private static final List<Map.Entry<TagKey<Item>, String>> FAMILIES = List.of(Map.entry(ItemTags.WOOL, "gui.fulldraw.fletching.any_wool"));
 
+    /** Each part slot's pictures, by slot, worked out when the screen opens. */
+    private final List<List<ItemStack>> ghosts = new ArrayList<>();
+
     public FletchingScreen(FletchingMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, TEXTURE);
+        for (int slot = 0; slot <= FletchingMenu.EXTRA; slot++) ghosts.add(slot < FletchingMenu.HEAD ? List.of() : slotParts(slot));
     }
 
-    /** Each empty part slot shows its part's picture; a filled one shows only its item. */
+    /**
+     * Each empty part slot shows a faded part it takes, the next every {@link #CYCLE_MS} when it takes several (a dyed
+     * family once); with no part in its tag, the panel's own picture. A filled slot shows only its item. Then the
+     * nearest arrow's need, when the arrow is crossed out.
+     */
     @Override
     public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(g, mouseX, mouseY, partialTick);
+        long turn = net.minecraft.util.Util.getMillis() / CYCLE_MS;
         for (int slot = FletchingMenu.HEAD; slot <= FletchingMenu.EXTRA; slot++) {
             var s = menu.getSlot(slot);
-            if (!s.hasItem())
-                g.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos + s.x, topPos + s.y, GHOST_U + 16 * slot, 0, 16, 16, 256, 256);
+            if (s.hasItem()) continue;
+            int x = leftPos + s.x, y = topPos + s.y;
+            List<ItemStack> parts = ghosts.get(slot);
+            if (parts.isEmpty()) {
+                g.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, GHOST_U + 16 * slot, 0, 16, 16, 256, 256);
+                continue;
+            }
+            g.fakeItem(parts.get((int) (turn % parts.size())), x, y);
+            g.fill(x, y, x + 16, y + 16, FADE);
         }
+        if (menu.hasRecipeError() && !menu.hints().isEmpty()) inlineHint(g, menu.hints().getFirst());
+    }
+
+    /**
+     * The nearest arrow's need, under the result: the arrow, then the part it needs with the count, or the part it's
+     * made without ("[Broadhead Arrow] needs [2 Iron Nugget]", "[Arrow] without [String]").
+     */
+    private void inlineHint(GuiGraphicsExtractor g, FletchingMenu.Hint hint) {
+        int x = leftPos + HINT_X, y = topPos + HINT_Y;
+        g.fakeItem(new ItemStack(hint.result()), x, y);
+        x += 19;
+        boolean without = hint.count() == 0;
+        ItemStack part = without ? menu.getSlot(hint.slot()).getItem().copyWithCount(1) : new ItemStack(hint.item(), hint.count());
+        if (part.isEmpty()) return;
+        Component words = Component.translatable(without ? "gui.fulldraw.fletching.inline_without" : "gui.fulldraw.fletching.inline_needs");
+        g.text(font, words, x, y + 4, LABEL, false);
+        x += font.width(words) + 3;
+        g.fakeItem(part, x, y);
+        if (!without) g.itemDecorations(font, part, x, y);
+    }
+
+    /** The parts an empty slot shows in turn: its tag's items, a dyed family as its first. */
+    public static List<ItemStack> slotParts(int slot) {
+        List<ItemStack> parts = new ArrayList<>();
+        Set<TagKey<Item>> families = new HashSet<>();
+        for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(FletchingMenu.SLOT_TAGS.get(slot))) {
+            var family = FAMILIES.stream().filter(f -> item.is(f.getKey())).findFirst();
+            if (family.isEmpty() || families.add(family.get().getKey())) parts.add(new ItemStack(item));
+        }
+        return parts;
     }
 
     @Override

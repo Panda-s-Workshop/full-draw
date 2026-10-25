@@ -5,12 +5,15 @@ import com.panda.fulldraw.FullDrawConfig;
 import com.panda.fulldraw.block.FlareLightBlock;
 import com.panda.fulldraw.block.RopeBlock;
 import com.panda.fulldraw.entity.BlastArrow;
+import com.panda.fulldraw.entity.BogLurker;
 import com.panda.fulldraw.entity.BroadheadArrow;
 import com.panda.fulldraw.entity.FlareArrow;
+import com.panda.fulldraw.entity.GaleHarrier;
 import com.panda.fulldraw.entity.RopeArrow;
 import com.panda.fulldraw.entity.StuckArrows;
 import com.panda.fulldraw.registry.ModBlocks;
 import com.panda.fulldraw.registry.ModEffects;
+import com.panda.fulldraw.registry.ModEntities;
 import com.panda.fulldraw.logic.ArrowTraits;
 import com.panda.fulldraw.registry.ModItems;
 import com.panda.fulldraw.shot.ShotHolder;
@@ -200,6 +203,29 @@ final class ArrowGameTests {
         helper.runAfterDelay(14, () -> {
             if (hit.isUsingItem()) helper.fail("the skeleton a blunt arrow hit inside its damage cooldown should have let its draw go");
             else if (!control.isUsingItem()) helper.fail("the skeleton hit by plain arrows should still be drawing");
+            else helper.succeed();
+        });
+    }
+
+    /**
+     * A blunt arrow breaks off the encounters' own wind-ups: a Gale Harrier shrieking before its dive circles again, and
+     * a Bog Lurker swelling for a spit lets it go. Each is held still in its tell.
+     */
+    static void bluntBreaksOffTells(GameTestHelper helper) {
+        Player player = shooter(helper);
+        GaleHarrier harrier = helper.spawn(ModEntities.GALE_HARRIER.get(), new Vec3(2.5, 3.0, 8.5));
+        harrier.setNoAi(true);
+        harrier.startTell(helper.getLevel());
+        BogLurker lurker = helper.spawn(ModEntities.BOG_LURKER.get(), new Vec3(6.5, 1.0, 8.5));
+        lurker.setNoAi(true);
+        lurker.startTell();
+        shot(helper, player, ModItems.BLUNT_ARROW.get(), new Vec3(2.5, 3.0 + harrier.getBbHeight() * 0.5, 8.5 - 2.4), new Vec3(0.0, 0.0, 3.0));
+        shot(helper, player, ModItems.BLUNT_ARROW.get(), new Vec3(6.5, 1.0 + lurker.getBbHeight() * 0.5, 8.5 - 2.4), new Vec3(0.0, 0.0, 3.0));
+        helper.runAfterDelay(6, () -> {
+            if (harrier.getHealth() >= harrier.getMaxHealth() || lurker.getHealth() >= lurker.getMaxHealth())
+                helper.fail("both blunt arrows should hit: harrier " + harrier.getHealth() + ", lurker " + lurker.getHealth());
+            else if (harrier.phase() != GaleHarrier.Phase.CIRCLE) helper.fail("the harrier's shriek should be broken off, it is " + harrier.phase().id());
+            else if (lurker.phase() != BogLurker.Phase.LURK) helper.fail("the lurker's spit should be broken off, it is " + lurker.phase().id());
             else helper.succeed();
         });
     }

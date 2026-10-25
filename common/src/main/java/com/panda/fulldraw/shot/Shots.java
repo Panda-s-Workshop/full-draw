@@ -128,6 +128,18 @@ public final class Shots {
         return advancement == null || player.getAdvancements().getOrStartProgress(advancement).isDone();
     }
 
+    /**
+     * The milestones a hit on a creature can earn its shooter: how far the shot flew, bringing a diving Gale Harrier
+     * down, and an arrow in a Bog Lurker's eyes while it lies in the water.
+     */
+    public static void reportEncounter(Entity owner, Entity target, Impact impact, boolean grounded) {
+        if (!(owner instanceof ServerPlayer player) || !(target instanceof LivingEntity)) return;
+        ModTriggers.EVENT.get().trigger(player, "long_shot", (int) impact.distance());
+        if (grounded) ModTriggers.EVENT.get().trigger(player, "grounded");
+        if (target instanceof BogLurker lurker && lurker.isInWater() && impact.precision())
+            ModTriggers.EVENT.get().trigger(player, "eyes_on_the_water");
+    }
+
     /** Tells the shooter how their arrow landed: the client plays the hit sounds and the readout. */
     public static void reportHit(Entity owner, ShotRecord shot, Impact impact, ShotMath.Breakdown breakdown) {
         float damage = (float) breakdown.total();
@@ -144,7 +156,6 @@ public final class Shots {
         if (!(owner instanceof ServerPlayer player)) return;
         FullDrawNetwork.send(player, new FullDrawNetwork.ShotResult(shot.perfect(), impact.precision(), (float) impact.distance(), damage));
         if (impact.precision()) ModTriggers.EVENT.get().trigger(player, "precision_hit", (int) impact.distance());
-        ModTriggers.EVENT.get().trigger(player, "long_shot", (int) impact.distance());
     }
 
     /** The launch speed for a planned shot: vanilla's speed times the weapon's multiplier. */

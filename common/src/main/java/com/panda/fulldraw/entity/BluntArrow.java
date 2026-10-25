@@ -55,8 +55,9 @@ public class BluntArrow extends FullDrawArrow {
     /**
      * Knocks a mob's attack back to its start: a swelling creeper's fuse goes out with a fizz (one lit with flint and
      * steel stays lit), a melee mob waits out its whole swing again, an archer lets its draw go, and a brain-driven
-     * mob (a piglin, a hoglin) cools down as after an attack. Mobs with attacks of their own making (a warden, a
-     * breeze, a blaze, an evoker, a ghast) only take the shove.
+     * mob (a piglin, a hoglin) cools down as after an attack. A Gale Harrier's shriek and a Bog Lurker's gurgle are
+     * broken off. Other mobs with attacks of their own making (a warden, a breeze, a blaze, an evoker, a ghast) only take
+     * the shove.
      */
     public static void interrupt(LivingEntity target) {
         if (target instanceof Creeper creeper && !creeper.isIgnited() && creeper.swell > 0) {
@@ -69,6 +70,8 @@ public class BluntArrow extends FullDrawArrow {
                 FullDrawNetwork.fuseOut(level, creeper);
             }
         }
+        if (target instanceof GaleHarrier harrier) harrier.breakOffTell();
+        if (target instanceof BogLurker lurker) lurker.breakOffTell();
         if (target instanceof Mob mob) {
             for (WrappedGoal goal : mob.getGoalSelector().getAvailableGoals())
                 if (goal.isRunning() && goal.getGoal() instanceof MeleeAttackGoal melee) melee.resetAttackCooldown();

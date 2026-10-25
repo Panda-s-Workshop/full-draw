@@ -37,6 +37,10 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_STAGGER = sound("shieldbearer_stagger");
     public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_CRACK = sound("shieldbearer_crack");
     public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_BASH = sound("shieldbearer_bash");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_AMBIENT = sound("shieldbearer_ambient");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_HURT = sound("shieldbearer_hurt");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_DEATH = sound("shieldbearer_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHIELDBEARER_CELEBRATE = sound("shieldbearer_celebrate");
     public static final DeferredHolder<SoundEvent, SoundEvent> HARRIER_AMBIENT = sound("gale_harrier_ambient");
     public static final DeferredHolder<SoundEvent, SoundEvent> HARRIER_SHRIEK = sound("gale_harrier_shriek");
     public static final DeferredHolder<SoundEvent, SoundEvent> HARRIER_DIVE = sound("gale_harrier_dive");

@@ -16,6 +16,8 @@ public final class LurkerRules {
     public static final double FLEE_UNTIL = 10.0;
     /** ...or for this many ticks at most, then comes back up. */
     public static final int FLEE_MAX_TICKS = 80;
+    /** Struck from beyond its spitting range, where it can't answer, it goes under and swims off for this many ticks. */
+    public static final int HIT_DIVE_TICKS = 60;
     /** Ticks from one spit to the next, at least... */
     public static final int SPIT_GAP_MIN = 50;
     /** ...and at most (2.5 to 3.5 s). */

@@ -16,6 +16,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.Weighted;
 import net.minecraft.world.effect.MobEffects;
@@ -62,25 +63,33 @@ final class LurkerGameTests {
      * An arrow from a player into a lurking lurker's eyes, which stand above the water, is a precision hit at ×2: twice
      * what the same arrow does to the body of one on land. The same arrow into the body of one under the water does
      * half. All three arrows fly level and fast from 2.4 blocks off, so they meet the same pipeline but for where they
-     * strike.
+     * strike. The eye shot earns its archer Eyes on the Water; the other archer, who hit only bodies, not; nor does a
+     * third, whose arrow takes a stranded lurker on the bank in the eyes.
      */
     static void bogLurkerEyeWeakSpot(GameTestHelper helper) {
         pond(helper);
-        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ServerPlayer player = helper.makeMockServerPlayerInLevel(), other = helper.makeMockServerPlayerInLevel();
+        ServerPlayer third = helper.makeMockServerPlayerInLevel();
+        BogLurker stranded = still(helper, new Vec3(9.5, POND_TOP + 1, 3.5));
+        shot(helper, third, new Vec3(9.5, POND_TOP + 1 + 0.6, 3.5 - 0.45 - 2.4), new Vec3(0.0, 0.0, 3.0));
         BogLurker eyes = still(helper, new Vec3(3.5, lurkY(), 8.5));
         BogLurker underwater = still(helper, new Vec3(8.5, lurkY(), 8.5));
         BogLurker land = still(helper, new Vec3(2.5, 1.0, 1.5));
         double eyeY = lurkY() + 0.6, bodyY = lurkY() + 0.25;
         // the lurkers face -z (yaw 180), toward arrows coming down +z
         AbstractArrow atEyes = shot(helper, player, new Vec3(3.5, eyeY, 8.5 - 0.45 - 2.4), new Vec3(0.0, 0.0, 3.0));
-        AbstractArrow atBody = shot(helper, player, new Vec3(8.5, bodyY, 8.5 - 0.45 - 2.4), new Vec3(0.0, 0.0, 3.0));
-        helper.runAfterDelay(4, () -> shot(helper, player, new Vec3(2.5 + 0.45 + 2.4, 1.25, 1.5), new Vec3(-3.0, 0.0, 0.0)));
+        AbstractArrow atBody = shot(helper, other, new Vec3(8.5, bodyY, 8.5 - 0.45 - 2.4), new Vec3(0.0, 0.0, 3.0));
+        helper.runAfterDelay(4, () -> shot(helper, other, new Vec3(2.5 + 0.45 + 2.4, 1.25, 1.5), new Vec3(-3.0, 0.0, 0.0)));
         helper.runAfterDelay(8, () -> {
             float e = lost(eyes), u = lost(underwater), l = lost(land);
             if (e <= 0 || u <= 0 || l <= 0)
                 helper.fail("every arrow should hit: eyes " + e + " (" + atEyes.position() + "), under water " + u + " (" + atBody.position() + "), on land " + l);
             else if (Math.abs(e - 2.0F * l) > 1.0F) helper.fail("the eyes should take twice the body's damage: eyes " + e + ", body on land " + l);
             else if (Math.abs(u - 0.5F * l) > 1.0F) helper.fail("the body under water should take half: under water " + u + ", on land " + l);
+            else if (!AdvancementGameTests.done(helper, player, "eyes_on_the_water")) helper.fail("an arrow in its eyes should award Eyes on the Water");
+            else if (AdvancementGameTests.done(helper, other, "eyes_on_the_water")) helper.fail("arrows in its body shouldn't award Eyes on the Water");
+            else if (lost(stranded) <= 0) helper.fail("the arrow should hit the stranded lurker's eyes");
+            else if (AdvancementGameTests.done(helper, third, "eyes_on_the_water")) helper.fail("a lurker's eyes out of the water shouldn't award Eyes on the Water");
             else helper.succeed();
         });
     }
@@ -205,6 +214,44 @@ final class LurkerGameTests {
             if (lurker.phase() == BogLurker.Phase.FLEE) helper.fail("it should come back up to lurk, it is still fleeing");
             else if (endedAt[0] < LurkerRules.FLEE_UNTIL && fleeTicks[0] < LurkerRules.FLEE_MAX_TICKS)
                 helper.fail("it came up after " + fleeTicks[0] + " ticks, " + endedAt[0] + " blocks off: neither far enough nor long enough");
+            else if (Math.abs(top - LurkerRules.SHOWS_ABOVE) > 0.05) helper.fail("back up, the top of it should be " + LurkerRules.SHOWS_ABOVE + " over the surface, it is " + top);
+            else helper.succeed();
+        });
+    }
+
+    /**
+     * Struck in the eyes by a player 20 blocks off, past where it can spit, it goes under at once and swims off for
+     * {@link LurkerRules#HIT_DIVE_TICKS}, though the player is already past where a flee would end; then it comes back up.
+     */
+    static void bogLurkerDivesWhenStruckFromAfar(GameTestHelper helper) {
+        pond(helper);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.snapTo(helper.absoluteVec(new Vec3(5.5, POND_TOP + 1, 7.5 - 20.0)));
+        BogLurker lurker = helper.spawn(ModEntities.BOG_LURKER.get(), new Vec3(5.5, lurkY(), 7.5));
+        lurker.setTarget(player);
+        double surface = helper.absoluteVec(new Vec3(0, SURFACE, 0)).y;
+        int[] struckOn = {-1}, fleeTicks = {0};
+        double[] deepest = {Double.MAX_VALUE};
+        int[] tick = {0};
+        helper.onEachTick(() -> {
+            tick[0]++;
+            // once it has settled at the surface, turned to the player: an arrow from 2.4 blocks before its eyes
+            if (tick[0] == 10) {
+                Vec3 at = helper.relativeVec(lurker.position());
+                shot(helper, player, new Vec3(at.x, at.y + 0.6, at.z - 0.45 - 2.4), new Vec3(0.0, 0.0, 3.0));
+            }
+            if (struckOn[0] < 0 && lurker.getHealth() < lurker.getMaxHealth()) struckOn[0] = tick[0];
+            if (lurker.phase() == BogLurker.Phase.FLEE) {
+                fleeTicks[0]++;
+                deepest[0] = Math.min(deepest[0], lurker.getBoundingBox().maxY - surface);
+            }
+        });
+        helper.runAfterDelay(LurkerRules.HIT_DIVE_TICKS + 80, () -> {
+            double top = lurker.getBoundingBox().maxY - surface;
+            if (struckOn[0] < 0) helper.fail("the arrow should hit it");
+            else if (fleeTicks[0] < LurkerRules.HIT_DIVE_TICKS) helper.fail("struck from 20 blocks it should stay under " + LurkerRules.HIT_DIVE_TICKS + " ticks, it fled " + fleeTicks[0]);
+            else if (deepest[0] > -0.5) helper.fail("it should sink under the surface; the top of it was at most " + deepest[0] + " from it");
+            else if (lurker.phase() == BogLurker.Phase.FLEE) helper.fail("it should come back up after its dive, it is still fleeing");
             else if (Math.abs(top - LurkerRules.SHOWS_ABOVE) > 0.05) helper.fail("back up, the top of it should be " + LurkerRules.SHOWS_ABOVE + " over the surface, it is " + top);
             else helper.succeed();
         });

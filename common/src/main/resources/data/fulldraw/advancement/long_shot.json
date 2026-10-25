@@ -1,0 +1,33 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "fulldraw:event",
+      "conditions": {
+        "event": "long_shot",
+        "value": {
+          "min": 50
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "fulldraw:longbow"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.long_shot.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.long_shot.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "fulldraw:right_between_the_eyes"
+}

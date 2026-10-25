@@ -25,9 +25,9 @@ import net.minecraft.world.entity.monster.illager.AbstractIllager;
 
 /**
  * The Shieldbearer: vanilla's illager model in the pillager's clothes, both arms out holding a tower shield before it,
- * as tall as it is, its sides bent back round the body and a slit to look through. When the shield is knocked down it
- * tips forward and the arms drop with it; cracked by a bolt it sags to one side, its split face still showing. A bash
- * shoves it forward. Celebrating, it drops the shield to raise its arms.
+ * as tall as it is, its sides bent back round the body and a slit to look through. When the shield is knocked aside it
+ * swings out to the bearer's left, baring its body, and the arms drop with it; cracked by a bolt it tips and sags to one
+ * side, its split face still showing. It shakes just before it comes back up. A bash shoves it forward. Celebrating, it drops the shield to raise its arms.
  */
 public final class ShieldbearerRenderer extends IllagerRenderer<Shieldbearer, ShieldbearerRenderer.State> {
     public static final ModelLayerLocation BODY = new ModelLayerLocation(FullDrawMod.id("shieldbearer"), "main");
@@ -60,6 +60,8 @@ public final class ShieldbearerRenderer extends IllagerRenderer<Shieldbearer, Sh
         super.extractRenderState(entity, state, partialTicks);
         state.lowered = entity.isCelebrating() ? 1.0F : entity.lowered(partialTicks);
         state.cracked = entity.isCracked();
+        state.celebrating = entity.isCelebrating();
+        state.wobble = entity.wobble(partialTicks);
         state.bash = entity.getSwingAnimation(partialTicks);
     }
 
@@ -73,8 +75,11 @@ public final class ShieldbearerRenderer extends IllagerRenderer<Shieldbearer, Sh
         public float lowered;
         /** Whether it's down from a bolt's crack. */
         public boolean cracked;
+        public boolean celebrating;
         /** The bash's swing, 0 to 1. */
         public float bash;
+        /** Its shake before it comes back up, in radians. */
+        public float wobble;
     }
 
     /** How far forward a bash shoves the shield, in model pixels, at the swing's height. */
@@ -108,8 +113,9 @@ public final class ShieldbearerRenderer extends IllagerRenderer<Shieldbearer, Sh
 
     /**
      * The tower shield: 14 by 32 model pixels, 2 thick, standing on its bottom edge before the bearer's shins with its top
-     * at the crown of the head, and a wing 4 wide down each side, bent back round the body. Knocked down, it tips forward
-     * about that edge; cracked, it tips less and leans to one side.
+     * at the crown of the head, and a wing 4 wide down each side, bent back round the body. Knocked aside, it swings out
+     * to the left, turned near edge-on; cracked, it tips forward and leans to one side; while the bearer cheers, it lies
+     * tipped forward before it.
      */
     static final class ShieldModel extends Model<State> {
         /** How far the wings bend back, in radians. */
@@ -135,8 +141,26 @@ public final class ShieldbearerRenderer extends IllagerRenderer<Shieldbearer, Sh
         @Override
         public void setupAnim(State state) {
             super.setupAnim(state);
-            shield.xRot = state.lowered * (state.cracked ? 0.6F : 1.1F);
-            shield.zRot = state.cracked ? state.lowered * 0.45F : 0.0F;
+            if (state.celebrating) {
+                // set down on its bottom edge before the bearer, leaning away, while it cheers
+                shield.x = 0.0F;
+                shield.yRot = 0.0F;
+                shield.xRot = 1.1F;
+                shield.zRot = 0.0F;
+            } else if (state.cracked) {
+                shield.x = 0.0F;
+                shield.yRot = 0.0F;
+                shield.xRot = state.lowered * 1.0F;
+                shield.zRot = state.lowered * 0.45F;
+            } else {
+                // swung out to the bearer's left (+x in the model), turned toward edge-on, leaning out a little
+                shield.x = state.lowered * 12.0F;
+                shield.yRot = state.lowered * 1.25F;
+                shield.xRot = state.lowered * 0.3F;
+                shield.zRot = -state.lowered * 0.2F;
+            }
+            shield.zRot += state.wobble;
+            shield.xRot += state.wobble * 0.5F;
             shield.y = 22.0F + state.lowered;
             shield.z = -10.0F - shove(state);
         }

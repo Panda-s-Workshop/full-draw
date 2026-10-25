@@ -9,6 +9,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -40,12 +41,12 @@ final class ShieldbearerGameTests {
 
     /**
      * Arrows from the front thud off the shield and fall at its feet: a plain one, and one that pierces three, which
-     * stops there too and never reaches the husk behind. The shield stays up.
+     * stops there too and never reaches the husk behind. The shield stays up, and its archer hasn't broken it.
      */
     static void shieldbearerBlocksFront(GameTestHelper helper) {
         Shieldbearer bearer = bearer(helper, 6.5, 6.5);
         LivingEntity behind = husk(helper, 9.5, 6.5);
-        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
         AbstractArrow plain = shot(helper, player, Items.ARROW, new Vec3(2.5, 2.2, 6.5), new Vec3(2.0, 0.0, 0.0));
         AbstractArrow piercing = shot(helper, player, Items.ARROW, new Vec3(1.5, 1.6, 6.5), new Vec3(2.0, 0.0, 0.0));
         piercing.setPierceLevel((byte) 3);
@@ -55,6 +56,7 @@ final class ShieldbearerGameTests {
             else if (bearer.isLowered()) helper.fail("plain arrows shouldn't lower the shield");
             else if (!plain.isAlive() || !piercing.isAlive()) helper.fail("stopped arrows should fall, not vanish");
             else if (plain.getX() > bearer.getX() || piercing.getX() > bearer.getX()) helper.fail("stopped arrows should fall in front of the shield");
+            else if (AdvancementGameTests.done(helper, player, "shield_breaker")) helper.fail("plain arrows on the shield shouldn't award Shield Breaker");
             else helper.succeed();
         });
     }
@@ -70,7 +72,7 @@ final class ShieldbearerGameTests {
         Shieldbearer over = bearer(helper, 8.5, 3.5);
         Shieldbearer blunt = bearer(helper, 8.5, 8.5);
         Shieldbearer fire = bearer(helper, 6.5, 11.5);
-        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
         // each faces -X; the side shots come along +Z, the back shot along -X, the high one along +X falling steeply
         shot(helper, player, Items.ARROW, new Vec3(3.5, 2.0, 0.6), new Vec3(0.0, 0.0, 2.0));
         shot(helper, player, Items.ARROW, new Vec3(6.5, 2.0, 8.5), new Vec3(-2.0, 0.0, 0.0));
@@ -88,20 +90,22 @@ final class ShieldbearerGameTests {
             if (lost(fire) <= 0 && !fire.isOnFire()) missed.add("a fireball from the front");
             if (!missed.isEmpty()) helper.fail("these should get past the shield " + missed);
             else if (blunt.isLowered()) helper.fail("a Blunt arrow that hits the bearer, not the shield, shouldn't lower the shield");
+            else if (AdvancementGameTests.done(helper, player, "shield_breaker")) helper.fail("arrows past the shield shouldn't award Shield Breaker");
             else helper.succeed();
         });
     }
 
     /**
-     * A Blunt arrow on the shield knocks it down for 1.5 s and hurts nothing; an arrow from the front lands while it's
-     * down, and once it's back up the next is stopped again.
+     * A Blunt arrow on the shield knocks it down for 1.5 s, hurts nothing and earns its archer Shield Breaker; an arrow
+     * from the front lands while it's down, and once it's back up the next is stopped again.
      */
     static void shieldbearerBluntStagger(GameTestHelper helper) {
         Shieldbearer bearer = bearer(helper, 6.5, 6.5);
-        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
         shot(helper, player, ModItems.BLUNT_ARROW.get(), new Vec3(2.5, 2.0, 6.5), new Vec3(2.0, 0.0, 0.0));
         helper.runAfterDelay(4, () -> {
             if (!bearer.isLowered()) helper.fail("a Blunt arrow on the shield should knock it down");
+            else if (!AdvancementGameTests.done(helper, player, "shield_breaker")) helper.fail("knocking the shield down should award Shield Breaker");
             else if (lost(bearer) > 0) helper.fail("the Blunt arrow should hurt nothing through the shield, the bearer lost " + lost(bearer));
             else if (bearer.loweredTicks() > TowerShield.STAGGER_TICKS || bearer.loweredTicks() < TowerShield.STAGGER_TICKS - 5)
                 helper.fail("the stagger should last " + TowerShield.STAGGER_TICKS + " ticks, " + bearer.loweredTicks() + " left after 4");
@@ -124,12 +128,12 @@ final class ShieldbearerGameTests {
 
     /**
      * An Arbalest bolt (shield-piercing) is stopped by the shield, piercing or not, and cracks it down for 3 s: the
-     * husk behind is untouched, the bearer too.
+     * husk behind is untouched, the bearer too. The crack earns its archer Shield Breaker.
      */
     static void shieldbearerBoltCracks(GameTestHelper helper) {
         Shieldbearer bearer = bearer(helper, 6.5, 6.5);
         LivingEntity behind = husk(helper, 9.5, 6.5);
-        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
         Vec3 at = helper.absoluteVec(new Vec3(2.5, 1.0, 6.5));
         player.snapTo(at.x, at.y, at.z, -90.0F, 0.0F);
         player.setYHeadRot(-90.0F);
@@ -147,6 +151,7 @@ final class ShieldbearerGameTests {
             else if (!bearer.isLowered()) helper.fail("an Arbalest bolt on the shield should crack it down");
             else if (bearer.loweredTicks() > TowerShield.CRACK_TICKS || bearer.loweredTicks() < TowerShield.CRACK_TICKS - 10)
                 helper.fail("the crack should last " + TowerShield.CRACK_TICKS + " ticks, " + bearer.loweredTicks() + " left after 8");
+            else if (!AdvancementGameTests.done(helper, player, "shield_breaker")) helper.fail("cracking the shield should award Shield Breaker");
             else helper.succeed();
         });
     }

@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "fulldraw:event",
+      "conditions": {
+        "event": "grounded"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "fulldraw:harrier_feather"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.grounded.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.grounded.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "fulldraw:right_between_the_eyes"
+}

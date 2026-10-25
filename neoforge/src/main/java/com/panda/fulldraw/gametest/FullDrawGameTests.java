@@ -61,6 +61,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("blocked_hit_reports_nothing", () -> AdvancementGameTests::blockedHitReportsNothing);
         FUNCTIONS.register("breeze_deflection_drops_record", () -> AdvancementGameTests::breezeDeflectionDropsRecord);
         FUNCTIONS.register("slice_advancements", () -> AdvancementGameTests::sliceAdvancements);
+        FUNCTIONS.register("long_shot_advancement", () -> AdvancementGameTests::longShotAdvancement);
         FUNCTIONS.register("recipes_loaded", () -> FullDrawGameTests::recipesLoaded);
         FUNCTIONS.register("arrows_fire_from_bow_and_dispenser", () -> ArrowGameTests::arrowsFireFromBowAndDispenser);
         FUNCTIONS.register("broadhead_bleeds", () -> ArrowGameTests::broadheadBleeds);
@@ -68,6 +69,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("blunt_cancels_creeper", () -> ArrowGameTests::bluntCancelsCreeper);
         FUNCTIONS.register("arrow_heads_in_the_pipeline", () -> ArrowGameTests::arrowHeadsInThePipeline);
         FUNCTIONS.register("blunt_interrupts_archer", () -> ArrowGameTests::bluntInterruptsArcher);
+        FUNCTIONS.register("blunt_breaks_off_tells", () -> ArrowGameTests::bluntBreaksOffTells);
         FUNCTIONS.register("rope_arrow_places_rope", () -> ArrowGameTests::ropeArrowPlacesRope);
         FUNCTIONS.register("rope_comes_down_together", () -> ArrowGameTests::ropeComesDownTogether);
         FUNCTIONS.register("rope_arrow_refusals", () -> ArrowGameTests::ropeArrowRefusals);
@@ -110,6 +112,7 @@ public final class FullDrawGameTests {
         FUNCTIONS.register("bog_lurker_spits_in_range", () -> LurkerGameTests::bogLurkerSpitsInRange);
         FUNCTIONS.register("bog_lurker_holds_fire_too_close", () -> LurkerGameTests::bogLurkerHoldsFireTooClose);
         FUNCTIONS.register("bog_lurker_flees_close", () -> LurkerGameTests::bogLurkerFleesClose);
+        FUNCTIONS.register("bog_lurker_dives_when_struck_from_afar", () -> LurkerGameTests::bogLurkerDivesWhenStruckFromAfar);
         FUNCTIONS.register("bog_lurker_saves", () -> LurkerGameTests::bogLurkerSaves);
         FUNCTIONS.register("bog_lurker_spawn_rules", () -> LurkerGameTests::bogLurkerSpawnRules);
         FUNCTIONS.register("bog_lurker_drops", () -> LurkerGameTests::bogLurkerDrops);
@@ -124,8 +127,9 @@ public final class FullDrawGameTests {
     /** Tests that need the open sky over their arena (every other test gets a barrier roof). */
     private static final java.util.Set<String> SKY = java.util.Set.of("harrier_spawn_rules", "bog_lurker_spawn_rules", "harrier_steep_dive_headshot",
             "harrier_dive_strikes_and_climbs");
-    /** Tests that watch a mob through more than one round of what it does: 10 s instead of 5. */
-    private static final java.util.Set<String> LONG = java.util.Set.of("bog_lurker_spits_in_range", "bog_lurker_flees_close");
+    /** Tests that watch a mob through more than one round of what it does, or wait on the light: 10 s instead of 5. */
+    private static final java.util.Set<String> LONG = java.util.Set.of("bog_lurker_spits_in_range", "bog_lurker_flees_close", "bog_lurker_dives_when_struck_from_afar",
+            "bog_lurker_spawn_rules", "harrier_spawn_rules");
 
     private FullDrawGameTests() {}
 

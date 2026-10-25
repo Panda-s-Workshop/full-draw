@@ -76,6 +76,39 @@ final class AdvancementGameTests {
         });
     }
 
+    /**
+     * Long Shot needs a hit from 50 blocks or more: two players' arrows strike two zombies, one loosed 40 blocks off and
+     * one 52 (the distance is the shot's, from where it was loosed: here the record's origin, set back along the line).
+     */
+    static void longShotAdvancement(GameTestHelper helper) {
+        ServerPlayer near = helper.makeMockServerPlayerInLevel(), far = helper.makeMockServerPlayerInLevel();
+        Zombie first = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(2.5, 1, 6.5));
+        Zombie second = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(8.5, 1, 6.5));
+        first.setBaby(false);
+        second.setBaby(false);
+        loose(helper, near, 2.5, 40.0);
+        loose(helper, far, 8.5, 52.0);
+        helper.runAfterDelay(10, () -> {
+            if (first.getHealth() >= first.getMaxHealth() || second.getHealth() >= second.getMaxHealth()) helper.fail("both arrows should hit");
+            else if (done(helper, near, "long_shot")) helper.fail("a hit from 40 blocks shouldn't award Long Shot");
+            else if (!done(helper, far, "long_shot")) helper.fail("a hit from 52 blocks should award Long Shot");
+            else helper.succeed();
+        });
+    }
+
+    /** A player's arrow down +z at x, about 3.6 blocks short of a zombie at z 6.5, its shot loosed {@code distance} off. */
+    private static void loose(GameTestHelper helper, ServerPlayer player, double x, double distance) {
+        Arrow arrow = EntityTypes.ARROW.create(helper.getLevel(), EntitySpawnReason.COMMAND);
+        Vec3 from = helper.absoluteVec(new Vec3(x, 2.0, 2.5));
+        arrow.setPos(from);
+        arrow.setOwner(player);
+        arrow.setNoGravity(true);
+        arrow.setDeltaMovement(0, 0, 3.0);
+        Vec3 loosed = from.add(0.0, 0.0, -(distance - 3.6));
+        ((ShotHolder) arrow).fulldraw$setShot(new ShotRecord(false, loosed, 1.0, 1.0, 0.0, BuiltInRegistries.ITEM.getKey(Items.BOW)));
+        helper.getLevel().addFreshEntity(arrow);
+    }
+
     /** An arrow a Breeze turns back loses its record, so it can't score for the archer. */
     static void breezeDeflectionDropsRecord(GameTestHelper helper) {
         helper.spawnWithNoFreeWill(EntityTypes.BREEZE, new Vec3(2.5, 1, 6.5));
@@ -93,7 +126,8 @@ final class AdvancementGameTests {
         });
     }
 
-    private static boolean done(GameTestHelper helper, ServerPlayer player, String id) {
+    /** Whether the player has earned the advancement fulldraw:{@code id}. */
+    static boolean done(GameTestHelper helper, ServerPlayer player, String id) {
         var holder = helper.getLevel().getServer().getAdvancements().get(FullDrawMod.id(id));
         if (holder == null) throw helper.assertionException("advancement fulldraw:" + id + " is not loaded");
         return player.getAdvancements().getOrStartProgress(holder).isDone();

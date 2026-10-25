@@ -66,6 +66,8 @@ public class BogLurker extends Mob implements Enemy {
 
     private int phaseTicks;
     private int nextSpit = FIRST_SPIT;
+    /** Ticks it stays under after a hit from out of its reach, whatever the distance. */
+    private int hitDive;
     private Vec3 swimDir = Vec3.ZERO;
     /** On a client: how far its throat is swollen for a spit, 0 to 1, eased; and its value a tick ago. */
     public float throat, throatO;
@@ -258,10 +260,22 @@ public class BogLurker extends Mob implements Enemy {
         }
     }
 
+    /** A Blunt arrow's knock: a spit being told is lost, and the next waits its full gap. */
+    public void breakOffTell() {
+        if (phase() == Phase.TELL) setPhase(Phase.LURK);
+    }
+
     /** Starts the tell before a spit: the throat swells and gurgles. Public so tests and pictures can start one. */
     public void startTell() {
         setPhase(Phase.TELL);
         playSound(ModSounds.LURKER_GURGLE.get(), 1.2F, 0.9F + random.nextFloat() * 0.2F);
+        // a ring of splashes round it on the water, plain from the bank at the edge of its range
+        double surface = surface(level());
+        if (level() instanceof ServerLevel level && !Double.isNaN(surface))
+            for (int i = 0; i < 16; i++) {
+                double a = i * Mth.TWO_PI / 16.0, cos = Math.cos(a), sin = Math.sin(a);
+                level.sendParticles(ParticleTypes.SPLASH, false, true, getX() + cos * 0.9, surface + 0.05, getZ() + sin * 0.9, 3, 0.05, 0.0, 0.05, 0.1);
+            }
     }
 
     /** Spits a glob at the target's chest, aimed high enough for its drop. Public so tests can make it spit. */
@@ -295,7 +309,9 @@ public class BogLurker extends Mob implements Enemy {
     private void flee(ServerLevel level, @Nullable LivingEntity target, double surface) {
         double distance = target == null ? Double.MAX_VALUE : distanceTo(target);
         boolean tired = phaseTicks > LurkerRules.FLEE_MAX_TICKS && distance >= LurkerRules.FLEE_WITHIN;
-        if (distance >= LurkerRules.FLEE_UNTIL || tired) {
+        if (hitDive > 0 && target != null) hitDive--;
+        else if (distance >= LurkerRules.FLEE_UNTIL || tired) {
+            hitDive = 0;
             setPhase(Phase.LURK);
             return;
         }
@@ -408,14 +424,21 @@ public class BogLurker extends Mob implements Enemy {
 
     /**
      * Its body under the water takes half from any projectile but a player's shot (which the shot pipeline weighs at the
-     * point it struck): whether it went through the water is read from where the projectile is when it strikes.
+     * point it struck): whether it went through the water is read from where the projectile is when it strikes. Struck
+     * at the surface by something out of its spitting range, it goes under and swims off, to come up somewhere else.
      */
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
         Entity direct = source.getDirectEntity();
         boolean shot = direct instanceof ShotHolder holder && holder.fulldraw$shot() != null;
         if (direct instanceof Projectile && !shot && belowSurface(direct.position())) amount *= (float) LurkerRules.SUBMERGED_BODY_MULT;
-        return super.hurtServer(level, source, amount);
+        boolean hurt = super.hurtServer(level, source, amount);
+        if (hurt && isAlive() && isInWater() && phase() != Phase.FLEE && source.getEntity() instanceof LivingEntity attacker
+                && LurkerRules.act(distanceTo(attacker)) == LurkerRules.Act.WATCH) {
+            hitDive = LurkerRules.HIT_DIVE_TICKS;
+            startFlee(level);
+        }
+        return hurt;
     }
 
     /** It spawns in water. */

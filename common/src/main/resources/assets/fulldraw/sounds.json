@@ -453,29 +453,109 @@
     "subtitle": "subtitles.fulldraw.shieldbearer_bash",
     "sounds": [
       {
-        "name": "minecraft:item/shield/block1",
+        "name": "minecraft:mob/irongolem/hit1",
         "volume": 1.0,
-        "pitch": 0.55
+        "pitch": 0.9
       },
       {
-        "name": "minecraft:item/shield/block2",
+        "name": "minecraft:mob/irongolem/hit2",
         "volume": 1.0,
-        "pitch": 0.55
+        "pitch": 0.9
       },
       {
-        "name": "minecraft:item/shield/block3",
+        "name": "minecraft:mob/irongolem/hit3",
         "volume": 1.0,
-        "pitch": 0.55
+        "pitch": 0.9
       },
       {
-        "name": "minecraft:item/shield/block4",
+        "name": "minecraft:mob/irongolem/hit4",
         "volume": 1.0,
-        "pitch": 0.55
+        "pitch": 0.9
+      }
+    ]
+  },
+  "shieldbearer_ambient": {
+    "subtitle": "subtitles.fulldraw.shieldbearer_ambient",
+    "sounds": [
+      {
+        "name": "minecraft:mob/pillager/idle1",
+        "volume": 1.0,
+        "pitch": 0.85
       },
       {
-        "name": "minecraft:item/shield/block5",
+        "name": "minecraft:mob/pillager/idle2",
         "volume": 1.0,
-        "pitch": 0.55
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/pillager/idle3",
+        "volume": 1.0,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/pillager/idle4",
+        "volume": 1.0,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "shieldbearer_hurt": {
+    "subtitle": "subtitles.fulldraw.shieldbearer_hurt",
+    "sounds": [
+      {
+        "name": "minecraft:mob/pillager/hurt1",
+        "volume": 1.0,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/pillager/hurt2",
+        "volume": 1.0,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/pillager/hurt3",
+        "volume": 1.0,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "shieldbearer_death": {
+    "subtitle": "subtitles.fulldraw.shieldbearer_death",
+    "sounds": [
+      {
+        "name": "minecraft:mob/pillager/death1",
+        "volume": 1.0,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/pillager/death2",
+        "volume": 1.0,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "shieldbearer_celebrate": {
+    "subtitle": "subtitles.fulldraw.shieldbearer_celebrate",
+    "sounds": [
+      {
+        "name": "minecraft:mob/pillager/celebrate1",
+        "volume": 1.0,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/pillager/celebrate2",
+        "volume": 1.0,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/pillager/celebrate3",
+        "volume": 1.0,
+        "pitch": 0.85
+      },
+      {
+        "name": "minecraft:mob/pillager/celebrate4",
+        "volume": 1.0,
+        "pitch": 0.85
       }
     ]
   },

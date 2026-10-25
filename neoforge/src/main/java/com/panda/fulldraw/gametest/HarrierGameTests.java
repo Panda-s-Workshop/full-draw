@@ -16,6 +16,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.Weighted;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -61,19 +62,28 @@ final class HarrierGameTests {
      * Two harriers diving east along level lines. An arrow head on into the first one's face is a headshot (not
      * Perfect) and grounds it: the two close by 4.1 blocks a tick, and the harrier's own move carries it over the
      * arrow's point between ticks, which still counts as the hit. A plain arrow into the second one's tail from behind
-     * hits it and leaves it in the air.
+     * hits it and leaves it in the air. Grounding it earns the first archer Grounded; the second, who only hit it, not.
+     * A third harrier, down to its last health, dies of the same head-on shot: its archer has brought it down too.
      */
     static void harrierGroundedByDiveHeadshot(GameTestHelper helper) {
-        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        ServerPlayer player = helper.makeMockServerPlayerInLevel(), other = helper.makeMockServerPlayerInLevel();
+        ServerPlayer killer = helper.makeMockServerPlayerInLevel();
         GaleHarrier headshot = diving(helper, 3.5);
         GaleHarrier plain = diving(helper, 8.5);
+        GaleHarrier doomed = diving(helper, 6.0);
+        doomed.setHealth(1.0F);
+        shot(helper, killer, false, new Vec3(11.0, DIVE_Y + 0.3, 6.0), new Vec3(-3.0, 0.0, 0.0));
         AbstractArrow headOn = shot(helper, player, false, new Vec3(11.0, DIVE_Y + 0.3, 3.5), new Vec3(-3.0, 0.0, 0.0));
-        shot(helper, player, false, new Vec3(0.2, DIVE_Y + 0.3, 8.5), new Vec3(3.0, 0.0, 0.0));
+        shot(helper, other, false, new Vec3(0.2, DIVE_Y + 0.3, 8.5), new Vec3(3.0, 0.0, 0.0));
         helper.runAfterDelay(8, () -> {
             if (lost(headshot) <= 0) helper.fail("the arrow should hit the diving harrier head on: " + where(helper, headOn, headshot));
             else if (headshot.phase() != GaleHarrier.Phase.GROUNDED) helper.fail("a headshot in the dive should ground it, it is " + headshot.phase().id());
             else if (lost(plain) <= 0) helper.fail("the arrow from behind should hit the diving harrier");
             else if (plain.phase() == GaleHarrier.Phase.GROUNDED) helper.fail("a plain hit in the dive shouldn't ground it");
+            else if (!AdvancementGameTests.done(helper, player, "grounded")) helper.fail("grounding a diving harrier should award Grounded");
+            else if (AdvancementGameTests.done(helper, other, "grounded")) helper.fail("a hit that didn't ground it shouldn't award Grounded");
+            else if (doomed.isAlive()) helper.fail("the head-on arrow should kill the harrier on its last health");
+            else if (!AdvancementGameTests.done(helper, killer, "grounded")) helper.fail("a headshot in the dive that kills it should award Grounded");
             else done(helper, headshot, plain);
         });
     }

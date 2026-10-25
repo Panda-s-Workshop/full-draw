@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "fulldraw:event",
+      "conditions": {
+        "event": "eyes_on_the_water"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "fulldraw:bog_eye"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.eyes_on_the_water.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.eyes_on_the_water.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "fulldraw:right_between_the_eyes"
+}

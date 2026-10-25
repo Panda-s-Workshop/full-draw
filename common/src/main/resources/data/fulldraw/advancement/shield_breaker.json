@@ -1,0 +1,30 @@
+{
+  "criteria": {
+    "done": {
+      "trigger": "fulldraw:event",
+      "conditions": {
+        "event": "shield_breaker"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "fulldraw:blunt_arrow"
+    },
+    "title": {
+      "translate": "advancements.fulldraw.shield_breaker.title"
+    },
+    "description": {
+      "translate": "advancements.fulldraw.shield_breaker.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "fulldraw:root"
+}

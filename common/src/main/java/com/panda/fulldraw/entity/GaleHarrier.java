@@ -134,9 +134,15 @@ public class GaleHarrier extends Mob implements Enemy {
         if (level().isClientSide()) {
             foldO = fold;
             fold = Mth.approach(fold, phase() == Phase.TELL || phase() == Phase.DIVE ? 1.0F : 0.0F, 0.2F);
-            // a dive leaves a streak of torn air behind it
-            if (phase() == Phase.DIVE && tickCount % 2 == 0)
-                level().addParticle(ParticleTypes.CLOUD, xo, yo + getBbHeight() * 0.5, zo, 0.0, 0.0, 0.0);
+            // a dive leaves a thick streak of torn air behind it, filled in along each tick's move so it reads from the
+            // ground 20 blocks below as one line (and past the usual particle range: it may be 30 up)
+            if (phase() == Phase.DIVE)
+                for (int i = 0; i < 3; i++) {
+                    double t = i / 3.0;
+                    level().addParticle(ParticleTypes.CLOUD, true, true, Mth.lerp(t, xo, getX()), Mth.lerp(t, yo, getY()) + getBbHeight() * 0.5,
+                            Mth.lerp(t, zo, getZ()), (random.nextDouble() - 0.5) * 0.04, (random.nextDouble() - 0.5) * 0.04,
+                            (random.nextDouble() - 0.5) * 0.04);
+                }
         }
     }
 
@@ -234,20 +240,25 @@ public class GaleHarrier extends Mob implements Enemy {
         if (terrainClose(level)) want = want.add(0.0, horizontalCollision ? 0.4 : 0.25, 0.0);
         steer(want, 0.2);
         if (target == null) return;
-        if (nextDive <= 0 && getY() >= anchor.y - HarrierFlight.CIRCLE_SLACK && hasLineOfSight(target)) {
-            setPhase(Phase.TELL);
-            nextDive = HarrierFlight.diveGap(random.nextDouble());
-            playSound(ModSounds.HARRIER_SHRIEK.get(), 4.0F, 0.95F + random.nextFloat() * 0.1F);
-        }
+        if (nextDive <= 0 && getY() >= anchor.y - HarrierFlight.CIRCLE_SLACK && hasLineOfSight(target)) startTell(level);
+    }
+
+    /** Starts the tell before a dive: the shriek, with the wings snapped shut. Public so tests can start one. */
+    public void startTell(ServerLevel level) {
+        setPhase(Phase.TELL);
+        nextDive = HarrierFlight.diveGap(random.nextDouble());
+        playSound(ModSounds.HARRIER_SHRIEK.get(), 4.0F, 0.95F + random.nextFloat() * 0.1F);
+        // the shriek's puff: a burst of cloud as the wings snap shut, seen from the ground as well as heard
+        level.sendParticles(ParticleTypes.CLOUD, true, true, getX(), getY() + getBbHeight() * 0.5, getZ(), 18, 0.7, 0.3, 0.7, 0.06);
     }
 
     /**
-     * Where it circles over a spot: {@code circleHeight} above the ground there under open sky; under a roof (a cave, the
-     * Nether, an overhang) as high as the room above allows, so it never presses itself against a ceiling.
+     * Where it circles over a spot: {@code circleHeight} above whatever stands highest there (the ground, or a roof the
+     * player has gone under, so it waits over the roof rather than coming down to them) while it flies under open sky;
+     * under a roof itself (a cave, the Nether) as high as the room above allows, so it never presses against a ceiling.
      */
     private Vec3 anchorOver(ServerLevel level, BlockPos foot, double baseY, double x, double z) {
-        boolean open = !level.dimensionType().hasCeiling()
-                && level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, foot.getX(), foot.getZ()) <= baseY + 1.5;
+        boolean open = !level.dimensionType().hasCeiling() && level.canSeeSky(blockPosition().above());
         if (open) return new Vec3(x, Math.max(level.getHeight(Heightmap.Types.MOTION_BLOCKING, foot.getX(), foot.getZ()), baseY) + circleHeight, z);
         return new Vec3(x, baseY + headroom(level, foot, circleHeight), z);
     }
@@ -275,6 +286,11 @@ public class GaleHarrier extends Mob implements Enemy {
         BlockPos ahead = BlockPos.containing(position().add(flat.normalize().scale(3.0)));
         for (int down = 0; down <= 2; down++) if (solid(level, ahead.below(down))) return true;
         return false;
+    }
+
+    /** A Blunt arrow's knock: a dive being told is broken off, and it circles again for its full gap. */
+    public void breakOffTell() {
+        if (phase() == Phase.TELL) setPhase(Phase.CIRCLE);
     }
 
     /** The tell: wings folded, it all but stops in the air for a second, then sets off at where the target is. */
@@ -375,10 +391,13 @@ public class GaleHarrier extends Mob implements Enemy {
 
     /**
      * An arrow from a player's shot struck it: a Perfect Release or a headshot while it dives brings it down. Called by
-     * the shot pipeline once the hit has dealt damage.
+     * the shot pipeline once the hit has dealt damage. Whether the shot was one that brings it down, even if it also
+     * killed it.
      */
-    public void struckByShot(boolean perfect, boolean precision) {
-        if (isAlive() && HarrierFlight.grounds(phase() == Phase.DIVE, perfect, precision)) ground();
+    public boolean struckByShot(boolean perfect, boolean precision) {
+        if (!HarrierFlight.grounds(phase() == Phase.DIVE, perfect, precision)) return false;
+        if (isAlive()) ground();
+        return true;
     }
 
     /**

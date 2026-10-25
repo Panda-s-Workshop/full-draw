@@ -228,9 +228,11 @@ public abstract class AbstractArrowMixin implements ShotHolder {
         fulldraw$target = null;
         if (shot != null && impact != null && breakdown != null && target.level() instanceof ServerLevel) {
             if (hurt) {
-                Shots.reportHit(((AbstractArrow) (Object) this).getOwner(), shot, impact, breakdown);
+                Entity owner = ((AbstractArrow) (Object) this).getOwner();
+                Shots.reportHit(owner, shot, impact, breakdown);
                 // a Perfect Release or a headshot brings a diving Gale Harrier down
-                if (target instanceof GaleHarrier harrier) harrier.struckByShot(shot.perfect(), impact.precision());
+                boolean grounded = target instanceof GaleHarrier harrier && harrier.struckByShot(shot.perfect(), impact.precision());
+                Shots.reportEncounter(owner, target, impact, grounded);
             } else fulldraw$shot = null;
         }
         return hurt;

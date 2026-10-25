@@ -62,7 +62,7 @@ public final class ModItems {
 
     /** A padded head: 1 damage, a hard shove, and the target's attack starts over. */
     public static final DeferredItem<FullDrawArrowItem> BLUNT_ARROW = ITEMS.registerItem("blunt_arrow",
-            p -> new FullDrawArrowItem(p, BluntArrow::new, BluntArrow::new, com.panda.fulldraw.logic.ArrowTraits.BLUNT, 2));
+            p -> new FullDrawArrowItem(p, BluntArrow::new, BluntArrow::new, com.panda.fulldraw.logic.ArrowTraits.BLUNT, 3));
 
     /** A coil of rope behind a hook: hangs a rope where it strikes a wall or a ceiling. */
     public static final DeferredItem<FullDrawArrowItem> ROPE_ARROW = ITEMS.registerItem("rope_arrow",

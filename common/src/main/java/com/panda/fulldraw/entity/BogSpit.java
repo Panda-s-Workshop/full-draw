@@ -63,7 +63,8 @@ public class BogSpit extends ThrowableItemProjectile {
     protected void onHit(HitResult hit) {
         super.onHit(hit);
         if (level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.ITEM_SLIME, getX(), getY(), getZ(), 8, 0.15, 0.15, 0.15, 0.05);
+            // a small splat: struck in the face, a big one would hide what the player was aiming at
+            level.sendParticles(ParticleTypes.ITEM_SLIME, getX(), getY(), getZ(), 4, 0.1, 0.1, 0.1, 0.03);
             level.playSound(null, getX(), getY(), getZ(), ModSounds.LURKER_SPIT_HIT.get(), getSoundSource(), 1.0F, 0.9F + random.nextFloat() * 0.2F);
             discard();
         }

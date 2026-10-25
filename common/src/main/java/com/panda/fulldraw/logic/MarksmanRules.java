@@ -20,7 +20,7 @@ public final class MarksmanRules {
     public static final int RISE_TICKS = 30;
     /** If it can't reach the crenel it means to shoot from in this long, it shoots from where it is. */
     public static final int STUCK_TICKS = 100;
-    /** Knocked off its tower (an explosion, a wind charge) for this long, it climbs back to its post. */
+    /** Knocked off its tower (an explosion, a wind charge) for this long, it is back at its post (in a puff of smoke). */
     public static final int STRANDED_TICKS = 100;
     /** A foe this close on the battlements gets the bow's end, not an arrow: a blow and a shove, once a second. */
     public static final double BASH_REACH = 3.0;

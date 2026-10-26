@@ -4,8 +4,9 @@
 
 **Website:** https://panda-s-workshop.github.io/full-draw/ (every weapon, arrow, creature and number)
 
-**Download:** not released yet (CurseForge link here after the first release). Modpacks: please use the CurseForge
-file, not the GitHub release.
+**Download:** [CurseForge](https://www.curseforge.com/minecraft/mc-mods/full-draw-archery-overhaul) or
+[GitHub Releases](https://github.com/Panda-s-Workshop/full-draw/releases). Modpacks: please use the CurseForge file, not
+the GitHub release.
 
 Archery where the shot is yours: time the release, aim for the head, pick the right bow and the right arrow.
 A Minecraft 26.3 mod for NeoForge and Fabric, Java 25, part of Panda's Workshop.
